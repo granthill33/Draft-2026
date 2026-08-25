@@ -2,64 +2,143 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>🏆 DRAFT LOCAL FANTASY PRO 🏆</title>
+    <title>🏆 DRAFT LOCAL FANTASY PRO 26/27 🏆</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: sans-serif; background: #0c0914; color: #e2e8f0; padding: 20px; }
-        header { background: #17122b; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; margin-bottom: 20px; }
-        .logo { font-weight: 900; font-size: 20px; color: #38bdf8; }
-        .turn-panel { background: #000; padding: 10px; border-radius: 8px; border: 1px solid #d946ef; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: radial-gradient(circle at 50% 0%, #17122b 0%, #06040a 70%); color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 30px; }
+        header { background: rgba(0,0,0,0.6); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+        .logo { font-weight: 900; font-size: 20px; background: linear-gradient(135deg, #38bdf8, #d946ef); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
+        .turn-panel { background: #0c0914; border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 12px; display: flex; align-items: center; gap: 15px; }
         .turn-panel.hidden { display: none; }
-        main { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        @media (min-width: 1280px) { main { grid-template-columns: 320px 1fr 320px; } }
-        .panel { background: #140f23; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; }
-        h2 { font-size: 13px; color: #38bdf8; text-transform: uppercase; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #221a3f; }
-        textarea, input { width: 100%; background: #000; border: 1px solid #221a3f; border-radius: 8px; padding: 10px; color: #fff; font-size: 12px; }
-        .btn { width: 100%; background: linear-gradient(90deg, #3b82f6, #d946ef); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
-        .btn-undo { background: #f59e0b; margin-top: 5px; }
-        .btn-clear { background: #ef4444; margin-top: 5px; }
-        .scroll { overflow-y: auto; max-height: 600px; }
-        .tabs { display: flex; gap: 5px; margin-bottom: 10px; }
-        .tab { background: #221a3f; border: none; color: #94a3b8; padding: 8px; border-radius: 6px; cursor: pointer; flex-grow: 1; }
-        .tab.active { background: #38bdf8; color: #000; font-weight: bold; }
-        .grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .neon-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.3); border-color: #06b6d4; }
+        .neon-fuchsia { box-shadow: 0 0 15px rgba(217, 70, 239, 0.3); border-color: #d946ef; }
+        main { max-width: 1500px; width: 100%; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 1fr; gap: 20px; flex-grow: 1; }
+        @media (min-width: 1280px) { main { grid-template-columns: 330px 1fr 340px; } }
+        .panel { background: rgba(20, 15, 35, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        h2 { font-size: 13px; text-transform: uppercase; color: #38bdf8; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; letter-spacing: 1px; }
+        textarea, input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; color: #fff; font-size: 12px; outline: none; }
+        textarea { resize: none; font-family: monospace; }
+        .btn { width: 100%; background: linear-gradient(90deg, #3b82f6, #d946ef); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 11px; text-transform: uppercase; cursor: pointer; letter-spacing: 0.5px; }
+        .btn-green { background: linear-gradient(90deg, #10b981, #059669); margin-top: 4px; }
+        .btn-undo { background: linear-gradient(90deg, #f59e0b, #d97706); margin-top: 4px; box-shadow: 0 4px 12px rgba(245,158,11,0.2); }
+        .btn-clear { background: linear-gradient(90deg, #ef4444, #b91c1c); }
+        .btn:hover { opacity: 0.95; }
+        .scroll { overflow-y: auto; max-height: 650px; flex-grow: 1; padding-right: 4px; }
+        .scroll::-webkit-scrollbar { width: 5px; }
+        .scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .tabs { display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; margin-bottom: 8px; }
+        .tab { background: transparent; border: 1px solid rgba(255,255,255,0.05); color: #94a3b8; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        .tab.active { background: rgba(56,189,248,0.1); border-color: #38bdf8; color: #38bdf8; }
+        .filter-section-title { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .filter-group { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.03); }
+        .btn-filter { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: #94a3b8; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        .btn-filter:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .btn-filter.active { background: #38bdf8; color: #000; font-weight: 800; border-color: #38bdf8; }
+        .btn-reset-filters { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; font-size: 9px; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        .btn-reset-filters:hover { background: rgba(239, 68, 68, 0.2); color: #fff; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
-        .card { background: rgba(255,255,255,0.02); border: 1px solid #221a3f; border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-fichar { background: #221a3f; border: 1px solid #38bdf8; color: #fff; padding: 5px 12px; border-radius: 6px; cursor: pointer; }
-        .history-item { background: #000; padding: 8px; border-radius: 6px; font-size: 12px; border-left: 3px solid #38bdf8; margin-bottom: 5px; }
-        .team-box { background: #000; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #221a3f; }
+        .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .card .name { font-weight: 700; color: #f1f5f9; font-size: 13px; display: block; margin-bottom: 2px; }
+        .card .team { font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+        .pos-badge { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-family: monospace; display: inline-block; vertical-align: middle; }
+        .pos-POR { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
+        .pos-DEF { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .pos-MED { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .pos-DEL { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }        .actions-box { display: flex; align-items: center; gap: 8px; }
+        .card button.btn-fichar { background: #1a1528; border: 1px solid #3b2e5a; color: #e2e8f0; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        .card:hover button.btn-fichar { background: #38bdf8; color: #000; font-weight: 800; border-color: #38bdf8; }
+        .history-item { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; font-size: 12px; border-left: 4px solid #38bdf8; }
+        .summary-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        @media (min-width: 640px) { .summary-grid { grid-template-columns: 1fr 1fr; } }
+        .team-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.04); }
     </style>
 </head>
 <body>
     <header>
-        <div class="logo">🏆 ENGINE DRAFT LOCAL FANTASY</div>
+        <div class="logo">⚽ DRAFT LOCAL LIGA PRO 26/27</div>
         <div id="turn-indicator" class="turn-panel hidden">
-            <small id="round-number" style="font-size:10px; color:#94a3b8; display:block;">RONDA 1 / 23</small>
-            <strong id="current-drafter" style="color:#fff; font-size:14px;">Listo...</strong>
-            <span id="direction-tag" style="font-size:11px; margin-left:10px;">IDA</span>
+            <div>
+                <small id="round-number" style="font-size:9px; color:#94a3b8; display:block; font-weight:700; letter-spacing:1px;">RONDA 1 / 23</small>
+                <strong id="current-drafter" style="font-size:15px; color:#fff;">Listo...</strong>
+            </div>
+            <div id="direction-tag" style="font-size:10px; font-weight:800; padding:5px 10px; border-radius:6px; text-transform:uppercase;">IDA</div>
         </div>
     </header>
     <main>
         <section class="panel" id="admin-setup-panel">
-            <h2>⚙️ Cargar Base de Datos Excel</h2>
-            <textarea id="players-input" rows="6" placeholder="Pega aquí tus columnas de Excel (Nombre, Equipo, Posición)."></textarea>
-            <button onclick="initLocalDraft()" id="btn-start" class="btn">🚀 Cargar 700 Jugadores</button>
+            <h2>⚙️ Carga de Jugadores Excel (100% Local Instantáneo)</h2>
+            <textarea id="players-input" rows="8" placeholder="Pega aquí tus 3 columnas de Excel (Nombre, Equipo, Posición)."></textarea>
+            <button onclick="initLocalDraft()" id="btn-start" class="btn">🚀 Iniciar Mercado Central</button>
         </section>
         <section class="panel">
             <div class="tabs">
-                <button id="tab-market" class="tab active" onclick="switchTab('market')">🛒 Mercado (<span id="pool-count">0</span>)</button>
-                <button id="tab-teams" class="tab" onclick="switchTab('teams')">👥 Plantillas</button>
+                <button id="tab-market" class="tab active" onclick="switchTab('market')">🛒 Mercado Común (<span id="pool-count">0</span>)</button>
+                <button id="tab-teams" class="tab" onclick="switchTab('teams')">👥 Plantillas Directo</button>
             </div>
-            <input type="text" id="search-player" oninput="filterPlayers()" placeholder="🔍 Escribe para buscar por nombre o equipo..." style="margin-bottom:10px;">
+            <div id="filter-wrapper">
+                <div class="filter-section-title"><span>Posición:</span><button class="btn-reset-filters" onclick="resetAllFilters()">🔄 Resetear</button></div>
+                <div class="filter-group" id="pos-filter-group">
+                    <button class="btn-filter active" onclick="setPosFilter('ALL')">TODAS</button>
+                    <button class="btn-filter" onclick="setPosFilter('POR')">POR</button>
+                    <button class="btn-filter" onclick="setPosFilter('DEF')">DEF</button>
+                    <button class="btn-filter" onclick="setPosFilter('MED')">MED</button>
+                    <button class="btn-filter" onclick="setPosFilter('DEL')">DEL</button>
+                </div>
+                <div class="filter-section-title">Equipos Reales Liga 26/27:</div>
+                <div class="filter-group scroll" id="team-filter-group" style="max-height: 95px;">
+                    <button class="btn-filter active" onclick="setTeamFilter('ALL')">TODOS</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Athletic')">Athletic Club</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Atlético')">Atlético de Madrid</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Osasuna')">CA Osasuna</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Alavés')">Deportivo Alavés</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Elche')">Elche CF</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Barcelona')">FC Barcelona</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Getafe')">Getafe CF</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Levante')">Levante UD</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Málaga')">Málaga CF</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Rayo')">Rayo Vallecano</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Espanyol')">RCD Espanyol</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Celta')">RC Celta de Vigo</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Deportivo')">RC Deportivo</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Betis')">Real Betis</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Real Madrid')">Real Madrid</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Racing')">Real Racing Club</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Sociedad')">Real Sociedad</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Sevilla')">Sevilla FC</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Valencia')">Valencia CF</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Villarreal')">Villarreal CF</button>
+                </div>
+            </div>
+            <div id="search-box"><input type="text" id="search-player" oninput="filterPlayers()" placeholder="🔍 Escribe para buscar por nombre o equipo real..."></div>
             <div id="main-container" class="scroll"><div id="players-pool" class="grid"></div></div>
-            <button onclick="undoLocalPick()" id="btn-undo" class="btn btn-undo hidden">↩️ Deshacer Último Fichaje</button>
-            <button onclick="hardLocalReset()" id="btn-reset-total" class="btn btn-clear hidden">🚨 RESETEAR LIGA COMPLETA</button>
+            <button onclick="undoLocalPick()" id="btn-undo" class="btn btn-undo hidden" style="margin-top:10px;">↩️ Deshacer Último Fichaje</button>
+            <button onclick="hardLocalReset()" id="btn-reset-total" class="btn btn-clear hidden" style="margin-top:15px; background:linear-gradient(90deg, #dc2626, #991b1b);">🚨 RESETEAR LIGA (BORRAR TODO DESDE CERO)</button>
         </section>
-        <section class="panel"><h2>📜 Historial de Picks</h2><div id="draft-history" class="scroll"></div></section>
+        <section class="panel"><h2>📜 Historial Global de Picks</h2><div id="draft-history" class="scroll" style="display:flex; flex-direction:column; gap:8px;"></div></section>
     </main>
     <script>
         let managers = ["Las Palmas (Turu Flores)", "Oviedo (Obafemi)", "Real Sociedad (Omar Little)", "Osasuna (Sens44)", "Huracán (Trosky)", "Levante (Celtics Fan)", "Lleida (Boibi2)", "Recreativo (JOSEDIN)", "Sporting (Rebekin)", "Celta (William)", "Guadalajara (Nikola Sarcevic)", "Deportivo (De la Penya)", "Valencia (Jraga)", "Barcelona (Malabar)", "Marino (Sauber)", "Eibar (Eragon86)", "Real Unión (Swes)", "Cadiz (Aitor55)", "Coruxo (Hill)", "Alaves (Torressss)"];
-        let players = [], history = [], teams = {}, currentManagerIndex = 0, currentRound = 1, activeTab = 'market';
+        let players = [], history = [], teams = {}, currentManagerIndex = 0, currentRound = 1, activeTab = 'market', selectedPosFilter = 'ALL', selectedTeamFilter = 'ALL';
+
+        function normalizeTeamName(tName) {
+            let str = tName.toLowerCase().trim();
+            if (str.includes("barça") || str.includes("barca") || str.includes("fcb") || str.includes("barcelona")) return "barcelona";
+            if (str.includes("racing") || str.includes("santander")) return "racing";
+            if (str.includes("atletico") || str.includes("atleti")) return "atlético";
+            if (str.includes("madrid") && !str.includes("atletico") && !str.includes("atleti")) return "real madrid";
+            if (str.includes("athletic") || str.includes("bilbao")) return "athletic";
+            if (str.includes("osasuna")) return "osasuna";
+            if (str.includes("alaves")) return "alavés";
+            if (str.includes("celta")) return "celta";
+            if (str.includes("depor") || str.includes("coruña")) return "deportivo";
+            if (str.includes("betis")) return "betis";
+            if (str.includes("sociedad")) return "sociedad";
+            if (str.includes("sevilla")) return "sevilla";
+            if (str.includes("valencia")) return "valencia";
+            if (str.includes("villarreal")) return "villarreal";
+            return str;
+        }
 
         function processText(rawText) {
             let lines = rawText.replace(/\r/g, "").split('\n'); let list = [];
@@ -68,9 +147,12 @@
                 let parts = line.split('\t');
                 if (parts.length < 2) parts = line.split(',');
                 let name = parts ? parts.trim() : "";
-                let team = parts ? parts.trim() : "Libre";
+                let team = parts ? parts.trim() : "Agente Libre";
                 let pos = parts ? parts.trim().toUpperCase() : "MED";
                 if (!name) return;
+                if (pos.includes("DFC") || pos === "DF") pos = "DEF";
+                if (pos.includes("MD") || pos === "MC" || pos.includes("MED")) pos = "MED";
+                if (pos === "DL" || pos.includes("DEL")) pos = "DEL";
                 list.push({ name: name, team: team, pos: pos });
             });
             return list;
@@ -80,7 +162,7 @@
             let raw = document.getElementById('players-input').value;
             let pool = processText(raw); if (!pool.length) { alert("Pega filas válidas."); return; }
             let emptyTeams = {}; managers.forEach(m => emptyTeams[m] = []);
-            let data = { players: pool, history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "MED", round: 0 }], teams: emptyTeams, currentRound: 1, currentManagerIndex: 0 };
+            let data = { players: pool, history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "INFO", round: 0 }], teams: emptyTeams, currentRound: 1, currentManagerIndex: 0 };
             localStorage.setItem('firme_backup_liga', JSON.stringify(data));
             loadFromObject(data);
         }
@@ -98,7 +180,7 @@
         function pickPlayer(idx) {
             let p = players[idx], m = managers[currentManagerIndex];
             history.unshift({ manager: m, name: p.name, team: p.team, pos: p.pos, round: currentRound });
-            if (!teams[m]) teams[m] = []; teams[m].push({ player: p.name, pos: p.pos });
+            if (!teams[m]) teams[m] = []; teams[m].push({ player: p.name, team: p.team, pos: p.pos, round: currentRound });
             players.splice(idx, 1);
             if (currentRound % 2 !== 0) { if (currentManagerIndex === managers.length - 1) currentRound++; else currentManagerIndex++; }
             else { if (currentManagerIndex === 0) currentRound++; else currentManagerIndex--; }
@@ -117,49 +199,57 @@
 
         function hardLocalReset() { if (confirm("¿Borrar todo?")) { localStorage.clear(); window.location.reload(); } }
         function switchTab(t) { activeTab = t; updateUI(); }
+        function setPosFilter(pos) { selectedPosFilter = (selectedPosFilter === pos) ? 'ALL' : pos; updateUI(); }
+        function setTeamFilter(teamName) { selectedTeamFilter = (selectedTeamFilter === teamName) ? 'ALL' : teamName; updateUI(); }
+        function resetAllFilters() { selectedPosFilter = 'ALL'; selectedTeamFilter = 'ALL'; document.getElementById('search-player').value = ""; updateUI(); }
         function filterPlayers() { renderMarket(); }
 
         function updateUI() {
             document.getElementById('pool-count').innerText = players.length;
             document.getElementById('round-number').innerText = `Ronda ${currentRound} / 23`;
             document.getElementById('current-drafter').innerText = managers[currentManagerIndex] || "COMPLETO";
-            document.getElementById('direction-tag').innerText = currentRound % 2 !== 0 ? "Ida ➡️" : "Vuelta ⬅️";
+            let tag = document.getElementById('direction-tag'), panel = document.getElementById('turn-indicator');
+            if (currentRound % 2 !== 0) { tag.innerText = "Ida ➡️"; panel.className = "turn-panel neon-cyan"; } 
+            else { tag.innerText = "Vuelta ⬅️"; panel.className = "turn-panel neon-fuchsia"; }
             if (activeTab === 'market') renderMarket(); else renderLiveTeams();
             renderHistory();
         }
 
         function renderMarket() {
-            let search = document.getElementById('search-player').value.toLowerCase().trim();
-            let pool = document.getElementById('players-pool'); pool.innerHTML = "";
-            let filtered = players.filter(p => p.name.toLowerCase().includes(search) || p.team.toLowerCase().includes(search));
-            filtered.forEach(p => {
-                let idx = players.indexOf(p);
-                let div = document.createElement('div'); div.className = "card";
-                div.innerHTML = `<div><strong>${p.name}</strong> [${p.pos}]<br><small style="color:#94a3b8">${p.team}</small></div><button class="btn-fichar" onclick="pickPlayer(${idx})">Fichar</button>`;
-                pool.appendChild(div);
+            const search = document.getElementById('search-player').value.toLowerCase().trim();
+            const pool = document.getElementById('players-pool'); pool.innerHTML = "";
+            const filtered = players.filter(p => {
+                let normPTeam = normalizeTeamName(p.team); let normFTeam = normalizeTeamName(selectedTeamFilter);
+                return (p.name.toLowerCase().includes(search) || normPTeam.includes(search)) && (selectedPosFilter === 'ALL' || p.pos === selectedPosFilter) && (selectedTeamFilter === 'ALL' || normPTeam === normFTeam);
+            });
+            filtered.forEach(pObj => {
+                const idx = players.indexOf(pObj); let posClass = `pos-${pObj.pos}`;
+                const card = document.createElement('div'); card.className = "card";
+                card.innerHTML = `<div><span class="name">${pObj.name} <span class="pos-badge ${posClass}">${pObj.pos}</span></span><span class="team">${pObj.team}</span></div><div class="actions-box"><button class="btn-fichar" onclick="pickPlayer(${idx})">Fichar</button></div>`;
+                pool.appendChild(card);
             });
         }
 
         function renderLiveTeams() {
-            let pool = document.getElementById('players-pool'); pool.innerHTML = '<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%;" id="s-grid"></div>';
-            let grid = document.getElementById('s-grid');
+            const pool = document.getElementById('players-pool'); pool.innerHTML = '<div class="summary-grid" id="s-grid"></div>';
+            const sGrid = document.getElementById('s-grid');
             managers.forEach(m => {
-                let html = `<div class="team-box"><h4>👤 ${m}</h4><ul style="list-style:none; font-size:11px; margin-top:5px;">`;
+                let html = `<div class="team-box"><h4 style="color:#38bdf8; font-size:12px; margin-bottom:6px;">👤 ${m}</h4><ul style="list-style:none; font-size:11px; display:flex; flex-direction:column; gap:4px;">`;
                 let mPlayers = teams[m] || [];
                 if (!mPlayers.length) html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;
-                else mPlayers.forEach(p => html += `<li>${p.player} [${p.pos}]</li>`);
-                grid.innerHTML += html + '</ul></div>';
+                else { mPlayers.forEach(p => { html += `<li style="background:rgba(255,255,255,0.01); padding:4px; border-radius:4px;">${p.player} <span style="font-size:9px; color:#64748b;">[${p.pos}]</span></li>`; }); }
+                sGrid.innerHTML += html + `</ul></div>`;
             });
         }
 
         function renderHistory() {
-            let container = document.getElementById('draft-history'); container.innerHTML = "";
-            if (history.length <= 1) { container.innerHTML = "<p style='color:#475569; font-size:11px;'>Esperando elecciones...</p>"; return; }
-            history.forEach(p => {
-                if (p.manager === "Comisionado") return;
-                let div = document.createElement('div'); div.className = "history-item";
-                div.innerHTML = `<strong>${p.manager}</strong> ficha a <span style="color:#38bdf8">${p.name}</span> (R${p.round})`;
-                container.appendChild(div);
+            const container = document.getElementById('draft-history'); container.innerHTML = "";
+            if(history.length <= 1) { container.innerHTML = `<p style="color:#475569; text-align:center; padding:10px;">Esperando elecciones...</p>`; return; }
+            history.forEach(pick => {
+                if(pick.manager === "Comisionado") return;
+                const item = document.createElement('div'); item.className = "history-item"; item.style.borderColor = pick.round % 2 !== 0 ? "#06b6d4" : "#d946ef";
+                item.innerHTML = `<strong>${pick.manager}</strong> ficha a <span style="color:#38bdf8; font-weight:700;">${pick.name}</span> [${pick.pos}] (R${pick.round})`;
+                container.appendChild(item);
             });
         }
 
@@ -170,3 +260,4 @@
     </script>
 </body>
 </html>
+
