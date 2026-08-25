@@ -181,9 +181,9 @@ Alaves (Torressss)</textarea>
                 if (!line.trim()) return;
                 let parts = line.split('\t');
                 if (parts.length < 2) { parts = line.split(','); }
-                let name = parts ? parts.trim() : "";
-                let team = parts ? parts.trim() : "Agente Libre";
-                let pos = parts ? parts.trim().toUpperCase() : "MED";
+                let name = parts[0] ? parts[0].trim() : "";
+                let team = parts[1] ? parts[1].trim() : "Agente Libre";
+                let pos = parts[2] ? parts[2].trim().toUpperCase() : "MED";
                 if (!name) return;
                 if (pos.includes("DFC") || pos === "DF") pos = "DEF";
                 if (pos.includes("MD") || pos === "MC" || pos.includes("MED")) pos = "MED";
@@ -210,7 +210,7 @@ Alaves (Torressss)</textarea>
             let updHistory = Array.from(history);
             updHistory.unshift({ manager: m, name: p.name, team: p.team, pos: p.pos, round: currentRound, overallPick: (updHistory.length) });
             let updTeam = Array.from(teams[m] || []);
-            if (updTeam.length === 1 && updTeam.player === "Fichajes Vacíos") updTeam = [];
+            if (updTeam.length === 1 && updTeam[0].player === "Fichajes Vacíos") updTeam = [];
             updTeam.push({ player: p.name, team: p.team, pos: p.pos, round: currentRound });
             let updPlayers = Array.from(players); updPlayers.splice(idx, 1);
             let nIdx = currentManagerIndex, nRound = currentRound;
@@ -283,7 +283,7 @@ Alaves (Torressss)</textarea>
             managers.forEach(m => {
                 let html = `<div class="team-box"><h4 style="color:#38bdf8; font-size:12px; margin-bottom:6px;">👤 ${m}</h4><ul style="list-style:none; font-size:11px; display:flex; flex-direction:column; gap:4px;">`;
                 let mPlayers = teams[m] || [];
-                if (!mPlayers.length || (mPlayers.length === 1 && mPlayers.player === "Fichajes Vacíos")) html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;
+                if (!mPlayers.length || (mPlayers.length === 1 && mPlayers[0].player === "Fichajes Vacíos")) html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;
                 else { mPlayers.forEach(p => { if(!p.player) return; html += `<li style="background:rgba(255,255,255,0.01); padding:4px; border-radius:4px;">${p.player} <span style="font-size:9px; color:#64748b;">[${p.pos}]</span></li>`; }); }
                 sGrid.innerHTML += html + `</ul></div>`;
             });
