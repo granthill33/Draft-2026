@@ -2,82 +2,392 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏆 SALA DE GUERRA: DRAFT INTERNO PRO 🏆</title>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: radial-gradient(circle at 50% 0%, #17122b 0%, #06040a 70%); color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 30px; }
-        header { background: rgba(0,0,0,0.6); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-        .logo { font-weight: 900; font-size: 20px; background: linear-gradient(135deg, #38bdf8, #d946ef); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
-        .turn-panel { background: #0c0914; border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 12px; display: flex; align-items: center; gap: 15px; }
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            background: radial-gradient(circle at 50% 0%, #120e24 0%, #050308 70%); 
+            color: #e2e8f0; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            padding-bottom: 30px; 
+        }
+        header { 
+            background: rgba(0,0,0,0.6); 
+            border-bottom: 1px solid rgba(255,255,255,0.06); 
+            padding: 15px 25px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4); 
+            backdrop-filter: blur(10px);
+        }
+        .logo { 
+            font-weight: 900; 
+            font-size: 20px; 
+            background: linear-gradient(135deg, #38bdf8, #d946ef); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            letter-spacing: 1px; 
+        }
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            background: rgba(255,255,255,0.05);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 0 0 8px #ef4444;
+            display: inline-block;
+        }
+        .status-dot.connected {
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+        }
+        .turn-panel { 
+            background: #0c0914; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            padding: 10px 20px; 
+            border-radius: 12px; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+        }
         .turn-panel.hidden { display: none; }
         .neon-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.3); border-color: #06b6d4; }
         .neon-fuchsia { box-shadow: 0 0 15px rgba(217, 70, 239, 0.3); border-color: #d946ef; }
-        main { max-width: 1500px; width: 100%; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 1fr; gap: 20px; flex-grow: 1; }
-        @media (min-width: 1280px) { main { grid-template-columns: 330px 1fr 340px; } }
-        .panel { background: rgba(20, 15, 35, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        h2 { font-size: 13px; text-transform: uppercase; color: #38bdf8; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; letter-spacing: 1px; }
-        textarea, input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; color: #fff; font-size: 12px; outline: none; }
+        
+        main { 
+            max-width: 1500px; 
+            width: 100%; 
+            margin: 0 auto; 
+            padding: 20px; 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 20px; 
+            flex-grow: 1; 
+        }
+        @media (min-width: 1280px) { main { grid-template-columns: 350px 1fr 340px; } }
+        
+        .panel { 
+            background: rgba(20, 15, 35, 0.6); 
+            backdrop-filter: blur(8px); 
+            border: 1px solid rgba(255,255,255,0.05); 
+            border-radius: 16px; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+        }
+        h2 { 
+            font-size: 13px; 
+            text-transform: uppercase; 
+            color: #38bdf8; 
+            border-bottom: 1px solid rgba(255,255,255,0.06); 
+            padding-bottom: 8px; 
+            letter-spacing: 1px; 
+        }
+        
+        textarea, input { 
+            width: 100%; 
+            background: rgba(0,0,0,0.5); 
+            border: 1px solid rgba(255,255,255,0.08); 
+            border-radius: 10px; 
+            padding: 12px; 
+            color: #fff; 
+            font-size: 12px; 
+            outline: none; 
+        }
         textarea { resize: none; font-family: monospace; }
-        .btn { width: 100%; background: linear-gradient(90deg, #3b82f6, #d946ef); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 11px; text-transform: uppercase; cursor: pointer; letter-spacing: 0.5px; }
+        
+        .btn { 
+            width: 100%; 
+            background: linear-gradient(90deg, #3b82f6, #d946ef); 
+            color: #fff; 
+            border: none; 
+            padding: 12px; 
+            border-radius: 10px; 
+            font-weight: 800; 
+            font-size: 11px; 
+            text-transform: uppercase; 
+            cursor: pointer; 
+            letter-spacing: 0.5px; 
+            transition: transform 0.1s ease, opacity 0.2s ease;
+        }
+        .btn:active { transform: scale(0.98); }
         .btn-green { background: linear-gradient(90deg, #10b981, #059669); margin-top: 4px; }
         .btn-undo { background: linear-gradient(90deg, #f59e0b, #d97706); margin-top: 4px; box-shadow: 0 4px 12px rgba(245,158,11,0.2); }
         .btn-clear { background: linear-gradient(90deg, #ef4444, #b91c1c); }
         .btn:hover { opacity: 0.95; }
+        
         .scroll { overflow-y: auto; max-height: 650px; flex-grow: 1; padding-right: 4px; }
         .scroll::-webkit-scrollbar { width: 5px; }
         .scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        
         .tabs { display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; margin-bottom: 8px; }
-        .tab { background: transparent; border: 1px solid rgba(255,255,255,0.05); color: #94a3b8; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        .tab { 
+            background: transparent; 
+            border: 1px solid rgba(255,255,255,0.05); 
+            color: #94a3b8; 
+            padding: 6px 12px; 
+            border-radius: 8px; 
+            font-size: 11px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+        }
         .tab.active { background: rgba(56,189,248,0.1); border-color: #38bdf8; color: #38bdf8; }
-        .filter-section-title { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
-        .filter-group { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.03); }
-        .btn-filter { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: #94a3b8; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        
+        .filter-section-title { 
+            font-size: 10px; 
+            font-weight: 800; 
+            color: #64748b; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            margin-top: 4px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .filter-group { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 5px; 
+            margin-bottom: 8px; 
+            background: rgba(0,0,0,0.2); 
+            padding: 8px; 
+            border-radius: 10px; 
+            border: 1px solid rgba(255,255,255,0.03); 
+        }
+        .btn-filter { 
+            background: rgba(255,255,255,0.03); 
+            border: 1px solid rgba(255,255,255,0.05); 
+            color: #94a3b8; 
+            padding: 4px 8px; 
+            border-radius: 6px; 
+            font-size: 10px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+        }
         .btn-filter:hover { background: rgba(255,255,255,0.08); color: #fff; }
         .btn-filter.active { background: #38bdf8; color: #000; font-weight: 800; border-color: #38bdf8; }
-        .btn-reset-filters { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; font-size: 9px; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        .btn-reset-filters { 
+            background: rgba(239, 68, 68, 0.1); 
+            border: 1px solid rgba(239, 68, 68, 0.3); 
+            color: #f87171; 
+            font-size: 9px; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+        }
         .btn-reset-filters:hover { background: rgba(239, 68, 68, 0.2); color: #fff; }
+        
         .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
-        .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .card { 
+            background: rgba(255,255,255,0.02); 
+            border: 1px solid rgba(255,255,255,0.04); 
+            border-radius: 12px; 
+            padding: 12px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
         .card .name { font-weight: 700; color: #f1f5f9; font-size: 13px; display: block; margin-bottom: 2px; }
         .card .team { font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
-        .pos-badge { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-family: monospace; display: inline-block; vertical-align: middle; }
+        
+        .pos-badge { 
+            font-size: 9px; 
+            font-weight: 800; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            margin-left: 6px; 
+            font-family: monospace; 
+            display: inline-block; 
+            vertical-align: middle; 
+        }
         .pos-POR { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
         .pos-DEF { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
         .pos-MED { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
         .pos-DEL { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        
         .actions-box { display: flex; align-items: center; gap: 8px; }
-        .card button.btn-fichar { background: #1a1528; border: 1px solid #3b2e5a; color: #e2e8f0; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        .card button.btn-fichar { 
+            background: #1a1528; 
+            border: 1px solid #3b2e5a; 
+            color: #e2e8f0; 
+            padding: 6px 12px; 
+            border-radius: 8px; 
+            font-size: 11px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+        }
         .card:hover button.btn-fichar { background: #38bdf8; color: #000; font-weight: 800; border-color: #38bdf8; }
-        .history-item { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; font-size: 12px; border-left: 4px solid #38bdf8; }
+        
+        .history-item { 
+            background: rgba(0,0,0,0.2); 
+            border: 1px solid rgba(255,255,255,0.04); 
+            border-radius: 10px; 
+            padding: 10px; 
+            font-size: 12px; 
+            border-left: 4px solid #38bdf8; 
+        }
+        
         .summary-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
         @media (min-width: 640px) { .summary-grid { grid-template-columns: 1fr 1fr; } }
-        .team-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.04); }
+        
+        .team-box { 
+            background: rgba(0,0,0,0.3); 
+            padding: 12px; 
+            border-radius: 12px; 
+            border: 1px solid rgba(255,255,255,0.04); 
+        }
+        
+        /* Configuration Screen Overlay */
+        .config-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 7, 18, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .config-card {
+            background: rgba(25, 20, 45, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        /* Dropdown selector for turn control */
+        .manager-select-panel {
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .manager-select-panel select {
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.1);
+            outline: none;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
+    <!-- Config Modal (overlay if config is missing) -->
+    <div id="supabase-config-modal" class="config-overlay" style="display: none;">
+        <div class="config-card">
+            <h2 style="color: #fff; font-size: 18px; text-align: center; border-bottom: none;">🔌 CONECTAR CON SUPABASE</h2>
+            <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-bottom: 10px;">
+                Ingresa las credenciales de tu proyecto de Supabase. Puedes encontrarlas en Configuración > API.
+            </p>
+            <div>
+                <label style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 4px;">Supabase Project URL</label>
+                <input type="text" id="sb-url" placeholder="https://xxxxxx.supabase.co">
+            </div>
+            <div>
+                <label style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 4px;">Supabase Anon Key</label>
+                <input type="text" id="sb-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+            </div>
+            <button onclick="saveSupabaseConfig()" class="btn" style="margin-top: 10px;">🚀 Guardar y Conectar</button>
+        </div>
+    </div>
+
     <header>
         <div class="logo">⚽ SALA DE GUERRA: LIVE DRAFT</div>
-        <div id="turn-indicator" class="turn-panel hidden">
-            <div>
-                <small id="round-number" style="font-size:9px; color:#94a3b8; display:block; font-weight:700; letter-spacing:1px;">RONDA 1 / 23</small>
-                <strong id="current-drafter" style="font-size:15px; color:#fff;">-</strong>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div class="connection-status">
+                <span id="sb-status-dot" class="status-dot"></span>
+                <span id="sb-status-text">Desconectado</span>
             </div>
-            <div id="direction-tag" style="font-size:10px; font-weight:800; padding:5px 10px; border-radius:6px; text-transform:uppercase;">IDA</div>
+            <div id="turn-indicator" class="turn-panel hidden">
+                <div>
+                    <small id="round-number" style="font-size:9px; color:#94a3b8; display:block; font-weight:700; letter-spacing:1px;">RONDA 1 / 23</small>
+                    <strong id="current-drafter" style="font-size:15px; color:#fff;">-</strong>
+                </div>
+                <div id="direction-tag" style="font-size:10px; font-weight:800; padding:5px 10px; border-radius:6px; text-transform:uppercase;">IDA</div>
+            </div>
         </div>
     </header>
+
     <main>
         <section class="panel">
-            <h2>⚙️ Gestión del Mercado</h2>
-            <textarea id="players-input" rows="5" placeholder="Pega aquí tus columnas de Excel directamente."></textarea>
-            <button onclick="initLocalDraft()" id="btn-start" class="btn">🚀 Cargar base de datos local</button>
-            <button onclick="undoLocalPick()" id="btn-undo" class="btn btn-undo hidden">↩️ Deshacer Último Pick</button>
-            <button onclick="hardLocalReset()" id="btn-reset-total" class="btn btn-clear hidden" style="margin-top:15px; background:linear-gradient(90deg, #dc2626, #991b1b);">🚨 RESETEAR TODO DESDE CERO</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px;">
+                <h2 style="border: none; padding: 0;">⚙️ Panel de Control</h2>
+                <button onclick="toggleAdminMode()" id="btn-admin-toggle" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; font-size: 10px; padding: 4px 8px; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-weight: bold;">🔑 Admin</button>
+            </div>
+
+            <!-- Panel de Administrador (Oculto por defecto) -->
+            <div id="admin-controls" style="display: none; flex-direction: column; gap: 12px; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.15); padding: 12px; border-radius: 12px; margin-bottom: 5px;">
+                <span style="font-weight: 800; font-size: 10px; color: #f87171; text-transform: uppercase; letter-spacing: 0.5px;">Panel de Administrador</span>
+                
+                <textarea id="players-input" rows="4" placeholder="Cargar Base de Datos: Pega columnas de Excel (Nombre, Equipo, Posición)"></textarea>
+                <button onclick="seedPlayersToSupabase()" id="btn-start" class="btn btn-green">🚀 Inicializar DB con Jugadores</button>
+                
+                <!-- Herramienta de Retenciones -->
+                <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px; margin-top: 5px; display: flex; flex-direction: column; gap: 8px;">
+                    <span style="font-weight: bold; font-size: 11px; color: #38bdf8;">Retener Jugador (Máx 4/equipo):</span>
+                    <input type="text" id="admin-player-search" oninput="searchAdminPlayers()" placeholder="Buscar jugador para retener..." style="padding: 8px;">
+                    <select id="admin-player-select" style="background: rgba(0,0,0,0.5); color: #fff; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); outline: none; font-size: 11px;"></select>
+                    <select id="admin-manager-select" style="background: rgba(0,0,0,0.5); color: #fff; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); outline: none; font-size: 11px;"></select>
+                    <button onclick="retainPlayer()" class="btn" style="background: linear-gradient(90deg, #38bdf8, #3b82f6); padding: 8px; font-size: 10px;">💾 Confirmar Retención</button>
+                </div>
+
+                <button onclick="undoLastPick()" id="btn-undo" class="btn btn-undo">↩️ Deshacer Último Pick</button>
+                <button onclick="resetDraftInSupabase()" id="btn-reset-total" class="btn btn-clear" style="margin-top:5px; background:linear-gradient(90deg, #dc2626, #991b1b);">🚨 RESETEAR DRAFT DESDE CERO</button>
+                <button onclick="clearAllPlayersFromDB()" class="btn" style="margin-top:5px; background:linear-gradient(90deg, #6b7280, #374151);">🗑️ VACIAR JUGADORES DE LA DB</button>
+                <button onclick="disconnectSupabase()" class="btn" style="background: #1e1b29; border: 1px solid rgba(255,255,255,0.05); color: #ef4444; font-size: 9px; padding: 6px; margin-top: 5px;">🔌 Desconectar Supabase</button>
+            </div>
+
+            <!-- Panel de Mánager (Visible para todos) -->
+            <div class="manager-select-panel">
+                <span style="font-weight: bold; color: #94a3b8;">Tu Identidad (Mánager Actual):</span>
+                <select id="user-identity" onchange="updateIdentity()">
+                    <option value="">Espectador / Todos</option>
+                </select>
+                <small style="color: #64748b; font-size: 10px;">Elige tu nombre si vas a fichar. En modo espectador, no podrás realizar fichajes.</small>
+            </div>
         </section>
+
         <section class="panel">
             <div class="tabs">
                 <button id="tab-market" class="tab active" onclick="switchTab('market')">🛒 Mercado (<span id="pool-count">0</span>)</button>
                 <button id="tab-teams" class="tab" onclick="switchTab('teams')">👥 Plantillas Directo</button>
+                <button id="tab-board" class="tab" onclick="switchTab('board')">📊 Tablero Draft</button>
             </div>
             <div id="filter-wrapper">
                 <div class="filter-section-title"><span>Posición:</span><button class="btn-reset-filters" onclick="resetAllFilters()">🔄 Resetear</button></div>
@@ -116,21 +426,470 @@
             <div id="search-box"><input type="text" id="search-player" oninput="filterPlayers()" placeholder="🔍 Escribe para buscar por nombre o equipo..."></div>
             <div id="main-container" class="scroll"><div id="players-pool" class="grid"><p style="color:#475569; text-align:center; padding-top:50px; font-size:12px; font-weight:700; text-transform:uppercase;">Esperando que cargues los jugadores...</p></div></div>
         </section>
-        <section class="panel"><h2>📜 Historial del Draft</h2><div id="draft-history" class="scroll" style="display:flex; flex-direction:column; gap:8px;"></div></section>
-    </main>
-    <script>
-        let managers = ["Las Palmas (Turu Flores)", "Oviedo (Obafemi)", "Real Sociedad (Omar Little)", "Osasuna (Sens44)", "Huracán (Trosky)", "Levante (Celtics Fan)", "Lleida (Boibi2)", "Recreativo (JOSEDIN)", "Sporting (Rebekin)", "Celta (William)", "Guadalajara (Nikola Sarcevic)", "Deportivo (De la Penya)", "Valencia (Jraga)", "Barcelona (Malabar)", "Marino (Sauber)", "Eibar (Eragon86)", "Real Unión (Swes)", "Cadiz (Aitor55)", "Coruxo (Hill)", "Alaves (Torressss)"];
-        let players = [], history = [], teams = {}; 
-        let currentManagerIndex = 0, currentRound = 1;
-        const MAX_ROUNDS = 23;
-        let isDraftActive = false;
-        let activeTab = 'market', selectedPosFilter = 'ALL', selectedTeamFilter = 'ALL';
 
-        window.addEventListener('beforeunload', function (e) {
-            if (isDraftActive) { e.preventDefault(); e.returnValue = 'Alerta'; }
-        });
+        <section class="panel">
+            <h2>📜 Historial del Draft</h2>
+            <div id="draft-history" class="scroll" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </section>
+    </main>
+
+    <script>
+        let managers = [];
+        const MAX_ROUNDS = 23;
+        
+        let supabase = null;
+        let dbPlayers = [];
+        let draftState = { current_round: 1, current_manager_index: 0, is_active: false };
+        let activeTab = 'market', selectedPosFilter = 'ALL', selectedTeamFilter = 'ALL';
+        let currentIdentity = "";
+        let isAdminMode = false;
+
+        function toggleAdminMode() {
+            if (!isAdminMode) {
+                const password = prompt("Introduce la contraseña de administrador:");
+                if (password === "draft2026") {
+                    isAdminMode = true;
+                    document.getElementById('admin-controls').style.display = 'flex';
+                    document.getElementById('btn-admin-toggle').innerText = "🔒 Cerrar";
+                    document.getElementById('btn-admin-toggle').style.background = "#dc2626";
+                    document.getElementById('btn-admin-toggle').style.color = "#fff";
+                    populateAdminManagers();
+                    searchAdminPlayers();
+                    updateUI();
+                } else {
+                    alert("Contraseña incorrecta.");
+                }
+            } else {
+                isAdminMode = false;
+                document.getElementById('admin-controls').style.display = 'none';
+                document.getElementById('btn-admin-toggle').innerText = "🔑 Admin";
+                document.getElementById('btn-admin-toggle').style.background = "rgba(255,255,255,0.05)";
+                document.getElementById('btn-admin-toggle').style.color = "#94a3b8";
+                updateUI();
+            }
+        }
+
+        function populateAdminManagers() {
+            const selectEl = document.getElementById('admin-manager-select');
+            if (!selectEl) return;
+            selectEl.innerHTML = "";
+            managers.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.innerText = m;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        function searchAdminPlayers() {
+            const query = document.getElementById('admin-player-search').value.toLowerCase().trim();
+            const selectEl = document.getElementById('admin-player-select');
+            if (!selectEl) return;
+            selectEl.innerHTML = "";
+            
+            const available = dbPlayers.filter(p => !p.drafted_by);
+            const filtered = available.filter(p => p.name.toLowerCase().includes(query) || p.real_team.toLowerCase().includes(query));
+            
+            filtered.slice(0, 50).forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.innerText = `${p.name} (${p.real_team} - [${p.position}])`;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        async function retainPlayer() {
+            if (!supabase) return;
+            const playerId = document.getElementById('admin-player-select').value;
+            const managerName = document.getElementById('admin-manager-select').value;
+            
+            if (!playerId || !managerName) {
+                alert("Selecciona un jugador y un mánager.");
+                return;
+            }
+            
+            const count = dbPlayers.filter(p => p.drafted_by === managerName && p.is_retained).length;
+            if (count >= 4) {
+                alert(`El mánager ${managerName} ya tiene el máximo de 4 jugadores retenidos.`);
+                return;
+            }
+            
+            const nextRetainedRound = count + 1;
+            const playerObj = dbPlayers.find(p => p.id == playerId);
+            if (!playerObj) return;
+            
+            if (!confirm(`¿Confirmar la retención de ${playerObj.name} por ${managerName} para la Ronda ${nextRetainedRound}?`)) return;
+            
+            const { error } = await supabase
+                .from('players')
+                .update({
+                    drafted_by: managerName,
+                    round_drafted: nextRetainedRound,
+                    is_retained: true,
+                    pick_number: 0
+                })
+                .eq('id', playerId);
+                
+            if (error) {
+                alert("Error al retener jugador: " + error.message);
+            } else {
+                alert(`✅ ${playerObj.name} retenido por ${managerName} (Ronda ${nextRetainedRound})`);
+                document.getElementById('admin-player-search').value = "";
+                searchAdminPlayers();
+            }
+        }
+
+        async function releaseRetained(playerId) {
+            if (!supabase) return;
+            const p = dbPlayers.find(x => x.id === playerId);
+            if (!p) return;
+            
+            if (!confirm(`¿Liberar la retención de ${p.name} por ${p.drafted_by}?`)) return;
+            
+            const managerName = p.drafted_by;
+            
+            const { error } = await supabase
+                .from('players')
+                .update({
+                    drafted_by: null,
+                    round_drafted: null,
+                    is_retained: false,
+                    pick_number: null
+                })
+                .eq('id', playerId);
+                
+            if (error) {
+                alert("Error al liberar jugador: " + error.message);
+                return;
+            }
+            
+            // Adjust rounds of remaining retained players
+            const remaining = dbPlayers
+                .filter(x => x.drafted_by === managerName && x.is_retained && x.id !== playerId)
+                .sort((a,b) => a.round_drafted - b.round_drafted);
+                
+            for (let i = 0; i < remaining.length; i++) {
+                const newRound = i + 1;
+                if (remaining[i].round_drafted !== newRound) {
+                    await supabase
+                        .from('players')
+                        .update({ round_drafted: newRound })
+                        .eq('id', remaining[i].id);
+                }
+            }
+            
+            alert(`✅ ${p.name} liberado.`);
+        }
+
+        // Load identity from local storage if saved
+        if (localStorage.getItem('draft_user_identity')) {
+            currentIdentity = localStorage.getItem('draft_user_identity');
+        }
+
+        function updateIdentity() {
+            currentIdentity = document.getElementById('user-identity').value;
+            localStorage.setItem('draft_user_identity', currentIdentity);
+            updateUI();
+        }
+
+        // Initialize connection
+        window.onload = function() {
+            initSupabaseConnection();
+        };
+
+        // Configuración por defecto de Supabase (Credenciales de tu proyecto)
+        const defaultSbUrl = "https://jyiaoohrklcedvsefpkz.supabase.co";
+        const defaultSbKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5aWFvb2hya2xjZWR2c2VmcGt6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NzE1OTksImV4cCI6MjEwMzI0NzU5OX0.6HIIn0Yx46HOdE68SNoYMKIDRZ6Kmq9hCLHj77xKCI0";
+
+        function initSupabaseConnection() {
+            const url = localStorage.getItem('sb_url') || defaultSbUrl;
+            const key = localStorage.getItem('sb_key') || defaultSbKey;
+
+            if (!url || !key) {
+                document.getElementById('supabase-config-modal').style.display = 'flex';
+                return;
+            }
+
+            try {
+                supabase = window['@supabase/supabase-js'].createClient(url, key);
+                document.getElementById('sb-status-dot').className = 'status-dot connected';
+                document.getElementById('sb-status-text').innerText = 'Conectado a Supabase';
+                document.getElementById('supabase-config-modal').style.display = 'none';
+                
+                fetchAndSubscribe();
+            } catch (err) {
+                console.error("Connection error: ", err);
+                alert("Error al conectar con Supabase. Verifica tus credenciales.");
+                disconnectSupabase();
+            }
+        }
+
+        function saveSupabaseConfig() {
+            const url = document.getElementById('sb-url').value.trim();
+            const key = document.getElementById('sb-key').value.trim();
+
+            if (!url || !key) {
+                alert("Por favor, rellena todos los campos.");
+                return;
+            }
+
+            localStorage.setItem('sb_url', url);
+            localStorage.setItem('sb_key', key);
+            initSupabaseConnection();
+        }
+
+        function disconnectSupabase() {
+            localStorage.removeItem('sb_url');
+            localStorage.removeItem('sb_key');
+            document.getElementById('sb-url').value = "";
+            document.getElementById('sb-key').value = "";
+            document.getElementById('sb-status-dot').className = 'status-dot';
+            document.getElementById('sb-status-text').innerText = 'Desconectado';
+            document.getElementById('supabase-config-modal').style.display = 'flex';
+        }
+
+        async function fetchAndSubscribe() {
+            // 1. Fetch initial state
+            await loadManagers();
+            await loadDraftState();
+            await loadPlayers();
+
+            // 2. Subscribe to realtime changes
+            supabase
+                .channel('db-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'draft_state' }, payload => {
+                    if (payload.new) {
+                        draftState = payload.new;
+                        updateUI();
+                    }
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, async () => {
+                    await loadPlayers();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'managers' }, async () => {
+                    await loadManagers();
+                })
+                .subscribe();
+        }
+
+        async function loadManagers() {
+            const { data, error } = await supabase
+                .from('managers')
+                .select('*')
+                .order('draft_order', { ascending: true });
+
+            if (error) {
+                console.error("Error loading managers:", error);
+            } else if (data) {
+                managers = data.map(m => m.name);
+                populateIdentitySelector();
+                updateUI();
+            }
+        }
+
+        function populateIdentitySelector() {
+            const selectEl = document.getElementById('user-identity');
+            selectEl.innerHTML = '<option value="">Espectador / Todos</option>';
+            managers.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.innerText = m;
+                selectEl.appendChild(opt);
+            });
+            
+            // Re-select identity if saved and still valid
+            const savedIdentity = localStorage.getItem('draft_user_identity');
+            if (savedIdentity && managers.includes(savedIdentity)) {
+                currentIdentity = savedIdentity;
+                selectEl.value = currentIdentity;
+            } else {
+                currentIdentity = "";
+                selectEl.value = "";
+                localStorage.removeItem('draft_user_identity');
+            }
+        }
+
+        async function loadDraftState() {
+            const { data, error } = await supabase
+                .from('draft_state')
+                .select('*')
+                .eq('id', 1)
+                .single();
+
+            if (error) {
+                console.error("Error loading draft state:", error);
+            } else if (data) {
+                draftState = data;
+            }
+        }
+
+        async function loadPlayers() {
+            const { data, error } = await supabase
+                .from('players')
+                .select('*')
+                .order('name', { ascending: true });
+
+            if (error) {
+                console.error("Error loading players:", error);
+            } else if (data) {
+                dbPlayers = data;
+                updateUI();
+                checkAndAutoAdvanceTurn();
+            }
+        }
+
+        async function checkAndAutoAdvanceTurn() {
+            if (!draftState.is_active || !supabase || !managers.length) return;
+            
+            const turnManager = managers[draftState.current_manager_index];
+            if (!turnManager) return;
+            
+            const mRetainedCount = dbPlayers.filter(p => p.drafted_by === turnManager && p.is_retained).length;
+            
+            if (mRetainedCount >= draftState.current_round) {
+                // This manager should be skipped in this round! Calculate the next turn
+                let nextRound = draftState.current_round;
+                let nextIndex = draftState.current_manager_index;
+                
+                while (nextRound <= MAX_ROUNDS) {
+                    if (nextRound % 2 !== 0) { // odd
+                        if (nextIndex === managers.length - 1) {
+                            nextRound++;
+                        } else {
+                            nextIndex++;
+                        }
+                    } else { // even
+                        if (nextIndex === 0) {
+                            nextRound++;
+                        } else {
+                            nextIndex--;
+                        }
+                    }
+                    
+                    if (nextRound > MAX_ROUNDS) break;
+                    
+                    const nextManager = managers[nextIndex];
+                    const nextRetainedCount = dbPlayers.filter(p => p.drafted_by === nextManager && p.is_retained).length;
+                    
+                    if (nextRetainedCount >= nextRound) {
+                        continue;
+                    } else {
+                        break;
+                    }
+                }
+                
+                const isStillActive = nextRound <= MAX_ROUNDS;
+                
+                await supabase
+                    .from('draft_state')
+                    .update({
+                        current_round: nextRound,
+                        current_manager_index: nextIndex,
+                        is_active: isStillActive
+                    })
+                    .eq('id', 1)
+                    .eq('current_round', draftState.current_round)
+                    .eq('current_manager_index', draftState.current_manager_index);
+            }
+        }
+
+        function processText(rawText) {
+            let lines = rawText.replace(/\r/g, "").split('\n'); 
+            let list = [];
+            lines.forEach(line => {
+                if (!line.trim()) return;
+                let parts = line.split('\t');
+                if (parts.length < 2) { parts = line.split(','); }
+                let name = parts ? parts[0].trim() : "";
+                let team = parts && parts[1] ? parts[1].trim() : "Agente Libre";
+                let pos = parts && parts[2] ? parts[2].trim().toUpperCase() : "MED";
+                if (!name) return;
+                if (pos.includes("DFC") || pos === "DF" || pos === "DFC" || pos === "DEF") pos = "DEF";
+                if (pos.includes("MD") || pos === "MC" || pos.includes("MED") || pos === "MJS") pos = "MED";
+                if (pos === "DL" || pos.includes("DEL") || pos === "EXT" || pos === "DC") pos = "DEL";
+                list.push({ name: name, real_team: team, position: pos });
+            });
+            return list;
+        }
+
+        async function seedPlayersToSupabase() {
+            if (!supabase) return;
+            let raw = document.getElementById('players-input').value;
+            let list = processText(raw);
+            if (!list.length) { alert("🚨 Pega primero las filas de tu Excel."); return; }
+
+            document.getElementById('btn-start').innerText = "Cargando...";
+            document.getElementById('btn-start').disabled = true;
+
+            // Delete existing players first
+            await supabase.from('players').delete().neq('id', 0);
+
+            // Insert new players in batches of 100
+            const batchSize = 100;
+            for (let i = 0; i < list.length; i += batchSize) {
+                const batch = list.slice(i, i + batchSize);
+                const { error } = await supabase.from('players').insert(batch);
+                if (error) {
+                    alert("Error insertando jugadores: " + error.message);
+                    break;
+                }
+            }
+
+            // Reset draft state
+            await supabase.from('draft_state').update({
+                current_round: 1,
+                current_manager_index: 0,
+                is_active: true
+            }).eq('id', 1);
+
+            document.getElementById('btn-start').innerText = "🚀 Cargar base de datos a Supabase";
+            document.getElementById('btn-start').disabled = false;
+            document.getElementById('players-input').value = "";
+            alert("✅ ¡Base de datos cargada correctamente y borrador activado!");
+        }
+
+        async function resetDraftInSupabase() {
+            if (!confirm("🚨 ¿Seguro que quieres resetear todo el borrador? Se borrarán todos los fichajes realizados.")) return;
+
+            // Clear drafted fields in all players
+            await supabase.from('players').update({
+                drafted_by: null,
+                round_drafted: null,
+                pick_number: null,
+                drafted_at: null
+            }).neq('id', 0);
+
+            // Reset draft state
+            await supabase.from('draft_state').update({
+                current_round: 1,
+                current_manager_index: 0,
+                is_active: true
+            }).eq('id', 1);
+
+            alert("✅ Borrador reseteado.");
+        }
+
+        async function clearAllPlayersFromDB() {
+            if (!confirm("🚨 ¿Seguro que quieres borrar TODOS los jugadores de la base de datos? Esto vaciará la lista por completo.")) return;
+
+            const { error } = await supabase.from('players').delete().neq('id', 0);
+            if (error) {
+                alert("Error al vaciar jugadores: " + error.message);
+                return;
+            }
+
+            // Reset draft state as well
+            await supabase.from('draft_state').update({
+                current_round: 1,
+                current_manager_index: 0,
+                is_active: false
+            }).eq('id', 1);
+
+            alert("✅ Base de datos de jugadores vaciada.");
+        }
 
         function normalizeTeamName(tName) {
+            if (!tName) return "";
             let str = tName.toLowerCase().trim();
             if (str.includes("barça") || str.includes("barca") || str.includes("fcb") || str.includes("barcelona")) return "barcelona";
             if (str.includes("racing") || str.includes("santander")) return "racing";
@@ -148,71 +907,14 @@
             if (str.includes("villarreal")) return "villarreal";
             return str;
         }
-        function processText(rawText) {
-            let lines = rawText.replace(/\r/g, "").split('\n'); let list = [];
-            lines.forEach(line => {
-                if (!line.trim()) return;
-                let parts = line.split('\t');
-                if (parts.length < 2) { parts = line.split(','); }
-                let name = parts ? parts[0].trim() : "";
-                let team = parts && parts[1] ? parts[1].trim() : "Agente Libre";
-                let pos = parts && parts[2] ? parts[2].trim().toUpperCase() : "MED";
-                if (!name) return;
-                if (pos.includes("DFC") || pos === "DF" || pos === "DFC" || pos === "DEF") pos = "DEF";
-                if (pos.includes("MD") || pos === "MC" || pos.includes("MED") || pos === "MJS") pos = "MED";
-                if (pos === "DL" || pos.includes("DEL") || pos === "EXT" || pos === "DC") pos = "DEL";
-                list.push({ name: name, team: team, pos: pos });
-            });
-            return list;
-        }
 
-        function initLocalDraft() {
-            managers.forEach(m => teams[m] = []);
-            let raw = document.getElementById('players-input').value;
-            players = processText(raw);
-            if (!players.length) { alert("🚨 Pega primero las filas de tu Excel."); return; }
-            document.getElementById('btn-start').style.display = "none";
-            document.getElementById('btn-undo').classList.remove('hidden');
-            document.getElementById('btn-reset-total').classList.remove('hidden');
-            isDraftActive = true;
-            document.getElementById('turn-indicator').classList.remove('hidden');
-            saveSession(); updateUI();
+        function switchTab(tabName) { 
+            activeTab = tabName; 
+            document.getElementById('tab-market').classList.toggle('active', tabName === 'market');
+            document.getElementById('tab-teams').classList.toggle('active', tabName === 'teams');
+            document.getElementById('tab-board').classList.toggle('active', tabName === 'board');
+            updateUI(); 
         }
-
-        function saveSession() {
-            localStorage.setItem('local_is_active', JSON.stringify(isDraftActive));
-            localStorage.setItem('local_players', JSON.stringify(players));
-            localStorage.setItem('local_history', JSON.stringify(history));
-            localStorage.setItem('local_teams', JSON.stringify(teams));
-            localStorage.setItem('local_round', currentRound);
-            localStorage.setItem('local_manager_idx', currentManagerIndex);
-        }
-        function checkSavedSession() {
-            let savedActive = localStorage.getItem('local_is_active');
-            if (savedActive && JSON.parse(savedActive) === true) {
-                isDraftActive = true;
-                players = JSON.parse(localStorage.getItem('local_players')) || [];
-                history = JSON.parse(localStorage.getItem('local_history')) || [];
-                teams = JSON.parse(localStorage.getItem('local_teams')) || {};
-                currentRound = parseInt(localStorage.getItem('local_round')) || 1;
-                currentManagerIndex = parseInt(localStorage.getItem('local_manager_idx')) || 0;
-                
-                document.getElementById('btn-start').style.display = "none";
-                document.getElementById('btn-undo').classList.remove('hidden');
-                document.getElementById('btn-reset-total').classList.remove('hidden');
-                document.getElementById('turn-indicator').classList.remove('hidden');
-                updateUI();
-                renderHistory();
-            }
-        }
-
-        function hardLocalReset() {
-            if (confirm("🚨 ¿Seguro que quieres borrar todos los fichajes guardados en este PC y empezar desde cero?")) {
-                localStorage.clear(); window.location.reload();
-            }
-        }
-
-        function switchTab(tabName) { activeTab = tabName; updateUI(); }
         function setPosFilter(pos) { selectedPosFilter = (selectedPosFilter === pos) ? 'ALL' : pos; updateUI(); }
         function setTeamFilter(teamName) { selectedTeamFilter = (selectedTeamFilter === teamName) ? 'ALL' : teamName; updateUI(); }
         function filterPlayers() { renderMarket(); }
@@ -223,70 +925,300 @@
         }
 
         function updateUI() {
-            document.getElementById('pool-count').innerText = players.length;
-            document.getElementById('round-number').innerText = `Ronda ${currentRound} / ${MAX_ROUNDS}`;
-            document.getElementById('current-drafter').innerText = managers[currentManagerIndex] || "COMPLETO";
-            let tag = document.getElementById('direction-tag'), panel = document.getElementById('turn-indicator');
-            if (currentRound % 2 !== 0) { tag.innerText = "Ida ➡️"; panel.className = "turn-panel neon-cyan"; } 
-            else { tag.innerText = "Vuelta ⬅️"; panel.className = "turn-panel neon-fuchsia"; }
-            if (activeTab === 'market') renderMarket(); else renderLiveTeams();
+            const activePlayers = dbPlayers.filter(p => !p.drafted_by);
+            document.getElementById('pool-count').innerText = activePlayers.length;
+            
+            if (draftState.is_active) {
+                document.getElementById('turn-indicator').classList.remove('hidden');
+                document.getElementById('round-number').innerText = `Ronda ${draftState.current_round} / ${MAX_ROUNDS}`;
+                document.getElementById('current-drafter').innerText = managers[draftState.current_manager_index] || "COMPLETO";
+                
+                let tag = document.getElementById('direction-tag');
+                let panel = document.getElementById('turn-indicator');
+                
+                if (draftState.current_round % 2 !== 0) { 
+                    tag.innerText = "Ida ➡️"; 
+                    panel.className = "turn-panel neon-cyan"; 
+                } else { 
+                    tag.innerText = "Vuelta ⬅️"; 
+                    panel.className = "turn-panel neon-fuchsia"; 
+                }
+                
+                document.getElementById('btn-undo').classList.remove('hidden');
+                document.getElementById('btn-reset-total').classList.remove('hidden');
+            } else {
+                document.getElementById('turn-indicator').classList.add('hidden');
+            }
+
+            // Active Tab Rendering
+            if (activeTab === 'market') {
+                document.getElementById('filter-wrapper').style.display = 'block';
+                document.getElementById('search-box').style.display = 'block';
+                renderMarket();
+            } else if (activeTab === 'teams') {
+                document.getElementById('filter-wrapper').style.display = 'none';
+                document.getElementById('search-box').style.display = 'none';
+                renderLiveTeams();
+            } else if (activeTab === 'board') {
+                document.getElementById('filter-wrapper').style.display = 'none';
+                document.getElementById('search-box').style.display = 'none';
+                renderDraftBoard();
+            }
+
+            renderHistory();
+        }
+
+        function renderDraftBoard() {
+            const pool = document.getElementById('players-pool');
+            pool.innerHTML = '<div style="overflow-x: auto; width: 100%; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);"><table id="board-table" style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: center; color: #e2e8f0;"></table></div>';
+            const table = document.getElementById('board-table');
+            
+            // Header Row: Managers
+            let headerHtml = '<thead><tr style="background: rgba(20, 15, 35, 0.8); border-bottom: 2px solid rgba(255,255,255,0.08);">';
+            headerHtml += '<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.05); font-weight: 800; text-transform: uppercase; color: #38bdf8;">Rda</th>';
+            managers.forEach(m => {
+                const isCurrent = draftState.is_active && managers[draftState.current_manager_index] === m;
+                const style = isCurrent ? 'background: rgba(56,189,248,0.15); color: #38bdf8; font-weight: bold; border: 1px solid #38bdf8;' : 'border: 1px solid rgba(255,255,255,0.05);';
+                headerHtml += `<th style="padding: 12px; min-width: 130px; ${style}">${m.split(' ')[0]}</th>`;
+            });
+            headerHtml += '</tr></thead>';
+            
+            // Rows: Rounds 1 to MAX_ROUNDS
+            let bodyHtml = '<tbody>';
+            for (let r = 1; r <= MAX_ROUNDS; r++) {
+                bodyHtml += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.03); ${r % 2 === 0 ? 'background: rgba(255,255,255,0.01);' : ''}">`;
+                bodyHtml += `<td style="padding: 10px; font-weight: bold; color: #64748b; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);">${r}</td>`;
+                
+                managers.forEach((m, mIdx) => {
+                    // Column is manager 'm'. We look for the player manager 'm' drafted in round 'r'
+                    const pick = dbPlayers.find(p => p.drafted_by === m && p.round_drafted === r);
+                    
+                    const isCurrentTurn = draftState.is_active && 
+                                          draftState.current_round === r && 
+                                          managers[draftState.current_manager_index] === m;
+                    
+                    let cellStyle = 'padding: 10px; border: 1px solid rgba(255,255,255,0.05); font-size: 10px;';
+                    let cellContent = '<span style="color: #475569; font-style: italic;">-</span>';
+                    
+                    if (pick) {
+                        let posClass = `pos-${pick.position}`;
+                        cellContent = `<div style="font-weight: 700; color: #fff; margin-bottom: 3px;">${pick.name}</div><div style="font-size: 9px; color: #94a3b8; display: flex; align-items: center; justify-content: center; gap: 4px;"><span>${pick.real_team}</span> <span class="pos-badge ${posClass}" style="margin: 0; padding: 1px 4px; font-size: 8px;">${pick.position}</span></div>`;
+                    } else if (isCurrentTurn) {
+                        cellStyle += 'background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; font-weight: 800;';
+                        cellContent = '⚡ ELIGIENDO';
+                    }
+                    
+                    bodyHtml += `<td style="${cellStyle}">${cellContent}</td>`;
+                });
+                bodyHtml += '</tr>';
+            }
+            bodyHtml += '</tbody>';
+            
+            table.innerHTML = headerHtml + bodyHtml;
         }
 
         function renderMarket() {
             const search = document.getElementById('search-player').value.toLowerCase().trim();
-            const pool = document.getElementById('players-pool'); pool.innerHTML = "";
-            const filtered = players.filter(p => {
-                let normPTeam = normalizeTeamName(p.team); let normFTeam = normalizeTeamName(selectedTeamFilter);
-                return (p.name.toLowerCase().includes(search) || normPTeam.includes(search)) && (selectedPosFilter === 'ALL' || p.pos === selectedPosFilter) && (selectedTeamFilter === 'ALL' || normPTeam === normFTeam);
+            const pool = document.getElementById('players-pool'); 
+            pool.innerHTML = "";
+
+            const available = dbPlayers.filter(p => !p.drafted_by);
+            const filtered = available.filter(p => {
+                let normPTeam = normalizeTeamName(p.real_team); 
+                let normFTeam = normalizeTeamName(selectedTeamFilter);
+                return (p.name.toLowerCase().includes(search) || normPTeam.includes(search)) && 
+                       (selectedPosFilter === 'ALL' || p.position === selectedPosFilter) && 
+                       (selectedTeamFilter === 'ALL' || normPTeam === normFTeam);
             });
+
+            if (!filtered.length) {
+                pool.innerHTML = `<p style="color:#475569; text-align:center; padding-top:50px; font-size:12px; font-weight:700; text-transform:uppercase;">Ningún jugador disponible coincide con los filtros</p>`;
+                return;
+            }
+
+            // Current turn manager
+            const turnManager = managers[draftState.current_manager_index];
+            const isMyTurn = currentIdentity === turnManager;
+
             filtered.forEach(pObj => {
-                const idx = players.indexOf(pObj); let posClass = `pos-${pObj.pos}`;
-                const card = document.createElement('div'); card.className = "card";
-                card.innerHTML = `<div><span class="name">${pObj.name} <span class="pos-badge ${posClass}">${pObj.pos}</span></span><span class="team">${pObj.team}</span></div><div class="actions-box"><button class="btn-fichar" onclick="pickPlayer(${idx})">Fichar</button></div>`;
+                let posClass = `pos-${pObj.position}`;
+                const card = document.createElement('div'); 
+                card.className = "card";
+                
+                // Show a disabled or active button depending on whether it is the manager's turn or they have selected an identity
+                let buttonHtml = '';
+                if (!currentIdentity) {
+                    buttonHtml = `<button class="btn-fichar" style="opacity: 0.5; cursor: not-allowed;" onclick="alert('Selecciona tu identidad de mánager en el panel izquierdo para poder fichar.')">Espectador</button>`;
+                } else if (!isMyTurn) {
+                    buttonHtml = `<button class="btn-fichar" style="opacity: 0.5; cursor: not-allowed;" onclick="alert('No es tu turno. Le toca a ${turnManager}')">Fichar</button>`;
+                } else {
+                    buttonHtml = `<button class="btn-fichar" onclick="pickPlayer(${pObj.id})">Fichar</button>`;
+                }
+
+                card.innerHTML = `<div><span class="name">${pObj.name} <span class="pos-badge ${posClass}">${pObj.position}</span></span><span class="team">${pObj.real_team}</span></div><div class="actions-box">${buttonHtml}</div>`;
                 pool.appendChild(card);
             });
         }
 
         function renderLiveTeams() {
-            const pool = document.getElementById('players-pool'); pool.innerHTML = '<div class="summary-grid" id="s-grid"></div>';
+            const pool = document.getElementById('players-pool'); 
+            pool.innerHTML = '<div class="summary-grid" id="s-grid"></div>';
             const sGrid = document.getElementById('s-grid');
+            
             managers.forEach(m => {
                 let html = `<div class="team-box"><h4 style="color:#38bdf8; font-size:12px; margin-bottom:6px;">👤 ${m}</h4><ul style="list-style:none; font-size:11px; display:flex; flex-direction:column; gap:4px;">`;
-                let mPlayers = teams[m] || [];
-                if (!mPlayers.length) html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;
-                else { mPlayers.forEach(p => { html += `<li style="background:rgba(255,255,255,0.01); padding:4px; border-radius:4px;">${p.player} <span style="font-size:9px; color:#64748b;">[${p.pos}]</span></li>`; }); }
+                let mPlayers = dbPlayers.filter(p => p.drafted_by === m).sort((a,b) => (a.pick_number || 0) - (b.pick_number || 0));
+                
+                if (!mPlayers.length) {
+                    html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;
+                } else { 
+                    mPlayers.forEach(p => { 
+                        let releaseBtn = '';
+                        if (isAdminMode && p.is_retained) {
+                            releaseBtn = `<button onclick="releaseRetained(${p.id})" style="background: rgba(239,68,68,0.2); border: 1px solid #ef4444; color:#f87171; font-size:8px; padding:1px 4px; border-radius:3px; cursor:pointer;">Liberar</button>`;
+                        }
+                        html += `<li style="background:rgba(255,255,255,0.01); padding:4px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;">
+                            <span>${p.name} <span style="font-size:9px; color:#64748b;">[${p.position}] (${p.is_retained ? 'Retenido R' + p.round_drafted : 'R' + p.round_drafted})</span></span>
+                            ${releaseBtn}
+                        </li>`; 
+                    }); 
+                }
                 sGrid.innerHTML += html + `</ul></div>`;
             });
         }
 
-        function pickPlayer(idx) {
-            const p = players[idx], m = managers[currentManagerIndex];
-            history.unshift({ manager: m, name: p.name, team: p.team, pos: p.pos, round: currentRound });
-            teams[m].push({ player: p.name, team: p.team, pos: p.pos, round: currentRound });
-            players.splice(idx, 1);
-            if (currentRound % 2 !== 0) { if (currentManagerIndex === managers.length - 1) currentRound++; else currentManagerIndex++; } 
-            else { if (currentManagerIndex === 0) currentRound++; else currentManagerIndex--; }
-            renderHistory(); saveSession(); updateUI();
+        async function pickPlayer(playerId) {
+            if (!draftState.is_active) return;
+            const turnManager = managers[draftState.current_manager_index];
+            if (currentIdentity !== turnManager) {
+                alert(`No es tu turno. El turno es de: ${turnManager}`);
+                return;
+            }
+
+            const p = dbPlayers.find(x => x.id === playerId);
+            if (!p || p.drafted_by) return;
+
+            // Get new pick index based on already drafted players
+            const draftedCount = dbPlayers.filter(x => x.drafted_by).length;
+            const nextPickNumber = draftedCount + 1;
+
+            // Update player as drafted
+            const { error: playerErr } = await supabase
+                .from('players')
+                .update({
+                    drafted_by: turnManager,
+                    round_drafted: draftState.current_round,
+                    pick_number: nextPickNumber,
+                    drafted_at: new Date().toISOString()
+                })
+                .eq('id', playerId);
+
+            if (playerErr) {
+                alert("Error al realizar el pick: " + playerErr.message);
+                return;
+            }
+
+            // Calculate next turn
+            let nextRound = draftState.current_round;
+            let nextIndex = draftState.current_manager_index;
+
+            if (draftState.current_round % 2 !== 0) { 
+                // Odd round: Left to right (0 to length-1)
+                if (draftState.current_manager_index === managers.length - 1) {
+                    nextRound++;
+                } else {
+                    nextIndex++;
+                }
+            } else { 
+                // Even round: Right to left (length-1 to 0)
+                if (draftState.current_manager_index === 0) {
+                    nextRound++;
+                } else {
+                    nextIndex--;
+                }
+            }
+
+            const isStillActive = nextRound <= MAX_ROUNDS;
+
+            // Update Draft State
+            const { error: stateErr } = await supabase
+                .from('draft_state')
+                .update({
+                    current_round: nextRound,
+                    current_manager_index: nextIndex,
+                    is_active: isStillActive
+                })
+                .eq('id', 1);
+
+            if (stateErr) {
+                console.error("Error updating draft state:", stateErr);
+            }
         }
 
-        function undoLocalPick() {
-            if (!history.length) return;
-            const last = history.shift(); players.push({ name: last.name, team: last.team, pos: last.pos });
-            teams[last.manager] = teams[last.manager].filter(p => p.player !== last.name);
-            currentRound = last.round; currentManagerIndex = managers.indexOf(last.manager);
-            renderHistory(); saveSession(); updateUI();
+        async function undoLastPick() {
+            // Find last drafted player by max pick_number
+            const drafted = dbPlayers.filter(p => p.drafted_by && p.pick_number);
+            if (!drafted.length) {
+                alert("No hay ningún pick para deshacer.");
+                return;
+            }
+
+            drafted.sort((a,b) => b.pick_number - a.pick_number);
+            const lastPick = drafted[0];
+
+            if (!confirm(`¿Deshacer la elección de ${lastPick.name} por ${lastPick.drafted_by}?`)) return;
+
+            // Release player in DB
+            const { error: playerErr } = await supabase
+                .from('players')
+                .update({
+                    drafted_by: null,
+                    round_drafted: null,
+                    pick_number: null,
+                    drafted_at: null
+                })
+                .eq('id', lastPick.id);
+
+            if (playerErr) {
+                alert("Error al liberar jugador: " + playerErr.message);
+                return;
+            }
+
+            // Revert draft state back to this manager's turn and round
+            const lastManagerIndex = managers.indexOf(lastPick.drafted_by);
+            const { error: stateErr } = await supabase
+                .from('draft_state')
+                .update({
+                    current_round: lastPick.round_drafted,
+                    current_manager_index: lastManagerIndex,
+                    is_active: true
+                })
+                .eq('id', 1);
+
+            if (stateErr) {
+                console.error("Error updating state during undo:", stateErr);
+            }
         }
 
         function renderHistory() {
-            const container = document.getElementById('draft-history'); container.innerHTML = "";
-            history.forEach(pick => {
-                const item = document.createElement('div'); item.className = "history-item"; item.style.borderColor = pick.round % 2 !== 0 ? "#06b6d4" : "#d946ef";
-                item.innerHTML = `<strong>${pick.manager}</strong> ficha a <span style="color:#38bdf8; font-weight:700;">${pick.name}</span> [${pick.pos}] (R${pick.round})`;
+            const container = document.getElementById('draft-history'); 
+            container.innerHTML = "";
+
+            const drafted = dbPlayers.filter(p => p.drafted_by).sort((a,b) => b.pick_number - a.pick_number);
+            
+            if (!drafted.length) {
+                container.innerHTML = `<p style="color:#475569; text-align:center; padding-top:20px; font-size:11px;">Historial vacío</p>`;
+                return;
+            }
+
+            drafted.forEach(pick => {
+                const item = document.createElement('div'); 
+                item.className = "history-item"; 
+                item.style.borderColor = pick.round_drafted % 2 !== 0 ? "#06b6d4" : "#d946ef";
+                item.innerHTML = `<strong>${pick.drafted_by}</strong> ficha a <span style="color:#38bdf8; font-weight:700;">${pick.name}</span> [${pick.position}] (R${pick.round_drafted} - Pick #${pick.pick_number})`;
                 container.appendChild(item);
             });
         }
-
-        window.onload = checkSavedSession;
     </script>
 </body>
 </html>
