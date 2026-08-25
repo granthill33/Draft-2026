@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>🏆 LIGA FANTASY PRO 26/27: EN DIRECTO 🏆</title>
+    <title>🏆 LIGA FANTASY PRO 26/27: DIRECTO LIVE 🏆</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: system-ui, -apple-system, sans-serif; background: radial-gradient(circle at 50% 0%, #17122b 0%, #06040a 70%); color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 30px; }
@@ -54,23 +54,22 @@
         @media (min-width: 640px) { .summary-grid { grid-template-columns: 1fr 1fr; } }
         .team-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.04); }
     </style>
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
+    <script src="https://ably.com"></script>
 </head>
 <body>
     <header>
-        <div class="logo">⚽ CLOUD DRAFT LIGA PRO 26/27</div>
+        <div class="logo">⚽ CONEXIÓN MULTIJUGADOR DIRECTA PRO</div>
         <div id="turn-indicator" class="turn-panel hidden">
             <div>
                 <small id="round-number" style="font-size:9px; color:#94a3b8; display:block; font-weight:700; letter-spacing:1px;">RONDA 1 / 23</small>
-                <strong id="current-drafter" style="font-size:15px; color:#fff;">Listo...</strong>
+                <strong id="current-drafter" style="font-size:15px; color:#fff;">Sincronizando...</strong>
             </div>
             <div id="direction-tag" style="font-size:10px; font-weight:800; padding:5px 10px; border-radius:6px; text-transform:uppercase;">IDA</div>
         </div>
     </header>
     <main>
         <section class="panel" id="admin-setup-panel">
-            <h2>⚙️ Carga de Jugadores Excel (Soporta listas masivas)</h2>
+            <h2>⚙️ Carga de Jugadores Excel (Sincronización Masiva Activa)</h2>
             <div style="display:flex; flex-direction:column; gap:4px;">
                 <textarea id="participants-input" rows="4" style="color:#64748b; font-size:11px;" disabled>Las Palmas (Turu Flores)
 Oviedo (Obafemi)
@@ -93,8 +92,8 @@ Cadiz (Aitor55)
 Coruxo (Hill)
 Alaves (Torressss)</textarea>
             </div>
-            <textarea id="players-input" rows="5" placeholder="Pega aquí tus 3 columnas de Excel (Nombre, Equipo, Posición)."></textarea>
-            <button onclick="initCloudDraft()" id="btn-start" class="btn">🚀 Iniciar Liga Global Sincronizada</button>
+            <textarea id="players-input" rows="5" placeholder="Pega aquí tus 3 columnas de Excel de jugadores."></textarea>
+            <button onclick="initGlobalDraft()" id="btn-start" class="btn">🚀 Iniciar Liga Compartida Instantánea</button>
         </section>
         <section class="panel">
             <div class="tabs">
@@ -137,20 +136,20 @@ Alaves (Torressss)</textarea>
             </div>
             <div id="search-box"><input type="text" id="search-player" oninput="filterPlayers()" placeholder="🔍 Escribe para buscar por nombre..."></div>
             <div id="main-container" class="scroll"><div id="players-pool" class="grid"></div></div>
-            <button onclick="undoCloudPick()" id="btn-undo" class="btn btn-undo hidden" style="margin-top:10px;">↩️ Deshacer Último Fichaje</button>
-            <button onclick="hardCloudReset()" id="btn-reset-total" class="btn btn-clear hidden" style="margin-top:15px; background:linear-gradient(90deg, #dc2626, #991b1b);">🚨 RESETEAR LIGA (BORRAR TODO DESDE CERO)</button>
+            <button onclick="undoGlobalPick()" id="btn-undo" class="btn btn-undo hidden" style="margin-top:10px;">↩️ Deshacer Último Fichaje</button>
+            <button onclick="hardGlobalReset()" id="btn-reset-total" class="btn btn-clear hidden" style="margin-top:15px; background:linear-gradient(90deg, #dc2626, #991b1b);">🚨 RESETEAR LIGA COMPLETA (BORRAR PARA TODOS)</button>
         </section>
         <section class="panel"><h2>📜 Historial Global en Vivo</h2><div id="draft-history" class="scroll" style="display:flex; flex-direction:column; gap:8px;"></div></section>
     </main>
     <script>
-        const firebaseConfig = { databaseURL: "https://firebaseio.com" };
-        firebase.initializeApp(firebaseConfig);
-        const cloudDB = firebase.database();
+        /* MOTOR WEBSOCKET ABIERTO SIN RESTRICCIONES SSL DE GOOGLE */
+        const ably = new Ably.Realtime('4eW6Fw.oX9Ytg:0VwX9wE2k3H7yN5k');
+        const channel = ably.channels.get('fantasy_liga_pro_2026');
+
         let managers = ["Las Palmas (Turu Flores)", "Oviedo (Obafemi)", "Real Sociedad (Omar Little)", "Osasuna (Sens44)", "Huracán (Trosky)", "Levante (Celtics Fan)", "Lleida (Boibi2)", "Recreativo (JOSEDIN)", "Sporting (Rebekin)", "Celta (William)", "Guadalajara (Nikola Sarcevic)", "Deportivo (De la Penya)", "Valencia (Jraga)", "Barcelona (Malabar)", "Marino (Sauber)", "Eibar (Eragon86)", "Real Unión (Swes)", "Cadiz (Aitor55)", "Coruxo (Hill)", "Alaves (Torressss)"];
         let players = [], history = [], teams = {};
         let currentManagerIndex = 0, currentRound = 1;
         let activeTab = 'market', selectedPosFilter = 'ALL', selectedTeamFilter = 'ALL';
-        window.addEventListener('beforeunload', function (e) { e.preventDefault(); e.returnValue = 'Alerta'; });
 
         function normalizeTeamName(tName) {
             let str = tName.toLowerCase().trim();
@@ -170,7 +169,6 @@ Alaves (Torressss)</textarea>
             if (str.includes("villarreal")) return "villarreal";
             return str;
         }
-
         function processText(rawText) {
             let lines = rawText.replace(/\r/g, "").split('\n'); let list = [];
             lines.forEach((line) => {
@@ -188,66 +186,67 @@ Alaves (Torressss)</textarea>
             });
             return list;
         }
-        function initCloudDraft() {
+
+        /* INYECCIÓN COMPRIMIDA EN WEBSOCKET: ARRANCA AL INSTANTE SIN CARGAS */
+        function initGlobalDraft() {
             let raw = document.getElementById('players-input').value;
             if (!raw.trim()) { alert("🚨 Pega primero el Excel."); return; }
             let pool = processText(raw);
             if (!pool.length) { alert("🚨 Formato inválido."); return; }
-            let emptyTeams = {}; managers.forEach(m => { emptyTeams[m] = [{ player: "Fichajes Vacíos", team: "Ninguno", pos: "MED", round: 0 }]; });
-            cloudDB.ref('liga_pro_2026').set({
+            let emptyTeams = {}; managers.forEach(m => { emptyTeams[m] = []; });
+            
+            let state = {
                 players: pool,
-                history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "INFO", round: 0, overallPick: 0 }],
+                history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "INFO", round: 0 }],
                 teams: emptyTeams, currentRound: 1, currentManagerIndex: 0
-            }).then(() => { document.getElementById('players-input').value = ""; });
-        }
-
-        function syncFromObject(data) {
-            players = data.players || []; history = data.history || []; teams = data.teams || {};
-            currentRound = data.currentRound; currentManagerIndex = data.currentManagerIndex;
-            document.getElementById('admin-setup-panel').style.display = "none";
-            document.getElementById('turn-indicator').classList.remove('hidden');
-            document.getElementById('btn-undo').classList.remove('hidden');
-            document.getElementById('btn-reset-total').classList.remove('hidden');
-            updateUI();
+            };
+            channel.publish('updateState', JSON.stringify(state));
         }
 
         function pickPlayerCloud(idx) {
             const p = players[idx], m = managers[currentManagerIndex];
             let updHistory = Array.from(history);
-            updHistory.unshift({ manager: m, name: p.name, team: p.team, pos: p.pos, round: currentRound, overallPick: (updHistory.length) });
+            updHistory.unshift({ manager: m, name: p.name, team: p.team, pos: p.pos, round: currentRound });
             let updTeam = Array.from(teams[m] || []);
-            if (updTeam.length === 1 && updTeam.player === "Fichajes Vacíos") updTeam = [];
             updTeam.push({ player: p.name, team: p.team, pos: p.pos, round: currentRound });
             let updPlayers = Array.from(players); updPlayers.splice(idx, 1);
             let nIdx = currentManagerIndex, nRound = currentRound;
             if (currentRound % 2 !== 0) { if (currentManagerIndex === managers.length - 1) nRound++; else nIdx++; } 
             else { if (currentManagerIndex === 0) nRound++; else nIdx--; }
-            cloudDB.ref('liga_pro_2026').update({ players: updPlayers, history: updHistory, [`teams/${m}`]: updTeam, currentRound: nRound, currentManagerIndex: nIdx });
+            
+            let state = { players: updPlayers, history: updHistory, teams: teams, currentRound: nRound, currentManagerIndex: nIdx };
+            state.teams[m] = updTeam;
+            channel.publish('updateState', JSON.stringify(state));
         }
-
-        function undoCloudPick() {
+        function undoGlobalPick() {
             if (!history || history.length <= 1) return;
             let updHistory = Array.from(history); const last = updHistory.shift();
             let updPlayers = Array.from(players); updPlayers.push({ name: last.name, team: last.team, pos: last.pos });
             let updTeam = Array.from(teams[last.manager] || []).filter(p => p.player !== last.name);
-            if(!updTeam.length) updTeam = [{ player: "Fichajes Vacíos", team: "Ninguno", pos: "MED", round: 0 }];
             let pIdx = managers.indexOf(last.manager);
-            cloudDB.ref('liga_pro_2026').update({ players: updPlayers, history: updHistory, [`teams/${last.manager}`]: updTeam, currentRound: last.round, currentManagerIndex: pIdx });
+            
+            let state = { players: updPlayers, history: updHistory, teams: teams, currentRound: last.round, currentManagerIndex: pIdx };
+            state.teams[last.manager] = updTeam;
+            channel.publish('updateState', JSON.stringify(state));
         }
 
-        function hardCloudReset() {
-            if (confirm("⚠️ ¿Resetear liga?")) { cloudDB.ref('liga_pro_2026').remove(); window.location.reload(); }
-        }
-
-        cloudDB.ref('liga_pro_2026').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) { syncFromObject(data); } else {
-                document.getElementById('admin-setup-panel').style.display = "flex";
-                document.getElementById('turn-indicator').classList.add('hidden');
-                document.getElementById('btn-undo').classList.add('hidden');
-                document.getElementById('btn-reset-total').classList.add('hidden');
-                document.getElementById('main-container').innerHTML = "";
+        function hardGlobalReset() {
+            if (confirm("⚠️ ¿Resetear liga completa para todos los mánagers?")) {
+                channel.publish('updateState', 'RESET');
             }
+        }
+
+        channel.subscribe('updateState', (msg) => {
+            if (msg.data === 'RESET') { window.location.reload(); return; }
+            const data = JSON.parse(msg.data);
+            players = data.players || []; history = data.history || []; teams = data.teams || {};
+            currentRound = data.currentRound; currentManagerIndex = data.currentManagerIndex;
+            
+            document.getElementById('admin-setup-panel').style.display = "none";
+            document.getElementById('turn-indicator').classList.remove('hidden');
+            document.getElementById('btn-undo').classList.remove('hidden');
+            document.getElementById('btn-reset-total').classList.remove('hidden');
+            updateUI();
         });
 
         function switchTab(tabName) { activeTab = tabName; updateUI(); }
@@ -289,8 +288,8 @@ Alaves (Torressss)</textarea>
             managers.forEach(m => {
                 let html = `<div class="team-box"><h4 style="color:#38bdf8; font-size:12px; margin-bottom:6px;">👤 ${m}</h4><ul style="list-style:none; font-size:11px; display:flex; flex-direction:column; gap:4px;">`;
                 let mPlayers = teams[m] || [];
-                if (!mPlayers.length || (mPlayers.length === 1 && mPlayers.player === "Fichajes Vacíos")) html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;
-                else { mPlayers.forEach(p => { if(!p.player || p.player === "Fichajes Vacíos") return; html += `<li style="background:rgba(255,255,255,0.01); padding:4px; border-radius:4px;">${p.player} <span style="font-size:9px; color:#64748b;">[${p.pos}]</span></li>`; }); }
+                if (!mPlayers.length) html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;
+                else { mPlayers.forEach(p => { html += `<li style="background:rgba(255,255,255,0.01); padding:4px; border-radius:4px;">${p.player} <span style="font-size:9px; color:#64748b;">[${p.pos}]</span></li>`; }); }
                 sGrid.innerHTML += html + `</ul></div>`;
             });
         }
