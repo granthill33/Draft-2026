@@ -170,29 +170,42 @@ Alaves (Torressss)</textarea>
             if (str.includes("villarreal")) return "villarreal";
             return str;
         }
+        /* NUEVO MOTOR BLINDADO ANTI-FALLOS DE FORMATO EXCEL */
         function processText(rawText) {
-            let lines = rawText.replace(/\r/g, "").split('\n'); let list = [];
-            lines.forEach((line) => {
-                if (!line.trim()) return;
+            if (!rawText || !rawText.trim()) return [];
+            let cleanText = rawText.replace(/\r/g, "");
+            let lines = cleanText.split('\n');
+            let list = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if (!line) continue;
+                
                 let parts = line.split('\t');
                 if (parts.length < 2) { parts = line.split(','); }
-                let name = parts ? parts.trim() : "";
-                let team = parts ? parts.trim() : "Agente Libre";
-                let pos = parts ? parts.trim().toUpperCase() : "MED";
-                if (!name) return;
-                if (pos.includes("DFC") || pos === "DF") pos = "DEF";
-                if (pos.includes("MD") || pos === "MC" || pos.includes("MED")) pos = "MED";
-                if (pos === "DL" || pos.includes("DEL")) pos = "DEL";
+                if (parts.length < 2) { parts = line.split(';'); }
+                
+                let name = parts[0] ? parts[0].trim() : "";
+                let team = parts[1] ? parts[1].trim() : "Agente Libre";
+                let pos = parts[2] ? parts[2].trim().toUpperCase() : "MED";
+                
+                if (!name || name.toLowerCase().includes("nombre")) continue;
+                
+                if (pos.includes("DFC") || pos === "DF" || pos.includes("DEF")) pos = "DEF";
+                if (pos.includes("MD") || pos === "MC" || pos.includes("MED") || pos.includes("MJS")) pos = "MED";
+                if (pos === "DL" || pos.includes("DEL") || pos.includes("EXT")) pos = "DEL";
+                if (pos !== "POR" && pos !== "DEF" && pos !== "MED" && pos !== "DEL") pos = "MED";
+                
                 list.push({ name: name, team: team, pos: pos });
-            });
+            }
             return list;
         }
 
         function initCloudDraft() {
             let raw = document.getElementById('players-input').value;
-            if (!raw.trim()) { alert("🚨 Pega primero las filas de tu Excel."); return; }
+            if (!raw || !raw.trim()) { alert("🚨 Pega primero las filas de tu Excel."); return; }
             let pool = processText(raw);
-            if (!pool.length) { alert("🚨 Formato de filas incorrecto."); return; }
+            if (!pool || !pool.length) { alert("🚨 No se han detectado jugadores. Revisa el formato de copiado."); return; }
             
             document.getElementById('btn-start').innerText = "⏳ Subiendo lista masiva (0%)...";
             document.getElementById('btn-start').disabled = true;
@@ -201,7 +214,7 @@ Alaves (Torressss)</textarea>
             let baseNode = { history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "INFO", round: 0, overallPick: 0 }], teams: emptyTeams, currentRound: 1, currentManagerIndex: 0 };
             
             cloudDB.ref('liga_pro_2026').set(baseNode).then(() => {
-                let chunkSize = 20; let currentIdx = 0;
+                let chunkSize = 25; let currentIdx = 0;
                 function uploadNextChunk() {
                     if (currentIdx >= pool.length) {
                         document.getElementById('players-input').value = "";
@@ -219,7 +232,7 @@ Alaves (Torressss)</textarea>
                     });
                 }
                 uploadNextChunk();
-            });
+            }).catch((err) => { alert("Error al conectar con la nube: " + err.message); document.getElementById('btn-start').disabled = false; document.getElementById('btn-start').innerText = "🚀 Iniciar Liga Global Sincronizada"; });
         }
         function syncFromObject(data) {
             players = data.players || []; history = data.history || []; teams = data.teams || {};
@@ -289,6 +302,7 @@ Alaves (Torressss)</textarea>
             renderHistory();
         }
 
+        /* FILTRADO OPTIMIZADO PARA LISTAS GIGANTES */
         function renderMarket() {
             const search = document.getElementById('search-player').value.toLowerCase().trim();
             const pool = document.getElementById('players-pool'); pool.innerHTML = "";
