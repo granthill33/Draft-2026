@@ -338,6 +338,32 @@
             border-radius: 6px;
             letter-spacing: 0.3px;
         }
+        .btn-copy {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #94a3b8;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .btn-copy:hover { color: #fff; border-color: #38bdf8; background: rgba(56,189,248,0.12); }
+        .team-box-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .board-copy-btn {
+            display: block;
+            margin: 4px auto 0;
+            font-size: 9px;
+            padding: 2px 6px;
+        }
 
         .config-overlay {
             position: fixed;
@@ -422,10 +448,18 @@
             background: rgba(0,0,0,0.25);
             border-radius: 6px;
         }
+        #main-container.board-mode {
+            max-height: none;
+            overflow: visible;
+        }
+        #players-pool.full-bleed {
+            display: block;
+            width: 100%;
+        }
         .board-wrap {
             overflow: auto;
             width: 100%;
-            max-height: min(75vh, 920px);
+            max-height: min(78vh, 960px);
             border-radius: 12px;
             background: rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.05);
@@ -438,6 +472,7 @@
             font-size: 11px;
             text-align: center;
             color: #e2e8f0;
+            table-layout: auto;
         }
         .board-wrap th,
         .board-wrap td {
@@ -446,8 +481,7 @@
             vertical-align: middle;
         }
         .board-wrap th {
-            min-width: 110px;
-            max-width: 140px;
+            min-width: 120px;
             font-weight: 800;
             font-size: 10px;
             line-height: 1.25;
@@ -463,8 +497,9 @@
             position: sticky;
             left: 0;
             z-index: 1;
-            min-width: 44px;
-            max-width: 52px;
+            min-width: 48px;
+            max-width: 56px;
+            width: 48px;
             background: rgba(12, 9, 20, 0.95);
             font-weight: 800;
             color: #64748b;
@@ -474,13 +509,16 @@
             color: #38bdf8;
         }
         .board-wrap td {
-            min-width: 110px;
-            max-width: 140px;
+            min-width: 120px;
             font-size: 10px;
         }
-        #main-container.board-mode {
-            max-height: none;
-            overflow: visible;
+        @media (min-width: 1280px) {
+            main.layout-wide-center {
+                grid-template-columns: 300px minmax(0, 1fr);
+            }
+            main.layout-wide-center .panel-history {
+                grid-column: 1 / -1;
+            }
         }
         .quick-add-row { display: grid; grid-template-columns: 1fr; gap: 6px; }
         @media (min-width: 400px) {
@@ -624,9 +662,10 @@
                     <button onclick="seedPlayersToSupabase()" id="btn-start" class="btn btn-green">🚀 Inicializar DB con Jugadores</button>
                 </div>
 
-                <!-- 2. Quick add -->
+                <!-- 2. Quick add + edit -->
                 <div class="admin-section">
-                    <span class="admin-section-title">2. Añadir jugador rápido</span>
+                    <span class="admin-section-title">2. Alta / edición de jugadores</span>
+                    <small style="color:#64748b;font-size:10px;">Añadir uno nuevo o corregir nombre, equipo o posición.</small>
                     <div class="quick-add-row">
                         <input type="text" id="quick-player-name" class="full" placeholder="Nombre">
                         <input type="text" id="quick-player-team" placeholder="Equipo real">
@@ -638,6 +677,23 @@
                         </select>
                     </div>
                     <button onclick="addSinglePlayer()" class="btn" style="background: linear-gradient(90deg, #06b6d4, #3b82f6);">➕ Añadir Jugador</button>
+
+                    <div style="border-top:1px solid rgba(255,255,255,0.06); padding-top:10px; margin-top:4px; display:flex; flex-direction:column; gap:8px;">
+                        <span style="font-weight:800; font-size:10px; color:#94a3b8; text-transform:uppercase;">Editar jugador existente</span>
+                        <input type="text" id="edit-player-search" oninput="searchEditPlayers()" placeholder="Buscar jugador a editar..." style="padding:8px;">
+                        <select id="edit-player-select" onchange="fillEditPlayerForm()"></select>
+                        <div class="quick-add-row">
+                            <input type="text" id="edit-player-name" class="full" placeholder="Nombre">
+                            <input type="text" id="edit-player-team" placeholder="Equipo real">
+                            <select id="edit-player-pos">
+                                <option value="POR">POR</option>
+                                <option value="DEF">DEF</option>
+                                <option value="MED">MED</option>
+                                <option value="DEL">DEL</option>
+                            </select>
+                        </div>
+                        <button onclick="saveEditedPlayer()" class="btn" style="background: linear-gradient(90deg, #f59e0b, #d97706);">💾 Guardar cambios</button>
+                    </div>
                 </div>
 
                 <!-- 3. Retenciones -->
@@ -806,6 +862,7 @@
             document.getElementById('btn-admin-toggle').style.color = "#fff";
             populateAdminManagers();
             searchAdminPlayers();
+            searchEditPlayers();
             renderPendingPicksAdmin();
             renderAdminsList();
             updateUI();
@@ -1070,7 +1127,10 @@
                 console.error("Error loading players:", error);
             } else if (data) {
                 dbPlayers = data;
-                if (isAdminMode) searchAdminPlayers();
+                if (isAdminMode) {
+                    searchAdminPlayers();
+                    searchEditPlayers();
+                }
                 updateUI();
                 checkAndAutoAdvanceTurn();
             }
@@ -1678,6 +1738,77 @@
             document.getElementById('quick-player-team').value = "";
             alert(`✅ ${name} añadido.`);
             await loadPlayers();
+            searchEditPlayers();
+        }
+
+        function searchEditPlayers() {
+            const selectEl = document.getElementById('edit-player-select');
+            const searchEl = document.getElementById('edit-player-search');
+            if (!selectEl || !searchEl) return;
+            const query = searchEl.value.toLowerCase().trim();
+            selectEl.innerHTML = "";
+            const filtered = dbPlayers
+                .filter(p => !query || p.name.toLowerCase().includes(query) || (p.real_team || '').toLowerCase().includes(query))
+                .slice(0, 80);
+            if (!filtered.length) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.innerText = 'Sin resultados';
+                selectEl.appendChild(opt);
+                return;
+            }
+            filtered.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                const tag = p.drafted_by ? ` · ${p.drafted_by}` : '';
+                opt.innerText = `${p.name} (${p.real_team} · ${p.position})${tag}`;
+                selectEl.appendChild(opt);
+            });
+            fillEditPlayerForm();
+        }
+
+        function fillEditPlayerForm() {
+            const selectEl = document.getElementById('edit-player-select');
+            if (!selectEl || !selectEl.value) return;
+            const p = getPlayerById(selectEl.value);
+            if (!p) return;
+            document.getElementById('edit-player-name').value = p.name || '';
+            document.getElementById('edit-player-team').value = p.real_team || '';
+            document.getElementById('edit-player-pos').value = ['POR','DEF','MED','DEL'].includes(p.position) ? p.position : 'MED';
+        }
+
+        async function saveEditedPlayer() {
+            if (!sbClient || !isAdminMode) return;
+            const selectEl = document.getElementById('edit-player-select');
+            const playerId = selectEl ? selectEl.value : '';
+            if (!playerId) {
+                alert("Selecciona un jugador.");
+                return;
+            }
+            const name = document.getElementById('edit-player-name').value.trim();
+            const real_team = document.getElementById('edit-player-team').value.trim() || "Agente Libre";
+            const position = document.getElementById('edit-player-pos').value;
+            if (!name) {
+                alert("El nombre es obligatorio.");
+                return;
+            }
+            const { error } = await sbClient
+                .from('players')
+                .update({ name, real_team, position })
+                .eq('id', playerId);
+            if (error) {
+                alert("Error al guardar: " + error.message);
+                return;
+            }
+            alert(`✅ ${name} actualizado (${position} · ${real_team}).`);
+            await loadPlayers();
+            searchEditPlayers();
+            // re-select same player if still in list
+            const sel = document.getElementById('edit-player-select');
+            if (sel) {
+                sel.value = String(playerId);
+                fillEditPlayerForm();
+            }
         }
 
         function renderAdminsList() {
@@ -1841,19 +1972,27 @@
                 renderAdminsList();
             }
 
+            const mainEl = document.querySelector('main');
+            const poolEl = document.getElementById('players-pool');
+            const mainContainer = document.getElementById('main-container');
+
             if (activeTab === 'market') {
                 document.getElementById('filter-wrapper').style.display = 'block';
                 document.getElementById('search-box').style.display = 'block';
                 document.getElementById('mdl-filter-wrapper').style.display = 'none';
                 document.getElementById('order-round-nav').style.display = 'none';
-                document.getElementById('main-container').classList.remove('board-mode');
+                mainContainer.classList.remove('board-mode');
+                if (mainEl) mainEl.classList.remove('layout-wide-center');
+                if (poolEl) poolEl.className = 'grid';
                 renderMarket();
             } else if (activeTab === 'teams') {
                 document.getElementById('filter-wrapper').style.display = 'none';
                 document.getElementById('search-box').style.display = 'none';
                 document.getElementById('mdl-filter-wrapper').style.display = 'block';
                 document.getElementById('order-round-nav').style.display = 'none';
-                document.getElementById('main-container').classList.remove('board-mode');
+                mainContainer.classList.remove('board-mode');
+                if (mainEl) mainEl.classList.remove('layout-wide-center');
+                if (poolEl) poolEl.className = 'full-bleed';
                 renderMdlFilters();
                 renderLiveTeams();
             } else if (activeTab === 'order') {
@@ -1861,7 +2000,9 @@
                 document.getElementById('search-box').style.display = 'none';
                 document.getElementById('mdl-filter-wrapper').style.display = 'none';
                 document.getElementById('order-round-nav').style.display = 'flex';
-                document.getElementById('main-container').classList.remove('board-mode');
+                mainContainer.classList.remove('board-mode');
+                if (mainEl) mainEl.classList.remove('layout-wide-center');
+                if (poolEl) poolEl.className = 'full-bleed';
                 renderOrderRoundNav();
                 renderOrderPicks();
             } else if (activeTab === 'board') {
@@ -1869,7 +2010,9 @@
                 document.getElementById('search-box').style.display = 'none';
                 document.getElementById('mdl-filter-wrapper').style.display = 'none';
                 document.getElementById('order-round-nav').style.display = 'none';
-                document.getElementById('main-container').classList.add('board-mode');
+                mainContainer.classList.add('board-mode');
+                if (mainEl) mainEl.classList.add('layout-wide-center');
+                if (poolEl) poolEl.className = 'full-bleed';
                 renderDraftBoard();
             }
 
@@ -2008,6 +2151,69 @@
             return dbPlayers.find(p => p.id === id || String(p.id) === String(id)) || null;
         }
 
+        function getManagerPicksSorted(managerId) {
+            return draftPicks
+                .filter(dp => dp.manager_id === managerId || String(dp.manager_id) === String(managerId))
+                .sort((a, b) => {
+                    if (a.is_retained !== b.is_retained) return a.is_retained ? -1 : 1;
+                    return (a.round || 0) - (b.round || 0) || (a.pick_number || 0) - (b.pick_number || 0);
+                });
+        }
+
+        function buildTeamRosterText(managerId) {
+            const m = managerById(managerId);
+            if (!m) return '';
+            const mgrPicks = getManagerPicksSorted(m.id);
+            const counts = { POR: 0, DEF: 0, MED: 0, DEL: 0 };
+            const lines = [];
+            mgrPicks.forEach(dp => {
+                const p = (dp.players && !Array.isArray(dp.players) ? dp.players : null) || getPlayerById(dp.player_id);
+                if (!p) return;
+                if (counts[p.position] !== undefined) counts[p.position]++;
+                const roundLabel = dp.is_retained
+                    ? `Ronda ${dp.round} (Retenido)`
+                    : `Ronda ${dp.round}${dp.pick_number > 0 ? ' · Pick #' + dp.pick_number : ''}`;
+                lines.push(`- ${p.name} [${p.position}] · ${p.real_team || '?'} · ${roundLabel}`);
+            });
+            const pending = pendingPicks
+                .filter(pp => pp.manager_id === m.id || String(pp.manager_id) === String(m.id))
+                .sort((a, b) => a.round - b.round);
+            pending.forEach(pp => lines.push(`- PENDIENTE · Ronda ${pp.round}`));
+
+            return [
+                m.name,
+                `POR ${counts.POR} | DEF ${counts.DEF} | MED ${counts.MED} | DEL ${counts.DEL} | Total ${mgrPicks.length}`,
+                '',
+                ...(lines.length ? lines : ['(Sin fichajes)'])
+            ].join('\n');
+        }
+
+        async function copyTeamRoster(managerId, btnEl) {
+            const text = buildTeamRosterText(managerId);
+            if (!text) return;
+            try {
+                await navigator.clipboard.writeText(text);
+                if (btnEl) {
+                    const prev = btnEl.innerText;
+                    btnEl.innerText = '✓ Copiado';
+                    setTimeout(() => { btnEl.innerText = prev; }, 1200);
+                }
+            } catch (e) {
+                // Fallback for older browsers / non-secure context
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
+                if (btnEl) {
+                    const prev = btnEl.innerText;
+                    btnEl.innerText = '✓ Copiado';
+                    setTimeout(() => { btnEl.innerText = prev; }, 1200);
+                }
+            }
+        }
+
         function renderDraftBoard() {
             const pool = document.getElementById('players-pool');
             pool.innerHTML = '<div class="board-wrap"><table id="board-table"></table></div>';
@@ -2019,7 +2225,7 @@
                 const isCurrent = draftState.is_active && managerAt(draftState.current_manager_index) && managerAt(draftState.current_manager_index).id === m.id;
                 const style = isCurrent ? 'background: rgba(56,189,248,0.2); color: #38bdf8; border: 1px solid #38bdf8;' : '';
                 const label = shortClubName(m.name);
-                headerHtml += `<th style="${style}" title="${m.name}">${label}</th>`;
+                headerHtml += `<th style="${style}" title="${m.name}">${label}<button type="button" class="btn-copy board-copy-btn" onclick="event.stopPropagation(); copyTeamRoster(${m.id}, this)">Copiar</button></th>`;
             });
             headerHtml += '</tr></thead>';
 
@@ -2132,12 +2338,7 @@
 
             list.forEach(m => {
                 const isYours = currentIdentity === m.name;
-                const mgrPicks = draftPicks
-                    .filter(dp => dp.manager_id === m.id || String(dp.manager_id) === String(m.id))
-                    .sort((a, b) => {
-                        if (a.is_retained !== b.is_retained) return a.is_retained ? -1 : 1;
-                        return (a.round || 0) - (b.round || 0) || (a.pick_number || 0) - (b.pick_number || 0);
-                    });
+                const mgrPicks = getManagerPicksSorted(m.id);
 
                 const counts = { POR: 0, DEF: 0, MED: 0, DEL: 0 };
                 mgrPicks.forEach(dp => {
@@ -2146,9 +2347,12 @@
                 });
 
                 let html = `<div class="team-box${isYours ? ' highlight' : ''}">
-                    <h4 style="color:#38bdf8; font-size:12px; margin-bottom:8px;">👤 ${shortClubName(m.name)}${isYours ? ' · Tu plantilla' : ''}
-                        <span style="display:block;font-size:10px;color:#64748b;font-weight:600;margin-top:2px;">${m.name}</span>
-                    </h4>
+                    <div class="team-box-header">
+                        <h4 style="color:#38bdf8; font-size:12px; margin:0;">👤 ${shortClubName(m.name)}${isYours ? ' · Tu plantilla' : ''}
+                            <span style="display:block;font-size:10px;color:#64748b;font-weight:600;margin-top:2px;">${m.name}</span>
+                        </h4>
+                        <button type="button" class="btn-copy" onclick="copyTeamRoster(${m.id}, this)">📋 Copiar</button>
+                    </div>
                     <div class="pos-counts">
                         <span class="pos-badge pos-POR">POR ${counts.POR}</span>
                         <span class="pos-badge pos-DEF">DEF ${counts.DEF}</span>
