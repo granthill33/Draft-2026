@@ -4,36 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏆 SALA DE GUERRA: DRAFT INTERNO PRO 🏆</title>
-    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: system-ui, -apple-system, sans-serif; 
-            background: radial-gradient(circle at 50% 0%, #120e24 0%, #050308 70%); 
-            color: #e2e8f0; 
-            min-height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            padding-bottom: 30px; 
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at 50% 0%, #120e24 0%, #050308 70%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 30px;
         }
-        header { 
-            background: rgba(0,0,0,0.6); 
-            border-bottom: 1px solid rgba(255,255,255,0.06); 
-            padding: 15px 25px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4); 
+        header {
+            background: rgba(0,0,0,0.6);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 12px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
             backdrop-filter: blur(10px);
         }
-        .logo { 
-            font-weight: 900; 
-            font-size: 20px; 
-            background: linear-gradient(135deg, #38bdf8, #d946ef); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
-            letter-spacing: 1px; 
+        .logo {
+            font-weight: 900;
+            font-size: 16px;
+            background: linear-gradient(135deg, #38bdf8, #d946ef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+        @media (min-width: 640px) { .logo { font-size: 20px; } }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         .connection-status {
             display: flex;
@@ -44,6 +52,10 @@
             padding: 6px 12px;
             border-radius: 20px;
             border: 1px solid rgba(255,255,255,0.08);
+        }
+        @media (max-width: 420px) {
+            .connection-status .status-label { display: none; }
+            .connection-status { padding: 6px 8px; }
         }
         .status-dot {
             width: 8px;
@@ -57,212 +69,255 @@
             background: #10b981;
             box-shadow: 0 0 8px #10b981;
         }
-        .turn-panel { 
-            background: #0c0914; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            padding: 10px 20px; 
-            border-radius: 12px; 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
+        .turn-panel {
+            background: #0c0914;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 14px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         .turn-panel.hidden { display: none; }
         .neon-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.3); border-color: #06b6d4; }
         .neon-fuchsia { box-shadow: 0 0 15px rgba(217, 70, 239, 0.3); border-color: #d946ef; }
-        
-        main { 
-            max-width: 1500px; 
-            width: 100%; 
-            margin: 0 auto; 
-            padding: 20px; 
-            display: grid; 
-            grid-template-columns: 1fr; 
-            gap: 20px; 
-            flex-grow: 1; 
+
+        main {
+            max-width: 1500px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 14px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            flex-grow: 1;
         }
-        @media (min-width: 1280px) { main { grid-template-columns: 350px 1fr 340px; } }
-        
-        .panel { 
-            background: rgba(20, 15, 35, 0.6); 
-            backdrop-filter: blur(8px); 
-            border: 1px solid rgba(255,255,255,0.05); 
-            border-radius: 16px; 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+        @media (min-width: 900px) {
+            main { grid-template-columns: 300px 1fr; padding: 18px; }
+            .panel-history { grid-column: 1 / -1; }
         }
-        h2 { 
-            font-size: 13px; 
-            text-transform: uppercase; 
-            color: #38bdf8; 
-            border-bottom: 1px solid rgba(255,255,255,0.06); 
-            padding-bottom: 8px; 
-            letter-spacing: 1px; 
+        @media (min-width: 1280px) {
+            main { grid-template-columns: 350px 1fr 340px; }
+            .panel-history { grid-column: auto; }
         }
-        
-        textarea, input { 
-            width: 100%; 
-            background: rgba(0,0,0,0.5); 
-            border: 1px solid rgba(255,255,255,0.08); 
-            border-radius: 10px; 
-            padding: 12px; 
-            color: #fff; 
-            font-size: 12px; 
-            outline: none; 
+
+        .panel {
+            background: rgba(20, 15, 35, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h2 {
+            font-size: 13px;
+            text-transform: uppercase;
+            color: #38bdf8;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        textarea, input, select {
+            width: 100%;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 12px;
+            color: #fff;
+            font-size: 12px;
+            outline: none;
         }
         textarea { resize: none; font-family: monospace; }
-        
-        .btn { 
-            width: 100%; 
-            background: linear-gradient(90deg, #3b82f6, #d946ef); 
-            color: #fff; 
-            border: none; 
-            padding: 12px; 
-            border-radius: 10px; 
-            font-weight: 800; 
-            font-size: 11px; 
-            text-transform: uppercase; 
-            cursor: pointer; 
-            letter-spacing: 0.5px; 
+        select { cursor: pointer; }
+
+        .btn {
+            width: 100%;
+            background: linear-gradient(90deg, #3b82f6, #d946ef);
+            color: #fff;
+            border: none;
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 11px;
+            text-transform: uppercase;
+            cursor: pointer;
+            letter-spacing: 0.5px;
             transition: transform 0.1s ease, opacity 0.2s ease;
+            min-height: 42px;
         }
         .btn:active { transform: scale(0.98); }
         .btn-green { background: linear-gradient(90deg, #10b981, #059669); margin-top: 4px; }
         .btn-undo { background: linear-gradient(90deg, #f59e0b, #d97706); margin-top: 4px; box-shadow: 0 4px 12px rgba(245,158,11,0.2); }
         .btn-clear { background: linear-gradient(90deg, #ef4444, #b91c1c); }
+        .btn-skip { background: linear-gradient(90deg, #a855f7, #7c3aed); }
         .btn:hover { opacity: 0.95; }
-        
-        .scroll { overflow-y: auto; max-height: 650px; flex-grow: 1; padding-right: 4px; }
+        .btn-sm {
+            width: auto;
+            min-height: 32px;
+            padding: 6px 10px;
+            font-size: 10px;
+        }
+
+        .scroll {
+            overflow-y: auto;
+            max-height: 50vh;
+            flex-grow: 1;
+            padding-right: 4px;
+        }
+        @media (min-width: 900px) {
+            .scroll { max-height: 650px; }
+        }
         .scroll::-webkit-scrollbar { width: 5px; }
         .scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        
-        .tabs { display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; margin-bottom: 8px; }
-        .tab { 
-            background: transparent; 
-            border: 1px solid rgba(255,255,255,0.05); 
-            color: #94a3b8; 
-            padding: 6px 12px; 
-            border-radius: 8px; 
-            font-size: 11px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            text-transform: uppercase; 
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding-bottom: 8px;
+            margin-bottom: 8px;
         }
+        .tab {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.05);
+            color: #94a3b8;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            min-height: 36px;
+        }
+        @media (min-width: 640px) { .tab { font-size: 11px; padding: 6px 12px; } }
         .tab.active { background: rgba(56,189,248,0.1); border-color: #38bdf8; color: #38bdf8; }
-        
-        .filter-section-title { 
-            font-size: 10px; 
-            font-weight: 800; 
-            color: #64748b; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-            margin-top: 4px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+
+        .filter-section-title {
+            font-size: 10px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .filter-group { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 5px; 
-            margin-bottom: 8px; 
-            background: rgba(0,0,0,0.2); 
-            padding: 8px; 
-            border-radius: 10px; 
-            border: 1px solid rgba(255,255,255,0.03); 
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 8px;
+            background: rgba(0,0,0,0.2);
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.03);
         }
-        .btn-filter { 
-            background: rgba(255,255,255,0.03); 
-            border: 1px solid rgba(255,255,255,0.05); 
-            color: #94a3b8; 
-            padding: 4px 8px; 
-            border-radius: 6px; 
-            font-size: 10px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            text-transform: uppercase; 
+        .btn-filter {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            color: #94a3b8;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            min-height: 32px;
         }
         .btn-filter:hover { background: rgba(255,255,255,0.08); color: #fff; }
         .btn-filter.active { background: #38bdf8; color: #000; font-weight: 800; border-color: #38bdf8; }
-        .btn-reset-filters { 
-            background: rgba(239, 68, 68, 0.1); 
-            border: 1px solid rgba(239, 68, 68, 0.3); 
-            color: #f87171; 
-            font-size: 9px; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            text-transform: uppercase; 
+        .btn-filter.yours { border-color: #d946ef; color: #e879f9; }
+        .btn-filter.yours.active { background: #d946ef; color: #fff; border-color: #d946ef; }
+        .btn-reset-filters {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            font-size: 9px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            min-height: 28px;
         }
         .btn-reset-filters:hover { background: rgba(239, 68, 68, 0.2); color: #fff; }
-        
+
         .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
-        
-        .card { 
-            background: rgba(255,255,255,0.02); 
-            border: 1px solid rgba(255,255,255,0.04); 
-            border-radius: 12px; 
-            padding: 12px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+
+        .card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
         }
         .card .name { font-weight: 700; color: #f1f5f9; font-size: 13px; display: block; margin-bottom: 2px; }
         .card .team { font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
-        
-        .pos-badge { 
-            font-size: 9px; 
-            font-weight: 800; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-            margin-left: 6px; 
-            font-family: monospace; 
-            display: inline-block; 
-            vertical-align: middle; 
+
+        .pos-badge {
+            font-size: 9px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            font-family: monospace;
+            display: inline-block;
+            vertical-align: middle;
         }
         .pos-POR { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
         .pos-DEF { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
         .pos-MED { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
         .pos-DEL { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-        
-        .actions-box { display: flex; align-items: center; gap: 8px; }
-        .card button.btn-fichar { 
-            background: #1a1528; 
-            border: 1px solid #3b2e5a; 
-            color: #e2e8f0; 
-            padding: 6px 12px; 
-            border-radius: 8px; 
-            font-size: 11px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            text-transform: uppercase; 
+
+        .actions-box { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .card button.btn-fichar {
+            background: #1a1528;
+            border: 1px solid #3b2e5a;
+            color: #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            min-height: 36px;
         }
-        .card:hover button.btn-fichar { background: #38bdf8; color: #000; font-weight: 800; border-color: #38bdf8; }
-        
-        .history-item { 
-            background: rgba(0,0,0,0.2); 
-            border: 1px solid rgba(255,255,255,0.04); 
-            border-radius: 10px; 
-            padding: 10px; 
-            font-size: 12px; 
-            border-left: 4px solid #38bdf8; 
+        .card:hover button.btn-fichar:not(:disabled) { background: #38bdf8; color: #000; font-weight: 800; border-color: #38bdf8; }
+        .card button.btn-fichar:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        .history-item {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 12px;
+            border-left: 4px solid #38bdf8;
         }
-        
+
         .summary-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
         @media (min-width: 640px) { .summary-grid { grid-template-columns: 1fr 1fr; } }
-        
-        .team-box { 
-            background: rgba(0,0,0,0.3); 
-            padding: 12px; 
-            border-radius: 12px; 
-            border: 1px solid rgba(255,255,255,0.04); 
+
+        .team-box {
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.04);
         }
-        
-        /* Configuration Screen Overlay */
+        .team-box.highlight {
+            border-color: rgba(217, 70, 239, 0.4);
+            box-shadow: 0 0 12px rgba(217, 70, 239, 0.15);
+        }
+
         .config-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -284,8 +339,7 @@
             flex-direction: column;
             gap: 15px;
         }
-        
-        /* Dropdown selector for turn control */
+
         .manager-select-panel {
             background: rgba(0,0,0,0.2);
             padding: 10px;
@@ -296,19 +350,67 @@
             flex-direction: column;
             gap: 8px;
         }
-        .manager-select-panel select {
-            background: rgba(0,0,0,0.5);
-            color: #fff;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid rgba(255,255,255,0.1);
-            outline: none;
-            width: 100%;
+
+        .pending-banner {
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 12px;
+            color: #fbbf24;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 8px;
         }
+        .pending-item {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 11px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .admin-section {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 10px;
+            margin-top: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .admin-section-title {
+            font-weight: 800;
+            font-size: 10px;
+            color: #38bdf8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .admin-list-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            padding: 6px 8px;
+            background: rgba(0,0,0,0.25);
+            border-radius: 6px;
+        }
+        .board-wrap { overflow-x: auto; width: 100%; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
+        .quick-add-row { display: grid; grid-template-columns: 1fr; gap: 6px; }
+        @media (min-width: 400px) {
+            .quick-add-row { grid-template-columns: 1fr 1fr; }
+            .quick-add-row .full { grid-column: 1 / -1; }
+        }
+        .slot-pending { color: #fbbf24; font-weight: 800; font-style: italic; }
     </style>
 </head>
 <body>
-    <!-- Config Modal (overlay if config is missing) -->
     <div id="supabase-config-modal" class="config-overlay" style="display: none;">
         <div class="config-card">
             <h2 style="color: #fff; font-size: 18px; text-align: center; border-bottom: none;">🔌 CONECTAR CON SUPABASE</h2>
@@ -329,10 +431,10 @@
 
     <header>
         <div class="logo">⚽ SALA DE GUERRA: LIVE DRAFT</div>
-        <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="header-right">
             <div class="connection-status">
                 <span id="sb-status-dot" class="status-dot"></span>
-                <span id="sb-status-text">Desconectado</span>
+                <span id="sb-status-text" class="status-label">Desconectado</span>
             </div>
             <div id="turn-indicator" class="turn-panel hidden">
                 <div>
@@ -348,32 +450,76 @@
         <section class="panel">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px;">
                 <h2 style="border: none; padding: 0;">⚙️ Panel de Control</h2>
-                <button onclick="console.log('Admin clicked'); toggleAdminMode()" id="btn-admin-toggle" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; font-size: 10px; padding: 4px 8px; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-weight: bold;">🔑 Admin</button>
+                <button onclick="toggleAdminMode()" id="btn-admin-toggle" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; font-size: 10px; padding: 8px 10px; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-weight: bold; min-height: 36px;">🔑 Admin</button>
             </div>
 
-            <!-- Panel de Administrador (Oculto por defecto) -->
-            <div id="admin-controls" style="display: none; flex-direction: column; gap: 12px; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.15); padding: 12px; border-radius: 12px; margin-bottom: 5px;">
+            <div id="admin-controls" style="display: none; flex-direction: column; gap: 12px; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.15); padding: 12px; border-radius: 12px;">
                 <span style="font-weight: 800; font-size: 10px; color: #f87171; text-transform: uppercase; letter-spacing: 0.5px;">Panel de Administrador</span>
-                
-                <textarea id="players-input" rows="4" placeholder="Cargar Base de Datos: Pega columnas de Excel (Nombre, Equipo, Posición)"></textarea>
-                <button onclick="seedPlayersToSupabase()" id="btn-start" class="btn btn-green">🚀 Inicializar DB con Jugadores</button>
-                
-                <!-- Herramienta de Retenciones -->
-                <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px; margin-top: 5px; display: flex; flex-direction: column; gap: 8px;">
-                    <span style="font-weight: bold; font-size: 11px; color: #38bdf8;">Retener Jugador (Máx 4/equipo):</span>
-                    <input type="text" id="admin-player-search" oninput="searchAdminPlayers()" placeholder="Buscar jugador para retener..." style="padding: 8px;">
-                    <select id="admin-player-select" style="background: rgba(0,0,0,0.5); color: #fff; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); outline: none; font-size: 11px;"></select>
-                    <select id="admin-manager-select" style="background: rgba(0,0,0,0.5); color: #fff; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); outline: none; font-size: 11px;"></select>
-                    <button onclick="retainPlayer()" class="btn" style="background: linear-gradient(90deg, #38bdf8, #3b82f6); padding: 8px; font-size: 10px;">💾 Confirmar Retención</button>
+
+                <!-- 1. Seed excel -->
+                <div class="admin-section" style="border-top: none; padding-top: 0; margin-top: 0;">
+                    <span class="admin-section-title">1. Cargar Excel</span>
+                    <textarea id="players-input" rows="4" placeholder="Cargar Base de Datos: Pega columnas de Excel (Nombre, Equipo, Posición)"></textarea>
+                    <button onclick="seedPlayersToSupabase()" id="btn-start" class="btn btn-green">🚀 Inicializar DB con Jugadores</button>
                 </div>
 
-                <button onclick="undoLastPick()" id="btn-undo" class="btn btn-undo">↩️ Deshacer Último Pick</button>
-                <button onclick="resetDraftInSupabase()" id="btn-reset-total" class="btn btn-clear" style="margin-top:5px; background:linear-gradient(90deg, #dc2626, #991b1b);">🚨 RESETEAR DRAFT DESDE CERO</button>
-                <button onclick="clearAllPlayersFromDB()" class="btn" style="margin-top:5px; background:linear-gradient(90deg, #6b7280, #374151);">🗑️ VACIAR JUGADORES DE LA DB</button>
-                <button onclick="disconnectSupabase()" class="btn" style="background: #1e1b29; border: 1px solid rgba(255,255,255,0.05); color: #ef4444; font-size: 9px; padding: 6px; margin-top: 5px;">🔌 Desconectar Supabase</button>
+                <!-- 2. Quick add -->
+                <div class="admin-section">
+                    <span class="admin-section-title">2. Añadir jugador rápido</span>
+                    <div class="quick-add-row">
+                        <input type="text" id="quick-player-name" class="full" placeholder="Nombre">
+                        <input type="text" id="quick-player-team" placeholder="Equipo real">
+                        <select id="quick-player-pos">
+                            <option value="POR">POR</option>
+                            <option value="DEF">DEF</option>
+                            <option value="MED" selected>MED</option>
+                            <option value="DEL">DEL</option>
+                        </select>
+                    </div>
+                    <button onclick="addSinglePlayer()" class="btn" style="background: linear-gradient(90deg, #06b6d4, #3b82f6);">➕ Añadir Jugador</button>
+                </div>
+
+                <!-- 3. Retenciones -->
+                <div class="admin-section">
+                    <span class="admin-section-title">3. Retenciones (Máx 4/equipo)</span>
+                    <input type="text" id="admin-player-search" oninput="searchAdminPlayers()" placeholder="Buscar jugador para retener..." style="padding: 8px;">
+                    <select id="admin-player-select"></select>
+                    <select id="admin-manager-select"></select>
+                    <button onclick="retainPlayer()" class="btn" style="background: linear-gradient(90deg, #38bdf8, #3b82f6);">💾 Confirmar Retención</button>
+                </div>
+
+                <!-- 4. Saltar turno -->
+                <div class="admin-section">
+                    <span class="admin-section-title">4. Turno</span>
+                    <button onclick="skipCurrentTurn()" class="btn btn-skip">⏭️ Saltar Turno (Pendiente)</button>
+                </div>
+
+                <!-- 5. Pending picks -->
+                <div class="admin-section">
+                    <span class="admin-section-title">5. Picks pendientes</span>
+                    <div id="pending-picks-list" style="display:flex; flex-direction:column; gap:6px;"></div>
+                </div>
+
+                <!-- 6. Admins CRUD -->
+                <div class="admin-section">
+                    <span class="admin-section-title">6. Administradores</span>
+                    <div id="admins-list" style="display:flex; flex-direction:column; gap:4px;"></div>
+                    <div style="display:flex; gap:6px;">
+                        <input type="text" id="new-admin-name" placeholder="Nombre admin" style="padding:8px;">
+                        <button onclick="addAdmin()" class="btn btn-sm" style="width:auto; white-space:nowrap;">Añadir</button>
+                    </div>
+                </div>
+
+                <!-- 7. Undo / Reset / Clear / Disconnect -->
+                <div class="admin-section">
+                    <span class="admin-section-title">7. Acciones peligrosas</span>
+                    <button onclick="undoLastPick()" id="btn-undo" class="btn btn-undo">↩️ Deshacer Último Pick</button>
+                    <button onclick="resetDraftInSupabase()" id="btn-reset-total" class="btn btn-clear" style="margin-top:5px; background:linear-gradient(90deg, #dc2626, #991b1b);">🚨 RESETEAR DRAFT DESDE CERO</button>
+                    <button onclick="clearAllPlayersFromDB()" class="btn" style="margin-top:5px; background:linear-gradient(90deg, #6b7280, #374151);">🗑️ VACIAR JUGADORES DE LA DB</button>
+                    <button onclick="disconnectSupabase()" class="btn" style="background: #1e1b29; border: 1px solid rgba(255,255,255,0.05); color: #ef4444; font-size: 9px; padding: 8px; margin-top: 5px;">🔌 Desconectar Supabase</button>
+                </div>
             </div>
 
-            <!-- Panel de Mánager (Visible para todos) -->
             <div class="manager-select-panel">
                 <span style="font-weight: bold; color: #94a3b8;">Tu Identidad (Mánager Actual):</span>
                 <select id="user-identity" onchange="updateIdentity()">
@@ -386,8 +532,13 @@
         <section class="panel">
             <div class="tabs">
                 <button id="tab-market" class="tab active" onclick="switchTab('market')">🛒 Mercado (<span id="pool-count">0</span>)</button>
-                <button id="tab-teams" class="tab" onclick="switchTab('teams')">👥 Plantillas Directo</button>
+                <button id="tab-teams" class="tab" onclick="switchTab('teams')">👥 Plantillas</button>
                 <button id="tab-board" class="tab" onclick="switchTab('board')">📊 Tablero Draft</button>
+            </div>
+            <div id="pending-resolve-banner" class="pending-banner" style="display:none;"></div>
+            <div id="mdl-filter-wrapper" style="display:none;">
+                <div class="filter-section-title"><span>Filtrar plantilla:</span></div>
+                <div class="filter-group" id="mdl-filter-group"></div>
             </div>
             <div id="filter-wrapper">
                 <div class="filter-section-title"><span>Posición:</span><button class="btn-reset-filters" onclick="resetAllFilters()">🔄 Resetear</button></div>
@@ -427,7 +578,7 @@
             <div id="main-container" class="scroll"><div id="players-pool" class="grid"><p style="color:#475569; text-align:center; padding-top:50px; font-size:12px; font-weight:700; text-transform:uppercase;">Esperando que cargues los jugadores...</p></div></div>
         </section>
 
-        <section class="panel">
+        <section class="panel panel-history">
             <h2>📜 Historial del Draft</h2>
             <div id="draft-history" class="scroll" style="display:flex; flex-direction:column; gap:8px;"></div>
         </section>
@@ -435,14 +586,46 @@
 
     <script>
         let managers = [];
-        const MAX_ROUNDS = 23;
-        
-        let sbClient = null;
         let dbPlayers = [];
+        let draftPicks = [];
+        let pendingPicks = [];
+        let adminsList = [];
         let draftState = { current_round: 1, current_manager_index: 0, is_active: false };
-        let activeTab = 'market', selectedPosFilter = 'ALL', selectedTeamFilter = 'ALL';
         let currentIdentity = "";
         let isAdminMode = false;
+        let resolvingPendingId = null;
+        let selectedMdlFilter = 'ALL';
+        const MAX_ROUNDS = 23;
+
+        let sbClient = null;
+        let activeTab = 'market';
+        let selectedPosFilter = 'ALL';
+        let selectedTeamFilter = 'ALL';
+        let realtimeChannel = null;
+
+        const defaultSbUrl = "https://jyiaoohrklcedvsefpkz.supabase.co";
+        const defaultSbKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5aWFvb2hya2xjZWR2c2VmcGt6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NzE1OTksImV4cCI6MjEwMzI0NzU5OX0.6HIIn0Yx46HOdE68SNoYMKIDRZ6Kmq9hCLHj77xKCI0";
+
+        function managerAt(i) {
+            return managers[i] || null;
+        }
+        function managerByName(name) {
+            return managers.find(m => m.name === name) || null;
+        }
+        function managerById(id) {
+            return managers.find(m => m.id === id || String(m.id) === String(id)) || null;
+        }
+        function managerNames() {
+            return managers.map(m => m.name);
+        }
+
+        if (localStorage.getItem('draft_user_identity')) {
+            currentIdentity = localStorage.getItem('draft_user_identity');
+        }
+
+        window.onload = function() {
+            initSupabaseConnection();
+        };
 
         function enableAdminMode() {
             isAdminMode = true;
@@ -452,11 +635,14 @@
             document.getElementById('btn-admin-toggle').style.color = "#fff";
             populateAdminManagers();
             searchAdminPlayers();
+            renderPendingPicksAdmin();
+            renderAdminsList();
             updateUI();
         }
 
         function disableAdminMode() {
             isAdminMode = false;
+            resolvingPendingId = null;
             document.getElementById('admin-controls').style.display = 'none';
             document.getElementById('btn-admin-toggle').innerText = "🔑 Admin";
             document.getElementById('btn-admin-toggle').style.background = "rgba(255,255,255,0.05)";
@@ -474,49 +660,26 @@
 
         function openAdminPasswordModal() {
             if (document.getElementById('admin-password-modal')) return;
-
             const modalHtml = `
                 <div id="admin-password-modal" style="
-                    position: fixed;
-                    top: 0; left: 0; right: 0; bottom: 0;
-                    background: rgba(0,0,0,0.8);
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    z-index: 9999;
-                ">
-                    <div style="
-                        background: rgba(20,15,35,0.9);
-                        border: 1px solid rgba(255,255,255,0.1);
-                        border-radius: 20px;
-                        padding: 40px 30px;
-                        max-width: 360px;
-                        width: 90%;
-                        text-align: center;
-                        color: #fff;
-                    ">
+                    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                    background: rgba(0,0,0,0.8); display: flex; justify-content: center;
+                    align-items: center; z-index: 9999;">
+                    <div style="background: rgba(20,15,35,0.9); border: 1px solid rgba(255,255,255,0.1);
+                        border-radius: 20px; padding: 40px 30px; max-width: 360px; width: 90%;
+                        text-align: center; color: #fff;">
                         <h3 style="font-size: 20px; margin-bottom: 20px; color: #38bdf8;">Panel de Administrador</h3>
                         <p style="font-size: 14px; margin-bottom: 25px; color: #64748b;">Contraseña requerida</p>
-                        <input type="password" id="admin-password-input" style="
-                            width: 100%;
-                            background: rgba(0,0,0,0.5);
-                            border: 1px solid rgba(255,255,255,0.1);
-                            border-radius: 10px;
-                            padding: 15px;
-                            font-size: 14px;
-                            color: #fff;
-                            margin-bottom: 20px;
-                            outline: none;
-                        " placeholder="Password">
+                        <input type="password" id="admin-password-input" style="width: 100%; background: rgba(0,0,0,0.5);
+                            border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;
+                            font-size: 14px; color: #fff; margin-bottom: 20px; outline: none;" placeholder="Password">
                         <div style="display: flex; gap: 10px;">
-                            <button onclick="verifyAdminPassword()" class="btn" style="flex: 1; background: linear-gradient(90deg, #3b82f6, #d946ef);">Entrar</button>
+                            <button onclick="verifyAdminPassword()" class="btn" style="flex: 1;">Entrar</button>
                             <button onclick="closeAdminPasswordModal()" class="btn" style="flex: 1; background: rgba(0,0,0,0.3); color: #64748b;">Cancelar</button>
                         </div>
                     </div>
-                </div>
-            `;
+                </div>`;
             document.body.insertAdjacentHTML('beforeEnd', modalHtml);
-
             const input = document.getElementById('admin-password-input');
             if (input) {
                 input.focus();
@@ -535,7 +698,6 @@
             const input = document.getElementById('admin-password-input');
             const password = input ? input.value : '';
             if (input) input.value = '';
-
             if (password === 'draft2026') {
                 closeAdminPasswordModal();
                 enableAdminMode();
@@ -554,27 +716,59 @@
             }
         }
 
+        function updateIdentity() {
+            currentIdentity = document.getElementById('user-identity').value;
+            localStorage.setItem('draft_user_identity', currentIdentity);
+            if (currentIdentity && activeTab === 'teams') {
+                selectedMdlFilter = currentIdentity;
+            }
+            updateUI();
+        }
+
+        function populateIdentitySelector() {
+            const selectEl = document.getElementById('user-identity');
+            selectEl.innerHTML = '<option value="">Espectador / Todos</option>';
+            managers.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.name;
+                opt.innerText = m.name;
+                selectEl.appendChild(opt);
+            });
+            const savedIdentity = localStorage.getItem('draft_user_identity');
+            const names = managers.map(m => m.name);
+            if (savedIdentity && names.includes(savedIdentity)) {
+                currentIdentity = savedIdentity;
+                selectEl.value = currentIdentity;
+            } else {
+                currentIdentity = "";
+                selectEl.value = "";
+                localStorage.removeItem('draft_user_identity');
+            }
+        }
+
         function populateAdminManagers() {
             const selectEl = document.getElementById('admin-manager-select');
             if (!selectEl) return;
             selectEl.innerHTML = "";
             managers.forEach(m => {
                 const opt = document.createElement('option');
-                opt.value = m;
-                opt.innerText = m;
+                opt.value = m.id;
+                opt.innerText = m.name;
                 selectEl.appendChild(opt);
             });
         }
 
         function searchAdminPlayers() {
-            const query = document.getElementById('admin-player-search').value.toLowerCase().trim();
+            const searchEl = document.getElementById('admin-player-search');
             const selectEl = document.getElementById('admin-player-select');
             if (!selectEl) return;
+            const query = (searchEl ? searchEl.value : '').toLowerCase().trim();
             selectEl.innerHTML = "";
-            
             const available = dbPlayers.filter(p => !p.drafted_by);
-            const filtered = available.filter(p => p.name.toLowerCase().includes(query) || p.real_team.toLowerCase().includes(query));
-            
+            const filtered = available.filter(p =>
+                p.name.toLowerCase().includes(query) ||
+                (p.real_team || '').toLowerCase().includes(query)
+            );
             filtered.slice(0, 50).forEach(p => {
                 const opt = document.createElement('option');
                 opt.value = p.id;
@@ -583,124 +777,18 @@
             });
         }
 
-        async function retainPlayer() {
-            if (!sbClient) return;
-            const playerId = document.getElementById('admin-player-select').value;
-            const managerName = document.getElementById('admin-manager-select').value;
-            
-            if (!playerId || !managerName) {
-                alert("Selecciona un jugador y un mánager.");
-                return;
-            }
-            
-            const count = dbPlayers.filter(p => p.drafted_by === managerName && p.is_retained).length;
-            if (count >= 4) {
-                alert(`El mánager ${managerName} ya tiene el máximo de 4 jugadores retenidos.`);
-                return;
-            }
-            
-            const nextRetainedRound = count + 1;
-            const playerObj = dbPlayers.find(p => p.id == playerId);
-            if (!playerObj) return;
-            
-            if (!confirm(`¿Confirmar la retención de ${playerObj.name} por ${managerName} para la Ronda ${nextRetainedRound}?`)) return;
-            
-            const { error } = await sbClient
-                .from('players')
-                .update({
-                    drafted_by: managerName,
-                    round_drafted: nextRetainedRound,
-                    is_retained: true,
-                    pick_number: 0
-                })
-                .eq('id', playerId);
-                
-            if (error) {
-                alert("Error al retener jugador: " + error.message);
-            } else {
-                alert(`✅ ${playerObj.name} retenido por ${managerName} (Ronda ${nextRetainedRound})`);
-                document.getElementById('admin-player-search').value = "";
-                searchAdminPlayers();
-            }
-        }
-
-        async function releaseRetained(playerId) {
-            if (!sbClient) return;
-            const p = dbPlayers.find(x => x.id === playerId);
-            if (!p) return;
-            
-            if (!confirm(`¿Liberar la retención de ${p.name} por ${p.drafted_by}?`)) return;
-            
-            const managerName = p.drafted_by;
-            
-            const { error } = await sbClient
-                .from('players')
-                .update({
-                    drafted_by: null,
-                    round_drafted: null,
-                    is_retained: false,
-                    pick_number: null
-                })
-                .eq('id', playerId);
-                
-            if (error) {
-                alert("Error al liberar jugador: " + error.message);
-                return;
-            }
-            
-            // Adjust rounds of remaining retained players
-            const remaining = dbPlayers
-                .filter(x => x.drafted_by === managerName && x.is_retained && x.id !== playerId)
-                .sort((a,b) => a.round_drafted - b.round_drafted);
-                
-            for (let i = 0; i < remaining.length; i++) {
-                const newRound = i + 1;
-                if (remaining[i].round_drafted !== newRound) {
-                    await sbClient
-                        .from('players')
-                        .update({ round_drafted: newRound })
-                        .eq('id', remaining[i].id);
-                }
-            }
-            
-            alert(`✅ ${p.name} liberado.`);
-        }
-
-        // Load identity from local storage if saved
-        if (localStorage.getItem('draft_user_identity')) {
-            currentIdentity = localStorage.getItem('draft_user_identity');
-        }
-
-        function updateIdentity() {
-            currentIdentity = document.getElementById('user-identity').value;
-            localStorage.setItem('draft_user_identity', currentIdentity);
-            updateUI();
-        }
-
-        // Initialize connection
-        window.onload = function() {
-            initSupabaseConnection();
-        };
-
-        // Configuración por defecto de Supabase (Credenciales de tu proyecto)
-        const defaultSbUrl = "https://jyiaoohrklcedvsefpkz.supabase.co";
-        const defaultSbKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5aWFvb2hya2xjZWR2c2VmcGt6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NzE1OTksImV4cCI6MjEwMzI0NzU5OX0.6HIIn0Yx46HOdE68SNoYMKIDRZ6Kmq9hCLHj77xKCI0";
-
         function initSupabaseConnection() {
             const url = localStorage.getItem('sb_url') || defaultSbUrl;
             const key = localStorage.getItem('sb_key') || defaultSbKey;
-
             if (!url || !key) {
                 document.getElementById('supabase-config-modal').style.display = 'flex';
                 return;
             }
-
             try {
                 sbClient = window.supabase.createClient(url, key);
                 document.getElementById('sb-status-dot').className = 'status-dot connected';
                 document.getElementById('sb-status-text').innerText = 'Conectado a Supabase';
                 document.getElementById('supabase-config-modal').style.display = 'none';
-                
                 fetchAndSubscribe();
             } catch (err) {
                 console.error("Connection error: ", err);
@@ -712,35 +800,43 @@
         function saveSupabaseConfig() {
             const url = document.getElementById('sb-url').value.trim();
             const key = document.getElementById('sb-key').value.trim();
-
             if (!url || !key) {
                 alert("Por favor, rellena todos los campos.");
                 return;
             }
-
             localStorage.setItem('sb_url', url);
             localStorage.setItem('sb_key', key);
             initSupabaseConnection();
         }
 
         function disconnectSupabase() {
+            if (realtimeChannel && sbClient) {
+                sbClient.removeChannel(realtimeChannel);
+                realtimeChannel = null;
+            }
             localStorage.removeItem('sb_url');
             localStorage.removeItem('sb_key');
             document.getElementById('sb-url').value = "";
             document.getElementById('sb-key').value = "";
             document.getElementById('sb-status-dot').className = 'status-dot';
             document.getElementById('sb-status-text').innerText = 'Desconectado';
+            sbClient = null;
             document.getElementById('supabase-config-modal').style.display = 'flex';
         }
 
         async function fetchAndSubscribe() {
-            // 1. Fetch initial state
             await loadManagers();
             await loadDraftState();
             await loadPlayers();
+            await loadDraftPicks();
+            await loadPendingPicks();
+            await loadAdmins();
 
-            // 2. Subscribe to realtime changes
-            sbClient
+            if (realtimeChannel) {
+                sbClient.removeChannel(realtimeChannel);
+            }
+
+            realtimeChannel = sbClient
                 .channel('db-changes')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'draft_state' }, payload => {
                     if (payload.new) {
@@ -754,6 +850,15 @@
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'managers' }, async () => {
                     await loadManagers();
                 })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'draft_picks' }, async () => {
+                    await loadDraftPicks();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'pending_picks' }, async () => {
+                    await loadPendingPicks();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'admins' }, async () => {
+                    await loadAdmins();
+                })
                 .subscribe();
         }
 
@@ -762,35 +867,13 @@
                 .from('managers')
                 .select('*')
                 .order('draft_order', { ascending: true });
-
             if (error) {
                 console.error("Error loading managers:", error);
             } else if (data) {
-                managers = data.map(m => m.name);
+                managers = data;
                 populateIdentitySelector();
+                populateAdminManagers();
                 updateUI();
-            }
-        }
-
-        function populateIdentitySelector() {
-            const selectEl = document.getElementById('user-identity');
-            selectEl.innerHTML = '<option value="">Espectador / Todos</option>';
-            managers.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m;
-                opt.innerText = m;
-                selectEl.appendChild(opt);
-            });
-            
-            // Re-select identity if saved and still valid
-            const savedIdentity = localStorage.getItem('draft_user_identity');
-            if (savedIdentity && managers.includes(savedIdentity)) {
-                currentIdentity = savedIdentity;
-                selectEl.value = currentIdentity;
-            } else {
-                currentIdentity = "";
-                selectEl.value = "";
-                localStorage.removeItem('draft_user_identity');
             }
         }
 
@@ -800,7 +883,6 @@
                 .select('*')
                 .eq('id', 1)
                 .single();
-
             if (error) {
                 console.error("Error loading draft state:", error);
             } else if (data) {
@@ -813,73 +895,506 @@
                 .from('players')
                 .select('*')
                 .order('name', { ascending: true });
-
             if (error) {
                 console.error("Error loading players:", error);
             } else if (data) {
                 dbPlayers = data;
+                if (isAdminMode) searchAdminPlayers();
                 updateUI();
                 checkAndAutoAdvanceTurn();
             }
         }
 
-        async function checkAndAutoAdvanceTurn() {
-            if (!draftState.is_active || !sbClient || !managers.length) return;
-            
-            const turnManager = managers[draftState.current_manager_index];
-            if (!turnManager) return;
-            
-            const mRetainedCount = dbPlayers.filter(p => p.drafted_by === turnManager && p.is_retained).length;
-            
-            if (mRetainedCount >= draftState.current_round) {
-                // This manager should be skipped in this round! Calculate the next turn
-                let nextRound = draftState.current_round;
-                let nextIndex = draftState.current_manager_index;
-                
-                while (nextRound <= MAX_ROUNDS) {
-                    if (nextRound % 2 !== 0) { // odd
-                        if (nextIndex === managers.length - 1) {
-                            nextRound++;
-                        } else {
-                            nextIndex++;
-                        }
-                    } else { // even
-                        if (nextIndex === 0) {
-                            nextRound++;
-                        } else {
-                            nextIndex--;
-                        }
-                    }
-                    
-                    if (nextRound > MAX_ROUNDS) break;
-                    
-                    const nextManager = managers[nextIndex];
-                    const nextRetainedCount = dbPlayers.filter(p => p.drafted_by === nextManager && p.is_retained).length;
-                    
-                    if (nextRetainedCount >= nextRound) {
-                        continue;
-                    } else {
-                        break;
-                    }
-                }
-                
-                const isStillActive = nextRound <= MAX_ROUNDS;
-                
-                await sbClient
-                    .from('draft_state')
-                    .update({
-                        current_round: nextRound,
-                        current_manager_index: nextIndex,
-                        is_active: isStillActive
-                    })
-                    .eq('id', 1)
-                    .eq('current_round', draftState.current_round)
-                    .eq('current_manager_index', draftState.current_manager_index);
+        async function loadDraftPicks() {
+            const { data, error } = await sbClient
+                .from('draft_picks')
+                .select('*')
+                .order('pick_number', { ascending: true });
+            if (error) {
+                console.error("Error loading draft_picks:", error);
+            } else if (data) {
+                draftPicks = data;
+                updateUI();
             }
         }
 
+        async function loadPendingPicks() {
+            const { data, error } = await sbClient
+                .from('pending_picks')
+                .select('*')
+                .order('created_at', { ascending: true });
+            if (error) {
+                console.error("Error loading pending_picks:", error);
+            } else if (data) {
+                pendingPicks = data;
+                if (isAdminMode) renderPendingPicksAdmin();
+                updateUI();
+            }
+        }
+
+        async function loadAdmins() {
+            const { data, error } = await sbClient
+                .from('admins')
+                .select('*')
+                .order('created_at', { ascending: true });
+            if (error) {
+                console.error("Error loading admins:", error);
+            } else if (data) {
+                adminsList = data;
+                if (isAdminMode) renderAdminsList();
+            }
+        }
+
+        function calcNextSnakeTurn(round, index) {
+            let nextRound = round;
+            let nextIndex = index;
+            if (round % 2 !== 0) {
+                if (index === managers.length - 1) {
+                    nextRound++;
+                } else {
+                    nextIndex++;
+                }
+            } else {
+                if (index === 0) {
+                    nextRound++;
+                } else {
+                    nextIndex--;
+                }
+            }
+            return { nextRound, nextIndex, isStillActive: nextRound <= MAX_ROUNDS };
+        }
+
+        function getRetentionCountForManager(managerName) {
+            return dbPlayers.filter(p => p.drafted_by === managerName && p.is_retained).length;
+        }
+
+        function hasPickOrPending(managerId, round) {
+            const hasPick = draftPicks.some(dp =>
+                (dp.manager_id === managerId || String(dp.manager_id) === String(managerId)) &&
+                dp.round === round &&
+                !dp.is_retained
+            );
+            const hasPending = pendingPicks.some(pp =>
+                (pp.manager_id === managerId || String(pp.manager_id) === String(managerId)) &&
+                pp.round === round
+            );
+            return hasPick || hasPending;
+        }
+
+        async function checkAndAutoAdvanceTurn() {
+            if (!draftState.is_active || !sbClient || !managers.length) return;
+
+            const turnManager = managerAt(draftState.current_manager_index);
+            if (!turnManager) return;
+
+            const mRetainedCount = getRetentionCountForManager(turnManager.name);
+
+            if (mRetainedCount < draftState.current_round) return;
+
+            let nextRound = draftState.current_round;
+            let nextIndex = draftState.current_manager_index;
+            let guard = 0;
+
+            while (nextRound <= MAX_ROUNDS && guard < 500) {
+                guard++;
+                const step = calcNextSnakeTurn(nextRound, nextIndex);
+                nextRound = step.nextRound;
+                nextIndex = step.nextIndex;
+                if (nextRound > MAX_ROUNDS) break;
+
+                const nextManager = managerAt(nextIndex);
+                if (!nextManager) break;
+                const nextRetainedCount = getRetentionCountForManager(nextManager.name);
+                if (nextRetainedCount >= nextRound) continue;
+                if (hasPickOrPending(nextManager.id, nextRound)) continue;
+                break;
+            }
+
+            const isStillActive = nextRound <= MAX_ROUNDS;
+            await sbClient
+                .from('draft_state')
+                .update({
+                    current_round: nextRound,
+                    current_manager_index: nextIndex,
+                    is_active: isStillActive
+                })
+                .eq('id', 1)
+                .eq('current_round', draftState.current_round)
+                .eq('current_manager_index', draftState.current_manager_index);
+        }
+
+        function canFichar() {
+            if (resolvingPendingId) {
+                return isAdminMode;
+            }
+            if (!draftState.is_active) return false;
+            const turnMgr = managerAt(draftState.current_manager_index);
+            if (!turnMgr) return false;
+            if (isAdminMode) return true;
+            return currentIdentity === turnMgr.name;
+        }
+
+        function getFicharTarget() {
+            if (resolvingPendingId) {
+                const pending = pendingPicks.find(p => p.id === resolvingPendingId || String(p.id) === String(resolvingPendingId));
+                if (!pending) return null;
+                const mgr = managerById(pending.manager_id);
+                if (!mgr) return null;
+                return { manager: mgr, round: pending.round, isPending: true, pendingId: pending.id };
+            }
+            const mgr = managerAt(draftState.current_manager_index);
+            if (!mgr) return null;
+            return { manager: mgr, round: draftState.current_round, isPending: false, pendingId: null };
+        }
+
+        async function pickPlayer(playerId) {
+            if (!sbClient) return;
+
+            const target = getFicharTarget();
+            if (!target) {
+                alert("No hay turno o pendiente válido.");
+                return;
+            }
+
+            if (!isAdminMode) {
+                if (resolvingPendingId) {
+                    alert("Solo el admin puede resolver pendientes.");
+                    return;
+                }
+                const turnMgr = managerAt(draftState.current_manager_index);
+                if (!draftState.is_active || !turnMgr || currentIdentity !== turnMgr.name) {
+                    alert(`No es tu turno. El turno es de: ${turnMgr ? turnMgr.name : '?'}`);
+                    return;
+                }
+            }
+
+            const p = dbPlayers.find(x => x.id == playerId);
+            if (!p || p.drafted_by) return;
+
+            const maxPick = draftPicks.reduce((mx, dp) => Math.max(mx, dp.pick_number || 0), 0);
+            const nextPickNumber = maxPick + 1;
+            const madeByAdmin = isAdminMode && (currentIdentity !== target.manager.name || !!resolvingPendingId);
+
+            const { error: pickErr } = await sbClient.from('draft_picks').insert({
+                round: target.round,
+                pick_number: nextPickNumber,
+                manager_id: target.manager.id,
+                player_id: p.id,
+                is_retained: false,
+                made_by_admin: madeByAdmin
+            });
+            if (pickErr) {
+                alert("Error al insertar pick: " + pickErr.message);
+                return;
+            }
+
+            const { error: playerErr } = await sbClient
+                .from('players')
+                .update({
+                    drafted_by: target.manager.name,
+                    round_drafted: target.round,
+                    pick_number: nextPickNumber,
+                    drafted_at: new Date().toISOString(),
+                    is_retained: false
+                })
+                .eq('id', playerId);
+
+            if (playerErr) {
+                alert("Error al actualizar jugador: " + playerErr.message);
+                return;
+            }
+
+            if (target.isPending && target.pendingId) {
+                await sbClient.from('pending_picks').delete().eq('id', target.pendingId);
+                resolvingPendingId = null;
+                updateUI();
+                return;
+            }
+
+            const { nextRound, nextIndex, isStillActive } = calcNextSnakeTurn(
+                draftState.current_round,
+                draftState.current_manager_index
+            );
+
+            await sbClient
+                .from('draft_state')
+                .update({
+                    current_round: nextRound,
+                    current_manager_index: nextIndex,
+                    is_active: isStillActive
+                })
+                .eq('id', 1);
+
+            await loadDraftState();
+            await loadDraftPicks();
+            await loadPlayers();
+            await checkAndAutoAdvanceTurn();
+        }
+
+        async function skipCurrentTurn() {
+            if (!sbClient || !isAdminMode) return;
+            if (!draftState.is_active) {
+                alert("El draft no está activo.");
+                return;
+            }
+            const mgr = managerAt(draftState.current_manager_index);
+            if (!mgr) return;
+
+            if (hasPickOrPending(mgr.id, draftState.current_round)) {
+                alert("Ya hay un pick o pendiente para esta casilla.");
+                return;
+            }
+
+            const { error } = await sbClient.from('pending_picks').insert({
+                round: draftState.current_round,
+                manager_id: mgr.id
+            });
+            if (error) {
+                alert("Error al crear pendiente: " + error.message);
+                return;
+            }
+
+            const { nextRound, nextIndex, isStillActive } = calcNextSnakeTurn(
+                draftState.current_round,
+                draftState.current_manager_index
+            );
+
+            await sbClient
+                .from('draft_state')
+                .update({
+                    current_round: nextRound,
+                    current_manager_index: nextIndex,
+                    is_active: isStillActive
+                })
+                .eq('id', 1);
+
+            await loadDraftState();
+            await loadPendingPicks();
+            await checkAndAutoAdvanceTurn();
+        }
+
+        function startResolvePending(pendingId) {
+            resolvingPendingId = pendingId;
+            switchTab('market');
+            updateUI();
+        }
+
+        function cancelResolvePending() {
+            resolvingPendingId = null;
+            updateUI();
+        }
+
+        function renderPendingPicksAdmin() {
+            const container = document.getElementById('pending-picks-list');
+            if (!container) return;
+            container.innerHTML = "";
+            if (!pendingPicks.length) {
+                container.innerHTML = '<p style="font-size:10px; color:#64748b;">Sin pendientes</p>';
+                return;
+            }
+            pendingPicks.forEach(pp => {
+                const mgr = managerById(pp.manager_id);
+                const name = mgr ? mgr.name : '?';
+                const row = document.createElement('div');
+                row.className = 'pending-item';
+                row.innerHTML = `<span>R${pp.round} — ${name}</span>`;
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-sm';
+                btn.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+                btn.innerText = 'Resolver';
+                btn.onclick = () => startResolvePending(pp.id);
+                row.appendChild(btn);
+                container.appendChild(row);
+            });
+        }
+
+        async function undoLastPick() {
+            if (!sbClient || !isAdminMode) return;
+
+            const normalPicks = draftPicks.filter(dp => !dp.is_retained && (dp.pick_number || 0) > 0);
+            if (!normalPicks.length) {
+                alert("No hay ningún pick para deshacer.");
+                return;
+            }
+            normalPicks.sort((a, b) => (b.pick_number || 0) - (a.pick_number || 0));
+            const last = normalPicks[0];
+            const player = dbPlayers.find(p => p.id === last.player_id || String(p.id) === String(last.player_id));
+            const mgr = managerById(last.manager_id);
+            const playerName = player ? player.name : 'jugador';
+            const mgrName = mgr ? mgr.name : '?';
+
+            if (!confirm(`¿Deshacer la elección de ${playerName} por ${mgrName}?`)) return;
+
+            const { error: delErr } = await sbClient.from('draft_picks').delete().eq('id', last.id);
+            if (delErr) {
+                alert("Error al borrar pick: " + delErr.message);
+                return;
+            }
+
+            if (player) {
+                await sbClient.from('players').update({
+                    drafted_by: null,
+                    round_drafted: null,
+                    pick_number: null,
+                    drafted_at: null,
+                    is_retained: false
+                }).eq('id', player.id);
+            }
+
+            const mgrIndex = managers.findIndex(m => m.id === last.manager_id || String(m.id) === String(last.manager_id));
+            await sbClient.from('draft_state').update({
+                current_round: last.round,
+                current_manager_index: mgrIndex >= 0 ? mgrIndex : 0,
+                is_active: true
+            }).eq('id', 1);
+
+            await loadDraftState();
+            await loadDraftPicks();
+            await loadPlayers();
+        }
+
+        async function retainPlayer() {
+            if (!sbClient || !isAdminMode) return;
+            const playerId = document.getElementById('admin-player-select').value;
+            const managerId = document.getElementById('admin-manager-select').value;
+            if (!playerId || !managerId) {
+                alert("Selecciona un jugador y un mánager.");
+                return;
+            }
+            const mgr = managerById(managerId);
+            if (!mgr) return;
+
+            const count = getRetentionCountForManager(mgr.name);
+            if (count >= 4) {
+                alert(`El mánager ${mgr.name} ya tiene el máximo de 4 jugadores retenidos.`);
+                return;
+            }
+
+            const nextRetainedRound = count + 1;
+            const playerObj = dbPlayers.find(p => p.id == playerId);
+            if (!playerObj) return;
+            if (!confirm(`¿Confirmar la retención de ${playerObj.name} por ${mgr.name} para la Ronda ${nextRetainedRound}?`)) return;
+
+            const { error: pickErr } = await sbClient.from('draft_picks').insert({
+                round: nextRetainedRound,
+                pick_number: 0,
+                manager_id: mgr.id,
+                player_id: playerObj.id,
+                is_retained: true,
+                made_by_admin: true
+            });
+            if (pickErr) {
+                alert("Error al insertar retención: " + pickErr.message);
+                return;
+            }
+
+            const { error } = await sbClient.from('players').update({
+                drafted_by: mgr.name,
+                round_drafted: nextRetainedRound,
+                is_retained: true,
+                pick_number: 0
+            }).eq('id', playerId);
+
+            if (error) {
+                alert("Error al retener jugador: " + error.message);
+            } else {
+                alert(`✅ ${playerObj.name} retenido por ${mgr.name} (Ronda ${nextRetainedRound})`);
+                document.getElementById('admin-player-search').value = "";
+                searchAdminPlayers();
+            }
+        }
+
+        async function releaseRetained(playerId) {
+            if (!sbClient || !isAdminMode) return;
+            const p = dbPlayers.find(x => x.id == playerId);
+            if (!p) return;
+            if (!confirm(`¿Liberar la retención de ${p.name} por ${p.drafted_by}?`)) return;
+
+            const managerName = p.drafted_by;
+            const mgr = managerByName(managerName);
+
+            const pick = draftPicks.find(dp =>
+                (dp.player_id === p.id || String(dp.player_id) === String(p.id)) && dp.is_retained
+            );
+            if (pick) {
+                await sbClient.from('draft_picks').delete().eq('id', pick.id);
+            }
+
+            const { error } = await sbClient.from('players').update({
+                drafted_by: null,
+                round_drafted: null,
+                is_retained: false,
+                pick_number: null,
+                drafted_at: null
+            }).eq('id', playerId);
+
+            if (error) {
+                alert("Error al liberar jugador: " + error.message);
+                return;
+            }
+
+            if (mgr) {
+                const remainingPicks = draftPicks
+                    .filter(dp =>
+                        (dp.manager_id === mgr.id || String(dp.manager_id) === String(mgr.id)) &&
+                        dp.is_retained &&
+                        (dp.player_id !== p.id && String(dp.player_id) !== String(p.id))
+                    )
+                    .sort((a, b) => a.round - b.round);
+
+                for (let i = 0; i < remainingPicks.length; i++) {
+                    const newRound = i + 1;
+                    if (remainingPicks[i].round !== newRound) {
+                        await sbClient.from('draft_picks').update({ round: newRound }).eq('id', remainingPicks[i].id);
+                        await sbClient.from('players').update({ round_drafted: newRound }).eq('id', remainingPicks[i].player_id);
+                    }
+                }
+            } else {
+                const remaining = dbPlayers
+                    .filter(x => x.drafted_by === managerName && x.is_retained && x.id != playerId)
+                    .sort((a, b) => a.round_drafted - b.round_drafted);
+                for (let i = 0; i < remaining.length; i++) {
+                    const newRound = i + 1;
+                    if (remaining[i].round_drafted !== newRound) {
+                        await sbClient.from('players').update({ round_drafted: newRound }).eq('id', remaining[i].id);
+                    }
+                }
+            }
+
+            alert(`✅ ${p.name} liberado.`);
+            await loadDraftPicks();
+            await loadPlayers();
+        }
+
+        async function resetDraftInSupabase() {
+            if (!sbClient || !isAdminMode) return;
+            if (!confirm("🚨 ¿Seguro que quieres resetear todo el borrador? Se borrarán todos los fichajes y pendientes.")) return;
+
+            await sbClient.from('draft_picks').delete().neq('id', 0);
+            await sbClient.from('pending_picks').delete().neq('id', 0);
+            await sbClient.from('players').update({
+                drafted_by: null,
+                round_drafted: null,
+                pick_number: null,
+                drafted_at: null,
+                is_retained: false
+            }).neq('id', 0);
+            await sbClient.from('draft_state').update({
+                current_round: 1,
+                current_manager_index: 0,
+                is_active: true
+            }).eq('id', 1);
+
+            resolvingPendingId = null;
+            alert("✅ Borrador reseteado.");
+            await loadDraftState();
+            await loadDraftPicks();
+            await loadPendingPicks();
+            await loadPlayers();
+        }
+
         function processText(rawText) {
-            let lines = rawText.replace(/\r/g, "").split('\n'); 
+            let lines = rawText.replace(/\r/g, "").split('\n');
             let list = [];
             lines.forEach(line => {
                 if (!line.trim()) return;
@@ -892,13 +1407,14 @@
                 if (pos.includes("DFC") || pos === "DF" || pos === "DFC" || pos === "DEF") pos = "DEF";
                 if (pos.includes("MD") || pos === "MC" || pos.includes("MED") || pos === "MJS") pos = "MED";
                 if (pos === "DL" || pos.includes("DEL") || pos === "EXT" || pos === "DC") pos = "DEL";
+                if (pos === "PT" || pos.includes("POR") || pos === "GK") pos = "POR";
                 list.push({ name: name, real_team: team, position: pos });
             });
             return list;
         }
 
         async function seedPlayersToSupabase() {
-            if (!sbClient) return;
+            if (!sbClient || !isAdminMode) return;
             let raw = document.getElementById('players-input').value;
             let list = processText(raw);
             if (!list.length) { alert("🚨 Pega primero las filas de tu Excel."); return; }
@@ -906,10 +1422,10 @@
             document.getElementById('btn-start').innerText = "Cargando...";
             document.getElementById('btn-start').disabled = true;
 
-            // Delete existing players first
+            await sbClient.from('draft_picks').delete().neq('id', 0);
+            await sbClient.from('pending_picks').delete().neq('id', 0);
             await sbClient.from('players').delete().neq('id', 0);
 
-            // Insert new players in batches of 100
             const batchSize = 100;
             for (let i = 0; i < list.length; i += batchSize) {
                 const batch = list.slice(i, i + batchSize);
@@ -920,57 +1436,116 @@
                 }
             }
 
-            // Reset draft state
             await sbClient.from('draft_state').update({
                 current_round: 1,
                 current_manager_index: 0,
                 is_active: true
             }).eq('id', 1);
 
-            document.getElementById('btn-start').innerText = "🚀 Cargar base de datos a Supabase";
+            document.getElementById('btn-start').innerText = "🚀 Inicializar DB con Jugadores";
             document.getElementById('btn-start').disabled = false;
             document.getElementById('players-input').value = "";
+            resolvingPendingId = null;
             alert("✅ ¡Base de datos cargada correctamente y borrador activado!");
-        }
-
-        async function resetDraftInSupabase() {
-            if (!confirm("🚨 ¿Seguro que quieres resetear todo el borrador? Se borrarán todos los fichajes realizados.")) return;
-
-            // Clear drafted fields in all players
-            await sbClient.from('players').update({
-                drafted_by: null,
-                round_drafted: null,
-                pick_number: null,
-                drafted_at: null
-            }).neq('id', 0);
-
-            // Reset draft state
-            await sbClient.from('draft_state').update({
-                current_round: 1,
-                current_manager_index: 0,
-                is_active: true
-            }).eq('id', 1);
-
-            alert("✅ Borrador reseteado.");
+            await loadDraftState();
+            await loadDraftPicks();
+            await loadPendingPicks();
+            await loadPlayers();
         }
 
         async function clearAllPlayersFromDB() {
-            if (!confirm("🚨 ¿Seguro que quieres borrar TODOS los jugadores de la base de datos? Esto vaciará la lista por completo.")) return;
+            if (!sbClient || !isAdminMode) return;
+            if (!confirm("🚨 ¿Seguro que quieres borrar TODOS los jugadores de la base de datos?")) return;
 
+            await sbClient.from('draft_picks').delete().neq('id', 0);
+            await sbClient.from('pending_picks').delete().neq('id', 0);
             const { error } = await sbClient.from('players').delete().neq('id', 0);
             if (error) {
                 alert("Error al vaciar jugadores: " + error.message);
                 return;
             }
 
-            // Reset draft state as well
             await sbClient.from('draft_state').update({
                 current_round: 1,
                 current_manager_index: 0,
                 is_active: false
             }).eq('id', 1);
 
+            resolvingPendingId = null;
             alert("✅ Base de datos de jugadores vaciada.");
+            await loadDraftState();
+            await loadDraftPicks();
+            await loadPendingPicks();
+            await loadPlayers();
+        }
+
+        async function addSinglePlayer() {
+            if (!sbClient || !isAdminMode) return;
+            const name = document.getElementById('quick-player-name').value.trim();
+            const real_team = document.getElementById('quick-player-team').value.trim() || "Agente Libre";
+            const position = document.getElementById('quick-player-pos').value;
+            if (!name) {
+                alert("El nombre es obligatorio.");
+                return;
+            }
+            const { error } = await sbClient.from('players').insert({ name, real_team, position });
+            if (error) {
+                alert("Error al añadir jugador: " + error.message);
+                return;
+            }
+            document.getElementById('quick-player-name').value = "";
+            document.getElementById('quick-player-team').value = "";
+            alert(`✅ ${name} añadido.`);
+            await loadPlayers();
+        }
+
+        function renderAdminsList() {
+            const container = document.getElementById('admins-list');
+            if (!container) return;
+            container.innerHTML = "";
+            if (!adminsList.length) {
+                container.innerHTML = '<p style="font-size:10px; color:#64748b;">Sin admins registrados</p>';
+                return;
+            }
+            adminsList.forEach(a => {
+                const row = document.createElement('div');
+                row.className = 'admin-list-row';
+                row.innerHTML = `<span>${a.name}</span>`;
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-sm';
+                btn.style.cssText = 'background:rgba(239,68,68,0.2); color:#f87171; width:auto;';
+                btn.innerText = 'Quitar';
+                btn.onclick = () => removeAdmin(a.id);
+                row.appendChild(btn);
+                container.appendChild(row);
+            });
+        }
+
+        async function addAdmin() {
+            if (!sbClient || !isAdminMode) return;
+            const name = document.getElementById('new-admin-name').value.trim();
+            if (!name) {
+                alert("Escribe un nombre.");
+                return;
+            }
+            const { error } = await sbClient.from('admins').insert({ name });
+            if (error) {
+                alert("Error al añadir admin: " + error.message);
+                return;
+            }
+            document.getElementById('new-admin-name').value = "";
+            await loadAdmins();
+        }
+
+        async function removeAdmin(id) {
+            if (!sbClient || !isAdminMode) return;
+            if (!confirm("¿Eliminar este admin?")) return;
+            const { error } = await sbClient.from('admins').delete().eq('id', id);
+            if (error) {
+                alert("Error al eliminar admin: " + error.message);
+                return;
+            }
+            await loadAdmins();
         }
 
         function normalizeTeamName(tName) {
@@ -978,11 +1553,17 @@
             let str = tName.toLowerCase().trim();
             if (str.includes("barça") || str.includes("barca") || str.includes("fcb") || str.includes("barcelona")) return "barcelona";
             if (str.includes("racing") || str.includes("santander")) return "racing";
-            if (str.includes("atletico") || str.includes("atleti")) return "atlético";
-            if (str.includes("madrid") && !str.includes("atletico") && !str.includes("atleti")) return "real madrid";
+            if (str.includes("atletico") || str.includes("atlético") || str.includes("atleti")) return "atlético";
+            if (str.includes("madrid") && !str.includes("atletico") && !str.includes("atlético") && !str.includes("atleti")) return "real madrid";
             if (str.includes("athletic") || str.includes("bilbao")) return "athletic";
             if (str.includes("osasuna")) return "osasuna";
-            if (str.includes("alaves")) return "alavés";
+            if (str.includes("alaves") || str.includes("alavés")) return "alavés";
+            if (str.includes("elche")) return "elche";
+            if (str.includes("getafe")) return "getafe";
+            if (str.includes("levante")) return "levante";
+            if (str.includes("malaga") || str.includes("málaga")) return "málaga";
+            if (str.includes("rayo")) return "rayo";
+            if (str.includes("espanyol") || str.includes("español")) return "espanyol";
             if (str.includes("celta")) return "celta";
             if (str.includes("depor") || str.includes("coruña")) return "deportivo";
             if (str.includes("betis")) return "betis";
@@ -993,126 +1574,212 @@
             return str;
         }
 
-        function switchTab(tabName) { 
-            activeTab = tabName; 
+        function switchTab(tabName) {
+            activeTab = tabName;
             document.getElementById('tab-market').classList.toggle('active', tabName === 'market');
             document.getElementById('tab-teams').classList.toggle('active', tabName === 'teams');
             document.getElementById('tab-board').classList.toggle('active', tabName === 'board');
-            updateUI(); 
+            if (tabName === 'teams' && currentIdentity) {
+                selectedMdlFilter = currentIdentity;
+            }
+            updateUI();
         }
-        function setPosFilter(pos) { selectedPosFilter = (selectedPosFilter === pos) ? 'ALL' : pos; updateUI(); }
-        function setTeamFilter(teamName) { selectedTeamFilter = (selectedTeamFilter === teamName) ? 'ALL' : teamName; updateUI(); }
+
+        function setPosFilter(pos) {
+            selectedPosFilter = (selectedPosFilter === pos) ? 'ALL' : pos;
+            updateUI();
+        }
+        function setTeamFilter(teamName) {
+            selectedTeamFilter = (selectedTeamFilter === teamName) ? 'ALL' : teamName;
+            updateUI();
+        }
+        function setMdlFilter(name) {
+            selectedMdlFilter = name;
+            updateUI();
+        }
         function filterPlayers() { renderMarket(); }
         function resetAllFilters() {
-            selectedPosFilter = 'ALL'; selectedTeamFilter = 'ALL';
+            selectedPosFilter = 'ALL';
+            selectedTeamFilter = 'ALL';
             document.getElementById('search-player').value = "";
             updateUI();
+        }
+
+        function updatePendingBanner() {
+            const banner = document.getElementById('pending-resolve-banner');
+            if (!banner) return;
+            if (!resolvingPendingId) {
+                banner.style.display = 'none';
+                banner.innerHTML = '';
+                return;
+            }
+            const pending = pendingPicks.find(p => p.id === resolvingPendingId || String(p.id) === String(resolvingPendingId));
+            if (!pending) {
+                resolvingPendingId = null;
+                banner.style.display = 'none';
+                return;
+            }
+            const mgr = managerById(pending.manager_id);
+            const name = mgr ? mgr.name : '?';
+            banner.style.display = 'flex';
+            banner.innerHTML = `<span>Resolviendo pendiente de <strong>${name}</strong> — Ronda ${pending.round}. Haz click en Fichar.</span>
+                <button class="btn btn-sm" style="background:rgba(0,0,0,0.4); width:auto;" onclick="cancelResolvePending()">Cancelar</button>`;
         }
 
         function updateUI() {
             const activePlayers = dbPlayers.filter(p => !p.drafted_by);
             document.getElementById('pool-count').innerText = activePlayers.length;
-            
-            if (draftState.is_active) {
+
+            const turnMgr = managerAt(draftState.current_manager_index);
+
+            if (draftState.is_active && turnMgr) {
                 document.getElementById('turn-indicator').classList.remove('hidden');
                 document.getElementById('round-number').innerText = `Ronda ${draftState.current_round} / ${MAX_ROUNDS}`;
-                document.getElementById('current-drafter').innerText = managers[draftState.current_manager_index] || "COMPLETO";
-                
+                document.getElementById('current-drafter').innerText = turnMgr.name;
+
                 let tag = document.getElementById('direction-tag');
                 let panel = document.getElementById('turn-indicator');
-                
-                if (draftState.current_round % 2 !== 0) { 
-                    tag.innerText = "Ida ➡️"; 
-                    panel.className = "turn-panel neon-cyan"; 
-                } else { 
-                    tag.innerText = "Vuelta ⬅️"; 
-                    panel.className = "turn-panel neon-fuchsia"; 
+                if (draftState.current_round % 2 !== 0) {
+                    tag.innerText = "Ida ➡️";
+                    panel.className = "turn-panel neon-cyan";
+                } else {
+                    tag.innerText = "Vuelta ⬅️";
+                    panel.className = "turn-panel neon-fuchsia";
                 }
-                
-                document.getElementById('btn-undo').classList.remove('hidden');
-                document.getElementById('btn-reset-total').classList.remove('hidden');
+            } else if (draftState.is_active) {
+                document.getElementById('turn-indicator').classList.remove('hidden');
+                document.getElementById('current-drafter').innerText = "COMPLETO";
             } else {
                 document.getElementById('turn-indicator').classList.add('hidden');
             }
 
-            // Active Tab Rendering
+            updatePendingBanner();
+            if (isAdminMode) {
+                renderPendingPicksAdmin();
+                renderAdminsList();
+            }
+
             if (activeTab === 'market') {
                 document.getElementById('filter-wrapper').style.display = 'block';
                 document.getElementById('search-box').style.display = 'block';
+                document.getElementById('mdl-filter-wrapper').style.display = 'none';
                 renderMarket();
             } else if (activeTab === 'teams') {
                 document.getElementById('filter-wrapper').style.display = 'none';
                 document.getElementById('search-box').style.display = 'none';
+                document.getElementById('mdl-filter-wrapper').style.display = 'block';
+                renderMdlFilters();
                 renderLiveTeams();
             } else if (activeTab === 'board') {
                 document.getElementById('filter-wrapper').style.display = 'none';
                 document.getElementById('search-box').style.display = 'none';
+                document.getElementById('mdl-filter-wrapper').style.display = 'none';
                 renderDraftBoard();
             }
 
             renderHistory();
         }
 
+        function renderMdlFilters() {
+            const group = document.getElementById('mdl-filter-group');
+            if (!group) return;
+            group.innerHTML = '';
+            const allBtn = document.createElement('button');
+            allBtn.className = 'btn-filter' + (selectedMdlFilter === 'ALL' ? ' active' : '');
+            allBtn.innerText = 'Todos';
+            allBtn.onclick = () => setMdlFilter('ALL');
+            group.appendChild(allBtn);
+
+            managers.forEach(m => {
+                const btn = document.createElement('button');
+                const short = m.name.split(' ')[0];
+                const isYours = currentIdentity === m.name;
+                let cls = 'btn-filter';
+                if (selectedMdlFilter === m.name) cls += ' active';
+                if (isYours) cls += ' yours';
+                btn.className = cls;
+                btn.innerText = isYours ? `Tu plantilla (${short})` : short;
+                btn.onclick = () => setMdlFilter(m.name);
+                group.appendChild(btn);
+            });
+        }
+
+        function getPlayerById(id) {
+            return dbPlayers.find(p => p.id === id || String(p.id) === String(id)) || null;
+        }
+
         function renderDraftBoard() {
             const pool = document.getElementById('players-pool');
-            pool.innerHTML = '<div style="overflow-x: auto; width: 100%; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);"><table id="board-table" style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: center; color: #e2e8f0;"></table></div>';
+            pool.innerHTML = '<div class="board-wrap"><table id="board-table" style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: center; color: #e2e8f0;"></table></div>';
             const table = document.getElementById('board-table');
-            
-            // Header Row: Managers
+
             let headerHtml = '<thead><tr style="background: rgba(20, 15, 35, 0.8); border-bottom: 2px solid rgba(255,255,255,0.08);">';
             headerHtml += '<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.05); font-weight: 800; text-transform: uppercase; color: #38bdf8;">Rda</th>';
             managers.forEach(m => {
-                const isCurrent = draftState.is_active && managers[draftState.current_manager_index] === m;
+                const isCurrent = draftState.is_active && managerAt(draftState.current_manager_index) && managerAt(draftState.current_manager_index).id === m.id;
                 const style = isCurrent ? 'background: rgba(56,189,248,0.15); color: #38bdf8; font-weight: bold; border: 1px solid #38bdf8;' : 'border: 1px solid rgba(255,255,255,0.05);';
-                headerHtml += `<th style="padding: 12px; min-width: 130px; ${style}">${m.split(' ')[0]}</th>`;
+                headerHtml += `<th style="padding: 12px; min-width: 130px; ${style}">${m.name.split(' ')[0]}</th>`;
             });
             headerHtml += '</tr></thead>';
-            
-            // Rows: Rounds 1 to MAX_ROUNDS
+
             let bodyHtml = '<tbody>';
             for (let r = 1; r <= MAX_ROUNDS; r++) {
                 bodyHtml += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.03); ${r % 2 === 0 ? 'background: rgba(255,255,255,0.01);' : ''}">`;
                 bodyHtml += `<td style="padding: 10px; font-weight: bold; color: #64748b; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);">${r}</td>`;
-                
-                managers.forEach((m, mIdx) => {
-                    // Column is manager 'm'. We look for the player manager 'm' drafted in round 'r'
-                    const pick = dbPlayers.find(p => p.drafted_by === m && p.round_drafted === r);
-                    
-                    const isCurrentTurn = draftState.is_active && 
-                                          draftState.current_round === r && 
-                                          managers[draftState.current_manager_index] === m;
-                    
+
+                managers.forEach((m) => {
+                    const pick = draftPicks.find(dp =>
+                        (dp.manager_id === m.id || String(dp.manager_id) === String(m.id)) &&
+                        dp.round === r
+                    );
+                    const pending = pendingPicks.find(pp =>
+                        (pp.manager_id === m.id || String(pp.manager_id) === String(m.id)) &&
+                        pp.round === r
+                    );
+                    const isCurrentTurn = draftState.is_active &&
+                        draftState.current_round === r &&
+                        managerAt(draftState.current_manager_index) &&
+                        managerAt(draftState.current_manager_index).id === m.id;
+
                     let cellStyle = 'padding: 10px; border: 1px solid rgba(255,255,255,0.05); font-size: 10px;';
                     let cellContent = '<span style="color: #475569; font-style: italic;">-</span>';
-                    
+
                     if (pick) {
-                        let posClass = `pos-${pick.position}`;
-                        cellContent = `<div style="font-weight: 700; color: #fff; margin-bottom: 3px;">${pick.name}</div><div style="font-size: 9px; color: #94a3b8; display: flex; align-items: center; justify-content: center; gap: 4px;"><span>${pick.real_team}</span> <span class="pos-badge ${posClass}" style="margin: 0; padding: 1px 4px; font-size: 8px;">${pick.position}</span></div>`;
+                        const player = getPlayerById(pick.player_id);
+                        if (player) {
+                            let posClass = `pos-${player.position}`;
+                            const retTag = pick.is_retained ? ' 🔒' : '';
+                            cellContent = `<div style="font-weight: 700; color: #fff; margin-bottom: 3px;">${player.name}${retTag}</div><div style="font-size: 9px; color: #94a3b8; display: flex; align-items: center; justify-content: center; gap: 4px;"><span>${player.real_team}</span> <span class="pos-badge ${posClass}" style="margin: 0; padding: 1px 4px; font-size: 8px;">${player.position}</span></div>`;
+                        } else {
+                            cellContent = '<span style="color:#94a3b8;">Pick</span>';
+                        }
+                    } else if (pending) {
+                        cellStyle += 'background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245,158,11,0.4);';
+                        cellContent = '<span class="slot-pending">PENDIENTE</span>';
                     } else if (isCurrentTurn) {
                         cellStyle += 'background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; font-weight: 800;';
                         cellContent = '⚡ ELIGIENDO';
                     }
-                    
+
                     bodyHtml += `<td style="${cellStyle}">${cellContent}</td>`;
                 });
                 bodyHtml += '</tr>';
             }
             bodyHtml += '</tbody>';
-            
             table.innerHTML = headerHtml + bodyHtml;
         }
 
         function renderMarket() {
             const search = document.getElementById('search-player').value.toLowerCase().trim();
-            const pool = document.getElementById('players-pool'); 
+            const pool = document.getElementById('players-pool');
             pool.innerHTML = "";
 
             const available = dbPlayers.filter(p => !p.drafted_by);
             const filtered = available.filter(p => {
-                let normPTeam = normalizeTeamName(p.real_team); 
+                let normPTeam = normalizeTeamName(p.real_team);
                 let normFTeam = normalizeTeamName(selectedTeamFilter);
-                return (p.name.toLowerCase().includes(search) || normPTeam.includes(search)) && 
-                       (selectedPosFilter === 'ALL' || p.position === selectedPosFilter) && 
+                return (p.name.toLowerCase().includes(search) || normPTeam.includes(search)) &&
+                       (selectedPosFilter === 'ALL' || p.position === selectedPosFilter) &&
                        (selectedTeamFilter === 'ALL' || normPTeam === normFTeam);
             });
 
@@ -1121,21 +1788,28 @@
                 return;
             }
 
-            // Current turn manager
-            const turnManager = managers[draftState.current_manager_index];
-            const isMyTurn = currentIdentity === turnManager;
+            const turnManager = managerAt(draftState.current_manager_index);
+            const turnName = turnManager ? turnManager.name : '';
+            const allowFichar = canFichar();
 
             filtered.forEach(pObj => {
                 let posClass = `pos-${pObj.position}`;
-                const card = document.createElement('div'); 
+                const card = document.createElement('div');
                 card.className = "card";
-                
-                // Show a disabled or active button depending on whether it is the manager's turn or they have selected an identity
+
                 let buttonHtml = '';
-                if (!currentIdentity) {
-                    buttonHtml = `<button class="btn-fichar" style="opacity: 0.5; cursor: not-allowed;" onclick="alert('Selecciona tu identidad de mánager en el panel izquierdo para poder fichar.')">Espectador</button>`;
-                } else if (!isMyTurn) {
-                    buttonHtml = `<button class="btn-fichar" style="opacity: 0.5; cursor: not-allowed;" onclick="alert('No es tu turno. Le toca a ${turnManager}')">Fichar</button>`;
+                if (resolvingPendingId && isAdminMode) {
+                    buttonHtml = `<button class="btn-fichar" onclick="pickPlayer(${pObj.id})">Fichar</button>`;
+                } else if (!currentIdentity && !isAdminMode) {
+                    buttonHtml = `<button class="btn-fichar" disabled onclick="alert('Selecciona tu identidad de mánager en el panel izquierdo para poder fichar.')">Espectador</button>`;
+                } else if (isAdminMode) {
+                    if (!draftState.is_active) {
+                        buttonHtml = `<button class="btn-fichar" disabled>Inactivo</button>`;
+                    } else {
+                        buttonHtml = `<button class="btn-fichar" onclick="pickPlayer(${pObj.id})">Fichar (${turnName.split(' ')[0] || '?'})</button>`;
+                    }
+                } else if (!allowFichar) {
+                    buttonHtml = `<button class="btn-fichar" disabled onclick="alert('No es tu turno. Le toca a ${turnName}')">Fichar</button>`;
                 } else {
                     buttonHtml = `<button class="btn-fichar" onclick="pickPlayer(${pObj.id})">Fichar</button>`;
                 }
@@ -1146,161 +1820,80 @@
         }
 
         function renderLiveTeams() {
-            const pool = document.getElementById('players-pool'); 
+            const pool = document.getElementById('players-pool');
             pool.innerHTML = '<div class="summary-grid" id="s-grid"></div>';
             const sGrid = document.getElementById('s-grid');
-            
-            managers.forEach(m => {
-                let html = `<div class="team-box"><h4 style="color:#38bdf8; font-size:12px; margin-bottom:6px;">👤 ${m}</h4><ul style="list-style:none; font-size:11px; display:flex; flex-direction:column; gap:4px;">`;
-                let mPlayers = dbPlayers.filter(p => p.drafted_by === m).sort((a,b) => (a.pick_number || 0) - (b.pick_number || 0));
-                
-                if (!mPlayers.length) {
+
+            const list = selectedMdlFilter === 'ALL'
+                ? managers
+                : managers.filter(m => m.name === selectedMdlFilter);
+
+            list.forEach(m => {
+                const isYours = currentIdentity === m.name;
+                let html = `<div class="team-box${isYours ? ' highlight' : ''}"><h4 style="color:#38bdf8; font-size:12px; margin-bottom:6px;">👤 ${m.name}${isYours ? ' · Tu plantilla' : ''}</h4><ul style="list-style:none; font-size:11px; display:flex; flex-direction:column; gap:4px;">`;
+
+                const mgrPicks = draftPicks
+                    .filter(dp => dp.manager_id === m.id || String(dp.manager_id) === String(m.id))
+                    .sort((a, b) => {
+                        if (a.is_retained !== b.is_retained) return a.is_retained ? -1 : 1;
+                        return (a.round || 0) - (b.round || 0) || (a.pick_number || 0) - (b.pick_number || 0);
+                    });
+
+                const mgrPending = pendingPicks.filter(pp =>
+                    pp.manager_id === m.id || String(pp.manager_id) === String(m.id)
+                );
+
+                if (!mgrPicks.length && !mgrPending.length) {
                     html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;
-                } else { 
-                    mPlayers.forEach(p => { 
+                } else {
+                    mgrPicks.forEach(dp => {
+                        const p = getPlayerById(dp.player_id);
+                        if (!p) return;
                         let releaseBtn = '';
-                        if (isAdminMode && p.is_retained) {
-                            releaseBtn = `<button onclick="releaseRetained(${p.id})" style="background: rgba(239,68,68,0.2); border: 1px solid #ef4444; color:#f87171; font-size:8px; padding:1px 4px; border-radius:3px; cursor:pointer;">Liberar</button>`;
+                        if (isAdminMode && dp.is_retained) {
+                            releaseBtn = `<button onclick="releaseRetained(${p.id})" style="background: rgba(239,68,68,0.2); border: 1px solid #ef4444; color:#f87171; font-size:8px; padding:4px 6px; border-radius:3px; cursor:pointer; min-height:28px;">Liberar</button>`;
                         }
-                        html += `<li style="background:rgba(255,255,255,0.01); padding:4px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;">
-                            <span>${p.name} <span style="font-size:9px; color:#64748b;">[${p.position}] (${p.is_retained ? 'Retenido R' + p.round_drafted : 'R' + p.round_drafted})</span></span>
+                        const label = dp.is_retained
+                            ? `Retenido R${dp.round}`
+                            : `R${dp.round} · #${dp.pick_number}`;
+                        html += `<li style="background:rgba(255,255,255,0.01); padding:6px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; gap:6px;">
+                            <span>${p.name} <span style="font-size:9px; color:#64748b;">[${p.position}] (${label})</span></span>
                             ${releaseBtn}
-                        </li>`; 
-                    }); 
+                        </li>`;
+                    });
+                    mgrPending.forEach(pp => {
+                        html += `<li style="background:rgba(245,158,11,0.08); padding:6px; border-radius:4px;" class="slot-pending">PENDIENTE — Ronda ${pp.round}</li>`;
+                    });
                 }
                 sGrid.innerHTML += html + `</ul></div>`;
             });
         }
 
-        async function pickPlayer(playerId) {
-            if (!draftState.is_active) return;
-            const turnManager = managers[draftState.current_manager_index];
-            if (currentIdentity !== turnManager) {
-                alert(`No es tu turno. El turno es de: ${turnManager}`);
-                return;
-            }
-
-            const p = dbPlayers.find(x => x.id === playerId);
-            if (!p || p.drafted_by) return;
-
-            // Get new pick index based on already drafted players
-            const draftedCount = dbPlayers.filter(x => x.drafted_by).length;
-            const nextPickNumber = draftedCount + 1;
-
-            // Update player as drafted
-            const { error: playerErr } = await sbClient
-                .from('players')
-                .update({
-                    drafted_by: turnManager,
-                    round_drafted: draftState.current_round,
-                    pick_number: nextPickNumber,
-                    drafted_at: new Date().toISOString()
-                })
-                .eq('id', playerId);
-
-            if (playerErr) {
-                alert("Error al realizar el pick: " + playerErr.message);
-                return;
-            }
-
-            // Calculate next turn
-            let nextRound = draftState.current_round;
-            let nextIndex = draftState.current_manager_index;
-
-            if (draftState.current_round % 2 !== 0) { 
-                // Odd round: Left to right (0 to length-1)
-                if (draftState.current_manager_index === managers.length - 1) {
-                    nextRound++;
-                } else {
-                    nextIndex++;
-                }
-            } else { 
-                // Even round: Right to left (length-1 to 0)
-                if (draftState.current_manager_index === 0) {
-                    nextRound++;
-                } else {
-                    nextIndex--;
-                }
-            }
-
-            const isStillActive = nextRound <= MAX_ROUNDS;
-
-            // Update Draft State
-            const { error: stateErr } = await sbClient
-                .from('draft_state')
-                .update({
-                    current_round: nextRound,
-                    current_manager_index: nextIndex,
-                    is_active: isStillActive
-                })
-                .eq('id', 1);
-
-            if (stateErr) {
-                console.error("Error updating draft state:", stateErr);
-            }
-        }
-
-        async function undoLastPick() {
-            // Find last drafted player by max pick_number
-            const drafted = dbPlayers.filter(p => p.drafted_by && p.pick_number);
-            if (!drafted.length) {
-                alert("No hay ningún pick para deshacer.");
-                return;
-            }
-
-            drafted.sort((a,b) => b.pick_number - a.pick_number);
-            const lastPick = drafted[0];
-
-            if (!confirm(`¿Deshacer la elección de ${lastPick.name} por ${lastPick.drafted_by}?`)) return;
-
-            // Release player in DB
-            const { error: playerErr } = await sbClient
-                .from('players')
-                .update({
-                    drafted_by: null,
-                    round_drafted: null,
-                    pick_number: null,
-                    drafted_at: null
-                })
-                .eq('id', lastPick.id);
-
-            if (playerErr) {
-                alert("Error al liberar jugador: " + playerErr.message);
-                return;
-            }
-
-            // Revert draft state back to this manager's turn and round
-            const lastManagerIndex = managers.indexOf(lastPick.drafted_by);
-            const { error: stateErr } = await sbClient
-                .from('draft_state')
-                .update({
-                    current_round: lastPick.round_drafted,
-                    current_manager_index: lastManagerIndex,
-                    is_active: true
-                })
-                .eq('id', 1);
-
-            if (stateErr) {
-                console.error("Error updating state during undo:", stateErr);
-            }
-        }
-
         function renderHistory() {
-            const container = document.getElementById('draft-history'); 
+            const container = document.getElementById('draft-history');
             container.innerHTML = "";
 
-            const drafted = dbPlayers.filter(p => p.drafted_by).sort((a,b) => b.pick_number - a.pick_number);
-            
-            if (!drafted.length) {
+            const normal = draftPicks
+                .filter(dp => !dp.is_retained && (dp.pick_number || 0) > 0)
+                .slice()
+                .sort((a, b) => (b.pick_number || 0) - (a.pick_number || 0));
+
+            if (!normal.length) {
                 container.innerHTML = `<p style="color:#475569; text-align:center; padding-top:20px; font-size:11px;">Historial vacío</p>`;
                 return;
             }
 
-            drafted.forEach(pick => {
-                const item = document.createElement('div'); 
-                item.className = "history-item"; 
-                item.style.borderColor = pick.round_drafted % 2 !== 0 ? "#06b6d4" : "#d946ef";
-                item.innerHTML = `<strong>${pick.drafted_by}</strong> ficha a <span style="color:#38bdf8; font-weight:700;">${pick.name}</span> [${pick.position}] (R${pick.round_drafted} - Pick #${pick.pick_number})`;
+            normal.forEach(dp => {
+                const player = getPlayerById(dp.player_id);
+                const mgr = managerById(dp.manager_id);
+                const item = document.createElement('div');
+                item.className = "history-item";
+                item.style.borderColor = dp.round % 2 !== 0 ? "#06b6d4" : "#d946ef";
+                const pName = player ? player.name : '?';
+                const pos = player ? player.position : '';
+                const mName = mgr ? mgr.name : '?';
+                const adminTag = dp.made_by_admin ? ' <span style="font-size:9px;color:#f87171;">(admin)</span>' : '';
+                item.innerHTML = `<strong>${mName}</strong> ficha a <span style="color:#38bdf8; font-weight:700;">${pName}</span> [${pos}] (R${dp.round} - Pick #${dp.pick_number})${adminTag}`;
                 container.appendChild(item);
             });
         }
