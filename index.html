@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>🏆 DRAFT LOCAL FANTASY PRO 26/27 🏆</title>
+    <title>🏆 LIGA FANTASY PRO 26/27: EN DIRECTO 🏆</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: system-ui, -apple-system, sans-serif; background: radial-gradient(circle at 50% 0%, #17122b 0%, #06040a 70%); color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 30px; }
@@ -12,8 +12,8 @@
         .turn-panel.hidden { display: none; }
         .neon-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.3); border-color: #06b6d4; }
         .neon-fuchsia { box-shadow: 0 0 15px rgba(217, 70, 239, 0.3); border-color: #d946ef; }
-        main { max-width: 1500px; width: 100%; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 1fr; gap: 20px; flex-grow: 1; }
-        @media (min-width: 1280px) { main { grid-template-columns: 330px 1fr 340px; } }
+        main { max-width: 1600px; width: 100%; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 1fr; gap: 20px; flex-grow: 1; }
+        @media (min-width: 1280px) { main { grid-template-columns: 340px 1fr 340px; } }
         .panel { background: rgba(20, 15, 35, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         h2 { font-size: 13px; text-transform: uppercase; color: #38bdf8; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; letter-spacing: 1px; }
         textarea, input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; color: #fff; font-size: 12px; outline: none; }
@@ -23,7 +23,7 @@
         .btn-undo { background: linear-gradient(90deg, #f59e0b, #d97706); margin-top: 4px; box-shadow: 0 4px 12px rgba(245,158,11,0.2); }
         .btn-clear { background: linear-gradient(90deg, #ef4444, #b91c1c); }
         .btn:hover { opacity: 0.95; }
-        .scroll { overflow-y: auto; max-height: 650px; flex-grow: 1; padding-right: 4px; }
+        .scroll { overflow-y: auto; max-height: 700px; flex-grow: 1; padding-right: 4px; }
         .scroll::-webkit-scrollbar { width: 5px; }
         .scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
         .tabs { display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; margin-bottom: 8px; }
@@ -38,14 +38,14 @@
         .btn-reset-filters:hover { background: rgba(239, 68, 68, 0.2); color: #fff; }
         .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
-        .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .card .name { font-weight: 700; color: #f1f5f9; font-size: 13px; display: block; margin-bottom: 2px; }
+        .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }        .card .name { font-weight: 700; color: #f1f5f9; font-size: 13px; display: block; margin-bottom: 2px; }
         .card .team { font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
         .pos-badge { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-family: monospace; display: inline-block; vertical-align: middle; }
         .pos-POR { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
         .pos-DEF { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
         .pos-MED { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .pos-DEL { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }        .actions-box { display: flex; align-items: center; gap: 8px; }
+        .pos-DEL { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .actions-box { display: flex; align-items: center; gap: 8px; }
         .card button.btn-fichar { background: #1a1528; border: 1px solid #3b2e5a; color: #e2e8f0; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
         .card:hover button.btn-fichar { background: #38bdf8; color: #000; font-weight: 800; border-color: #38bdf8; }
         .history-item { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; font-size: 12px; border-left: 4px solid #38bdf8; }
@@ -117,6 +117,7 @@
         </section>
         <section class="panel"><h2>📜 Historial Global de Picks</h2><div id="draft-history" class="scroll" style="display:flex; flex-direction:column; gap:8px;"></div></section>
     </main>
+
     <script>
         let managers = ["Las Palmas (Turu Flores)", "Oviedo (Obafemi)", "Real Sociedad (Omar Little)", "Osasuna (Sens44)", "Huracán (Trosky)", "Levante (Celtics Fan)", "Lleida (Boibi2)", "Recreativo (JOSEDIN)", "Sporting (Rebekin)", "Celta (William)", "Guadalajara (Nikola Sarcevic)", "Deportivo (De la Penya)", "Valencia (Jraga)", "Barcelona (Malabar)", "Marino (Sauber)", "Eibar (Eragon86)", "Real Unión (Swes)", "Cadiz (Aitor55)", "Coruxo (Hill)", "Alaves (Torressss)"];
         let players = [], history = [], teams = {}, currentManagerIndex = 0, currentRound = 1, activeTab = 'market', selectedPosFilter = 'ALL', selectedTeamFilter = 'ALL';
@@ -150,9 +151,9 @@
                 let team = parts ? parts.trim() : "Agente Libre";
                 let pos = parts ? parts.trim().toUpperCase() : "MED";
                 if (!name) return;
-                if (pos.includes("DFC") || pos === "DF") pos = "DEF";
+                if (pos.includes("DFC") || pos === "DF" || pos.includes("DEF")) pos = "DEF";
                 if (pos.includes("MD") || pos === "MC" || pos.includes("MED")) pos = "MED";
-                if (pos === "DL" || pos.includes("DEL")) pos = "DEL";
+                if (pos === "DL" || pos.includes("DEL") || pos.includes("DC")) pos = "DEL";
                 list.push({ name: name, team: team, pos: pos });
             });
             return list;
@@ -245,10 +246,10 @@
         function renderHistory() {
             const container = document.getElementById('draft-history'); container.innerHTML = "";
             if(history.length <= 1) { container.innerHTML = `<p style="color:#475569; text-align:center; padding:10px;">Esperando elecciones...</p>`; return; }
-            history.forEach(pick => {
-                if(pick.manager === "Comisionado") return;
-                const item = document.createElement('div'); item.className = "history-item"; item.style.borderColor = pick.round % 2 !== 0 ? "#06b6d4" : "#d946ef";
-                item.innerHTML = `<strong>${pick.manager}</strong> ficha a <span style="color:#38bdf8; font-weight:700;">${pick.name}</span> [${pick.pos}] (R${pick.round})`;
+            history.forEach(p => {
+                if(p.manager === "Comisionado") return;
+                const item = document.createElement('div'); item.className = "history-item"; item.style.borderColor = p.round % 2 !== 0 ? "#06b6d4" : "#d946ef";
+                item.innerHTML = `<strong>${p.manager}</strong> ficha a <span style="color:#38bdf8; font-weight:700;">${p.name}</span> (R${p.round})`;
                 container.appendChild(item);
             });
         }
@@ -260,4 +261,3 @@
     </script>
 </body>
 </html>
-
