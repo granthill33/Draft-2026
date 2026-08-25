@@ -510,12 +510,12 @@
                     </div>
                 </div>
 
-                <!-- 7. Undo / Reset / Clear / Disconnect -->
+                <!-- 7. Start / Undo / Reset / Disconnect -->
                 <div class="admin-section">
-                    <span class="admin-section-title">7. Acciones peligrosas</span>
+                    <span class="admin-section-title">7. Control del Draft</span>
+                    <button onclick="startDraft()" id="btn-start-draft" class="btn btn-green">▶️ Iniciar Draft</button>
                     <button onclick="undoLastPick()" id="btn-undo" class="btn btn-undo">↩️ Deshacer Último Pick</button>
                     <button onclick="resetDraftInSupabase()" id="btn-reset-total" class="btn btn-clear" style="margin-top:5px; background:linear-gradient(90deg, #dc2626, #991b1b);">🚨 RESETEAR DRAFT DESDE CERO</button>
-                    <button onclick="clearAllPlayersFromDB()" class="btn" style="margin-top:5px; background:linear-gradient(90deg, #6b7280, #374151);">🗑️ VACIAR JUGADORES DE LA DB</button>
                     <button onclick="disconnectSupabase()" class="btn" style="background: #1e1b29; border: 1px solid rgba(255,255,255,0.05); color: #ef4444; font-size: 9px; padding: 8px; margin-top: 5px;">🔌 Desconectar Supabase</button>
                 </div>
             </div>
@@ -1366,27 +1366,57 @@
             await loadPlayers();
         }
 
-        async function resetDraftInSupabase() {
+        async function startDraft() {
             if (!sbClient || !isAdminMode) return;
-            if (!confirm("🚨 ¿Seguro que quieres resetear todo el borrador? Se borrarán todos los fichajes y pendientes.")) return;
+            if (!managers.length) {
+                alert("No hay managers cargados.");
+                return;
+            }
+            if (!dbPlayers.length) {
+                alert("Carga jugadores antes de iniciar el draft.");
+                return;
+            }
+            if (draftState.is_active) {
+                if (!confirm("El draft ya está activo. ¿Reiniciar el marcador de turno a Ronda 1 (sin borrar picks ni jugadores)?")) return;
+            }
 
-            await sbClient.from('draft_picks').delete().neq('id', 0);
-            await sbClient.from('pending_picks').delete().neq('id', 0);
-            await sbClient.from('players').update({
-                drafted_by: null,
-                round_drafted: null,
-                pick_number: null,
-                drafted_at: null,
-                is_retained: false
-            }).neq('id', 0);
-            await sbClient.from('draft_state').update({
+            const { error } = await sbClient.from('draft_state').update({
                 current_round: 1,
                 current_manager_index: 0,
                 is_active: true
             }).eq('id', 1);
 
+            if (error) {
+                alert("Error al iniciar el draft: " + error.message);
+                return;
+            }
+
             resolvingPendingId = null;
-            alert("✅ Borrador reseteado.");
+            alert("✅ Draft iniciado.");
+            await loadDraftState();
+            await checkAndAutoAdvanceTurn();
+            updateUI();
+        }
+
+        async function resetDraftInSupabase() {
+            if (!sbClient || !isAdminMode) return;
+            if (!confirm("🚨 ¿Seguro? Se borrarán TODOS los jugadores, picks y pendientes. El draft quedará parado.")) return;
+
+            await sbClient.from('draft_picks').delete().neq('id', 0);
+            await sbClient.from('pending_picks').delete().neq('id', 0);
+            const { error } = await sbClient.from('players').delete().neq('id', 0);
+            if (error) {
+                alert("Error al borrar jugadores: " + error.message);
+                return;
+            }
+            await sbClient.from('draft_state').update({
+                current_round: 1,
+                current_manager_index: 0,
+                is_active: false
+            }).eq('id', 1);
+
+            resolvingPendingId = null;
+            alert("✅ Draft reseteado a cero (jugadores y picks eliminados).");
             await loadDraftState();
             await loadDraftPicks();
             await loadPendingPicks();
@@ -1439,40 +1469,14 @@
             await sbClient.from('draft_state').update({
                 current_round: 1,
                 current_manager_index: 0,
-                is_active: true
+                is_active: false
             }).eq('id', 1);
 
             document.getElementById('btn-start').innerText = "🚀 Inicializar DB con Jugadores";
             document.getElementById('btn-start').disabled = false;
             document.getElementById('players-input').value = "";
             resolvingPendingId = null;
-            alert("✅ ¡Base de datos cargada correctamente y borrador activado!");
-            await loadDraftState();
-            await loadDraftPicks();
-            await loadPendingPicks();
-            await loadPlayers();
-        }
-
-        async function clearAllPlayersFromDB() {
-            if (!sbClient || !isAdminMode) return;
-            if (!confirm("🚨 ¿Seguro que quieres borrar TODOS los jugadores de la base de datos?")) return;
-
-            await sbClient.from('draft_picks').delete().neq('id', 0);
-            await sbClient.from('pending_picks').delete().neq('id', 0);
-            const { error } = await sbClient.from('players').delete().neq('id', 0);
-            if (error) {
-                alert("Error al vaciar jugadores: " + error.message);
-                return;
-            }
-
-            await sbClient.from('draft_state').update({
-                current_round: 1,
-                current_manager_index: 0,
-                is_active: false
-            }).eq('id', 1);
-
-            resolvingPendingId = null;
-            alert("✅ Base de datos de jugadores vaciada.");
+            alert("✅ Jugadores cargados. Usa «Iniciar Draft» cuando quieras arrancar (tras las retenciones si las hay).");
             await loadDraftState();
             await loadDraftPicks();
             await loadPendingPicks();
