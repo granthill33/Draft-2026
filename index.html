@@ -54,7 +54,7 @@
         @media (min-width: 640px) { .summary-grid { grid-template-columns: 1fr 1fr; } }
         .team-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.04); }
     </style>
-    <script src="https://ably.com"></script>
+    <script src="https://pubnub.com"></script>
 </head>
 <body>
     <header>
@@ -142,10 +142,7 @@ Alaves (Torressss)</textarea>
         <section class="panel"><h2>📜 Historial Global en Vivo</h2><div id="draft-history" class="scroll" style="display:flex; flex-direction:column; gap:8px;"></div></section>
     </main>
     <script>
-        /* MOTOR WEBSOCKET ABIERTO SIN RESTRICCIONES SSL DE GOOGLE */
-        const ably = new Ably.Realtime('4eW6Fw.oX9Ytg:0VwX9wE2k3H7yN5k');
-        const channel = ably.channels.get('fantasy_liga_pro_2026');
-
+        const pubnub = new PubNub({ publishKey: 'pub-c-4b67f18b-6ef4-4d82-8a4d-ef696d594bbf', subscribeKey: 'sub-c-be4e5251-872f-4886-9a25-9ba44770fc5e', userId: "manager_" + Math.random().toString(36).substring(2, 9) });
         let managers = ["Las Palmas (Turu Flores)", "Oviedo (Obafemi)", "Real Sociedad (Omar Little)", "Osasuna (Sens44)", "Huracán (Trosky)", "Levante (Celtics Fan)", "Lleida (Boibi2)", "Recreativo (JOSEDIN)", "Sporting (Rebekin)", "Celta (William)", "Guadalajara (Nikola Sarcevic)", "Deportivo (De la Penya)", "Valencia (Jraga)", "Barcelona (Malabar)", "Marino (Sauber)", "Eibar (Eragon86)", "Real Unión (Swes)", "Cadiz (Aitor55)", "Coruxo (Hill)", "Alaves (Torressss)"];
         let players = [], history = [], teams = {};
         let currentManagerIndex = 0, currentRound = 1;
@@ -169,6 +166,7 @@ Alaves (Torressss)</textarea>
             if (str.includes("villarreal")) return "villarreal";
             return str;
         }
+
         function processText(rawText) {
             let lines = rawText.replace(/\r/g, "").split('\n'); let list = [];
             lines.forEach((line) => {
@@ -187,22 +185,15 @@ Alaves (Torressss)</textarea>
             return list;
         }
 
-        /* INYECCIÓN COMPRIMIDA EN WEBSOCKET: ARRANCA AL INSTANTE SIN CARGAS */
         function initGlobalDraft() {
             let raw = document.getElementById('players-input').value;
             if (!raw.trim()) { alert("🚨 Pega primero el Excel."); return; }
             let pool = processText(raw);
             if (!pool.length) { alert("🚨 Formato inválido."); return; }
             let emptyTeams = {}; managers.forEach(m => { emptyTeams[m] = []; });
-            
-            let state = {
-                players: pool,
-                history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "INFO", round: 0 }],
-                teams: emptyTeams, currentRound: 1, currentManagerIndex: 0
-            };
-            channel.publish('updateState', JSON.stringify(state));
+            let state = { players: pool, history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "INFO", round: 0 }], teams: emptyTeams, currentRound: 1, currentManagerIndex: 0 };
+            pubnub.publish({ channel: 'fantasy_liga_pro_2026', message: state });
         }
-
         function pickPlayerCloud(idx) {
             const p = players[idx], m = managers[currentManagerIndex];
             let updHistory = Array.from(history);
@@ -213,41 +204,40 @@ Alaves (Torressss)</textarea>
             let nIdx = currentManagerIndex, nRound = currentRound;
             if (currentRound % 2 !== 0) { if (currentManagerIndex === managers.length - 1) nRound++; else nIdx++; } 
             else { if (currentManagerIndex === 0) nRound++; else nIdx--; }
-            
             let state = { players: updPlayers, history: updHistory, teams: teams, currentRound: nRound, currentManagerIndex: nIdx };
             state.teams[m] = updTeam;
-            channel.publish('updateState', JSON.stringify(state));
+            pubnub.publish({ channel: 'fantasy_liga_pro_2026', message: state });
         }
+
         function undoGlobalPick() {
             if (!history || history.length <= 1) return;
             let updHistory = Array.from(history); const last = updHistory.shift();
             let updPlayers = Array.from(players); updPlayers.push({ name: last.name, team: last.team, pos: last.pos });
             let updTeam = Array.from(teams[last.manager] || []).filter(p => p.player !== last.name);
             let pIdx = managers.indexOf(last.manager);
-            
             let state = { players: updPlayers, history: updHistory, teams: teams, currentRound: last.round, currentManagerIndex: pIdx };
             state.teams[last.manager] = updTeam;
-            channel.publish('updateState', JSON.stringify(state));
+            pubnub.publish({ channel: 'fantasy_liga_pro_2026', message: state });
         }
 
         function hardGlobalReset() {
-            if (confirm("⚠️ ¿Resetear liga completa para todos los mánagers?")) {
-                channel.publish('updateState', 'RESET');
-            }
+            if (confirm("⚠️ ¿Resetear liga completa para todos?")) { pubnub.publish({ channel: 'fantasy_liga_pro_2026', message: 'RESET' }); }
         }
 
-        channel.subscribe('updateState', (msg) => {
-            if (msg.data === 'RESET') { window.location.reload(); return; }
-            const data = JSON.parse(msg.data);
-            players = data.players || []; history = data.history || []; teams = data.teams || {};
-            currentRound = data.currentRound; currentManagerIndex = data.currentManagerIndex;
-            
-            document.getElementById('admin-setup-panel').style.display = "none";
-            document.getElementById('turn-indicator').classList.remove('hidden');
-            document.getElementById('btn-undo').classList.remove('hidden');
-            document.getElementById('btn-reset-total').classList.remove('hidden');
-            updateUI();
+        pubnub.addListener({
+            message: function(event) {
+                if (event.message === 'RESET') { window.location.reload(); return; }
+                const data = event.message;
+                players = data.players || []; history = data.history || []; teams = data.teams || {};
+                currentRound = data.currentRound; currentManagerIndex = data.currentManagerIndex;
+                document.getElementById('admin-setup-panel').style.display = "none";
+                document.getElementById('turn-indicator').classList.remove('hidden');
+                document.getElementById('btn-undo').classList.remove('hidden');
+                document.getElementById('btn-reset-total').classList.remove('hidden');
+                updateUI();
+            }
         });
+        pubnub.subscribe({ channels: ['fantasy_liga_pro_2026'] });
 
         function switchTab(tabName) { activeTab = tabName; updateUI(); }
         function setPosFilter(pos) { selectedPosFilter = (selectedPosFilter === pos) ? 'ALL' : pos; updateUI(); }
