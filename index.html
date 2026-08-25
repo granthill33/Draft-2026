@@ -1,131 +1,12 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>🏆 LIGA FANTASY PRO 26/27: DIRECTO LIVE 🏆</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: radial-gradient(circle at 50% 0%, #17122b 0%, #06040a 70%); color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 30px; }
-        header { background: rgba(0,0,0,0.6); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-        .logo { font-weight: 900; font-size: 20px; background: linear-gradient(135deg, #38bdf8, #d946ef); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
-        .turn-panel { background: #0c0914; border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 12px; display: flex; align-items: center; gap: 15px; }
-        .turn-panel.hidden { display: none; }
-        .neon-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.3); border-color: #06b6d4; }
-        .neon-fuchsia { box-shadow: 0 0 15px rgba(217, 70, 239, 0.3); border-color: #d946ef; }
-        main { max-width: 1500px; width: 100%; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 1fr; gap: 20px; flex-grow: 1; }
-        @media (min-width: 1280px) { main { grid-template-columns: 330px 1fr 340px; } }
-        .panel { background: rgba(20, 15, 35, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        h2 { font-size: 13px; text-transform: uppercase; color: #38bdf8; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; letter-spacing: 1px; }
-        textarea, input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; color: #fff; font-size: 12px; outline: none; }
-        textarea { resize: none; font-family: monospace; }
-        .btn { width: 100%; background: linear-gradient(90deg, #3b82f6, #d946ef); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 11px; text-transform: uppercase; cursor: pointer; letter-spacing: 0.5px; }
-        .btn-green { background: linear-gradient(90deg, #10b981, #059669); margin-top: 4px; }
-        .btn-undo { background: linear-gradient(90deg, #f59e0b, #d97706); margin-top: 4px; box-shadow: 0 4px 12px rgba(245,158,11,0.2); }
-        .btn-clear { background: linear-gradient(90deg, #ef4444, #b91c1c); }
-        .btn:hover { opacity: 0.95; }
-        .scroll { overflow-y: auto; max-height: 650px; flex-grow: 1; padding-right: 4px; }
-        .scroll::-webkit-scrollbar { width: 5px; }
-        .scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        .tabs { display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; margin-bottom: 8px; }
-        .tab { background: transparent; border: 1px solid rgba(255,255,255,0.05); color: #94a3b8; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
-        .tab.active { background: rgba(56,189,248,0.1); border-color: #38bdf8; color: #38bdf8; }
-        .filter-section-title { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
-        .filter-group { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.03); }
-        .btn-filter { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: #94a3b8; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
-        .btn-filter:hover { background: rgba(255,255,255,0.08); color: #fff; }
-        .btn-filter.active { background: #38bdf8; color: #000; font-weight: 800; border-color: #38bdf8; }
-        .btn-reset-filters { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; font-size: 9px; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
-        .btn-reset-filters:hover { background: rgba(239, 68, 68, 0.2); color: #fff; }
-        .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-        @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
-        .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .card .name { font-weight: 700; color: #f1f5f9; font-size: 13px; display: block; margin-bottom: 2px; }
-        .card .team { font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
-        .pos-badge { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-family: monospace; display: inline-block; vertical-align: middle; }
-        .pos-por { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
-        .pos-def { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
-        .pos-med { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .pos-del { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-        .actions-box { display: flex; align-items: center; gap: 8px; }
-        .card button.btn-fichar { background: #1a1528; border: 1px solid #3b2e5a; color: #e2e8f0; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
-        .card:hover button.btn-fichar { background: #38bdf8; color: #000; font-weight: 800; border-color: #38bdf8; }
-        .history-item { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; font-size: 12px; border-left: 4px solid #38bdf8; }
-        .summary-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-        @media (min-width: 640px) { .summary-grid { grid-template-columns: 1fr 1fr; } }
-        .team-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.04); }
-    </style>
-    <script src="https://pubnub.com"></script>
-</head>
-<body>
-    <header>
-        <div class="logo">⚽ CLOUD DRAFT LIGA PRO 26/27</div>
-        <div id="turn-indicator" class="turn-panel hidden">
-            <div>
-                <small id="round-number" style="font-size:9px; color:#94a3b8; display:block; font-weight:700; letter-spacing:1px;">RONDA 1 / 23</small>
-                <strong id="current-drafter" style="font-size:15px; color:#fff;">Sincronizando...</strong>
-            </div>
-            <div id="direction-tag" style="font-size:10px; font-weight:800; padding:5px 10px; border-radius:6px; text-transform:uppercase;">IDA</div>
-        </div>
-    </header>
-    <main>
-        <section class="panel" id="admin-setup-panel">
-            <h2>⚙️ Carga de Jugadores Excel (20 Participantes Internos)</h2>
-            <textarea id="players-input" rows="8" placeholder="Pega aquí las 3 columnas de tu Excel (Nombre, Equipo, Posición)."></textarea>
-            <button onclick="initGlobalDraft()" id="btn-start" class="btn">🚀 Iniciar Liga Global Sincronizada</button>
-        </section>
-        <section class="panel">
-            <div class="tabs">
-                <button id="tab-market" class="tab active" onclick="switchTab('market')">🛒 Mercado Común (<span id="pool-count">0</span>)</button>
-                <button id="tab-teams" class="tab" onclick="switchTab('teams')">👥 Plantillas Directo</button>
-            </div>
-            <div id="filter-wrapper">
-                <div class="filter-section-title"><span>Posición:</span><button class="btn-reset-filters" onclick="resetAllFilters()">🔄 Resetear</button></div>
-                <div class="filter-group" id="pos-filter-group">
-                    <button class="btn-filter active" onclick="setPosFilter('ALL')">TODAS</button>
-                    <button class="btn-filter" onclick="setPosFilter('POR')">POR</button>
-                    <button class="btn-filter" onclick="setPosFilter('DEF')">DEF</button>
-                    <button class="btn-filter" onclick="setPosFilter('MED')">MED</button>
-                    <button class="btn-filter" onclick="setPosFilter('DEL')">DEL</button>
-                </div>
-                <div class="filter-section-title">Equipos Real Liga 26/27:</div>
-                <div class="filter-group scroll" id="team-filter-group" style="max-height: 95px;">
-                    <button class="btn-filter active" onclick="setTeamFilter('ALL')">TODOS</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Athletic')">Athletic Club</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Atlético')">Atlético de Madrid</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Osasuna')">CA Osasuna</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Alavés')">Deportivo Alavés</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Elche')">Elche CF</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Barcelona')">FC Barcelona</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Getafe')">Getafe CF</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Levante')">Levante UD</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Málaga')">Málaga CF</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Rayo')">Rayo Vallecano</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Espanyol')">RCD Espanyol</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Celta')">RC Celta de Vigo</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Deportivo')">RC Deportivo</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Betis')">Real Betis</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Real Madrid')">Real Madrid</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Racing')">Real Racing Club</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Sociedad')">Real Sociedad</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Sevilla')">Sevilla FC</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Valencia')">Valencia CF</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Villarreal')">Villarreal CF</button>
-                </div>
-            </div>
-            <div id="search-box"><input type="text" id="search-player" oninput="filterPlayers()" placeholder="🔍 Escribe para buscar por nombre..."></div>
-            <div id="main-container" class="scroll"><div id="players-pool" class="grid"></div></div>
-            <button onclick="undoGlobalPick()" id="btn-undo" class="btn btn-undo hidden" style="margin-top:10px;">↩️ Deshacer Último Fichaje</button>
-            <button onclick="hardGlobalReset()" id="btn-reset-total" class="btn btn-clear hidden" style="margin-top:15px; background:linear-gradient(90deg, #dc2626, #991b1b);">🚨 RESETEAR LIGA COMPLETA (BORRAR PARA TODOS)</button>
-        </section>
-        <section class="panel"><h2>📜 Historial Global en Vivo</h2><div id="draft-history" class="scroll" style="display:flex; flex-direction:column; gap:8px;"></div></section>
-    </main>
-    <script>
-        const pubnub = new PubNub({ publishKey: 'pub-c-4b67f18b-6ef4-4d82-8a4d-ef696d594bbf', subscribeKey: 'sub-c-be4e5251-872f-4886-9a25-9ba44770fc5e', userId: "mgr_" + Math.random().toString(36).substring(2, 7) });
+        /* CONEXIÓN CON LA NUEVA BASE DE DATOS SIN RESTRICCIONES DE RED */
+        const firebaseConfig = { databaseURL: "https://firebaseio.com" };
+        firebase.initializeApp(firebaseConfig);
+        const cloudDB = firebase.database();
         let managers = ["Las Palmas (Turu Flores)", "Oviedo (Obafemi)", "Real Sociedad (Omar Little)", "Osasuna (Sens44)", "Huracán (Trosky)", "Levante (Celtics Fan)", "Lleida (Boibi2)", "Recreativo (JOSEDIN)", "Sporting (Rebekin)", "Celta (William)", "Guadalajara (Nikola Sarcevic)", "Deportivo (De la Penya)", "Valencia (Jraga)", "Barcelona (Malabar)", "Marino (Sauber)", "Eibar (Eragon86)", "Real Unión (Swes)", "Cadiz (Aitor55)", "Coruxo (Hill)", "Alaves (Torressss)"];
         let players = [], history = [], teams = {};
         let currentManagerIndex = 0, currentRound = 1;
         let activeTab = 'market', selectedPosFilter = 'ALL', selectedTeamFilter = 'ALL';
-
+        window.addEventListener('beforeunload', function (e) { e.preventDefault(); e.returnValue = 'Alerta'; });
         function normalizeTeamName(tName) {
             let str = tName.toLowerCase().trim();
             if (str.includes("barça") || str.includes("barca") || str.includes("fcb") || str.includes("barcelona")) return "barcelona";
@@ -144,16 +25,15 @@
             if (str.includes("villarreal")) return "villarreal";
             return str;
         }
-
         function processText(rawText) {
             let lines = rawText.replace(/\r/g, "").split('\n'); let list = [];
             lines.forEach((line) => {
                 if (!line.trim()) return;
                 let parts = line.split('\t');
                 if (parts.length < 2) { parts = line.split(','); }
-                let name = parts ? parts.trim() : "";
-                let team = parts ? parts.trim() : "Agente Libre";
-                let pos = parts ? parts.trim().toUpperCase() : "MED";
+                let name = parts ? parts[0].trim() : "";
+                let team = parts ? parts[1].trim() : "Agente Libre";
+                let pos = parts ? parts[2].trim().toUpperCase() : "MED";
                 if (!name) return;
                 if (pos.includes("DFC") || pos === "DF") pos = "DEF";
                 if (pos.includes("MD") || pos === "MC" || pos.includes("MED")) pos = "MED";
@@ -162,15 +42,45 @@
             });
             return list;
         }
-
-        function initGlobalDraft() {
+        /* DOSIFICADOR AUTOMÁTICO DE RAFAGAS PARA SUBIR LOS 700 SIN COLAPSAR */
+        function initCloudDraft() {
             let raw = document.getElementById('players-input').value;
             if (!raw.trim()) { alert("🚨 Pega primero el Excel."); return; }
             let pool = processText(raw);
             if (!pool.length) { alert("🚨 Formato inválido."); return; }
-            let emptyTeams = {}; managers.forEach(m => { emptyTeams[m] = []; });
-            let state = { players: pool, history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "INFO", round: 0 }], teams: emptyTeams, currentRound: 1, currentManagerIndex: 0 };
-            pubnub.publish({ channel: 'fantasy_liga_pro_2026', message: state });
+            
+            document.getElementById('btn-start').innerText = "⏳ Sincronizando lista masiva...";
+            document.getElementById('btn-start').disabled = true;
+            
+            let emptyTeams = {}; managers.forEach(m => { emptyTeams[m] = [{ player: "Fichajes Vacíos", team: "Ninguno", pos: "MED", round: 0 }]; });
+            let baseNode = { history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "INFO", round: 0 }], teams: emptyTeams, currentRound: 1, currentManagerIndex: 0 };
+            
+            cloudDB.ref('liga_pro_2026').set(baseNode).then(() => {
+                let size = 30; let current = 0;
+                function sendChunk() {
+                    if (current >= pool.length) {
+                        document.getElementById('players-input').value = "";
+                        return;
+                    }
+                    let chunk = pool.slice(current, current + size);
+                    let upObj = {};
+                    chunk.forEach((p, i) => { upObj[current + i] = p; });
+                    cloudDB.ref('liga_pro_2026/players').update(upObj).then(() => {
+                        current += size;
+                        sendChunk();
+                    });
+                }
+                sendChunk();
+            });
+        }
+        function syncFromObject(data) {
+            players = data.players || []; history = data.history || []; teams = data.teams || {};
+            currentRound = data.currentRound; currentManagerIndex = data.currentManagerIndex;
+            document.getElementById('admin-setup-panel').style.display = "none";
+            document.getElementById('turn-indicator').classList.remove('hidden');
+            document.getElementById('btn-undo').classList.remove('hidden');
+            document.getElementById('btn-reset-total').classList.remove('hidden');
+            updateUI();
         }
 
         function pickPlayerCloud(idx) {
@@ -178,52 +88,46 @@
             let updHistory = Array.from(history);
             updHistory.unshift({ manager: m, name: p.name, team: p.team, pos: p.pos, round: currentRound });
             let updTeam = Array.from(teams[m] || []);
+            if (updTeam.length === 1 && updTeam.player === "Fichajes Vacíos") updTeam = [];
             updTeam.push({ player: p.name, team: p.team, pos: p.pos, round: currentRound });
             let updPlayers = Array.from(players); updPlayers.splice(idx, 1);
             let nIdx = currentManagerIndex, nRound = currentRound;
             if (currentRound % 2 !== 0) { if (currentManagerIndex === managers.length - 1) nRound++; else nIdx++; } 
             else { if (currentManagerIndex === 0) nRound++; else nIdx--; }
-            let state = { players: updPlayers, history: updHistory, teams: teams, currentRound: nRound, currentManagerIndex: nIdx };
-            state.teams[m] = updTeam;
-            pubnub.publish({ channel: 'fantasy_liga_pro_2026', message: state });
+            cloudDB.ref('liga_pro_2026').update({ players: updPlayers, history: updHistory, [`teams/${m}`]: updTeam, currentRound: nRound, currentManagerIndex: nIdx });
         }
-
-        function undoGlobalPick() {
+        function undoCloudPick() {
             if (!history || history.length <= 1) return;
             let updHistory = Array.from(history); const last = updHistory.shift();
             let updPlayers = Array.from(players); updPlayers.push({ name: last.name, team: last.team, pos: last.pos });
             let updTeam = Array.from(teams[last.manager] || []).filter(p => p.player !== last.name);
+            if(!updTeam.length) updTeam = [{ player: "Fichajes Vacíos", team: "Ninguno", pos: "MED", round: 0 }];
             let pIdx = managers.indexOf(last.manager);
-            let state = { players: updPlayers, history: updHistory, teams: teams, currentRound: last.round, currentManagerIndex: pIdx };
-            state.teams[last.manager] = updTeam;
-            pubnub.publish({ channel: 'fantasy_liga_pro_2026', message: state });
+            cloudDB.ref('liga_pro_2026').update({ players: updPlayers, history: updHistory, [`teams/${last.manager}`]: updTeam, currentRound: last.round, currentManagerIndex: pIdx });
         }
 
-        function hardGlobalReset() {
-            if (confirm("⚠️ ¿Resetear liga completa para todos?")) { pubnub.publish({ channel: 'fantasy_liga_pro_2026', message: 'RESET' }); }
+        function hardCloudReset() {
+            if (confirm("⚠️ ¿Resetear liga completa?")) { cloudDB.ref('liga_pro_2026').remove(); window.location.reload(); }
         }
 
-        pubnub.addListener({
-            message: function(event) {
-                if (event.message === 'RESET') { window.location.reload(); return; }
-                const data = event.message;
-                players = data.players || []; history = data.history || []; teams = data.teams || {};
-                currentRound = data.currentRound; currentManagerIndex = data.currentManagerIndex;
-                document.getElementById('admin-setup-panel').style.display = "none";
-                document.getElementById('turn-indicator').classList.remove('hidden');
-                document.getElementById('btn-undo').classList.remove('hidden');
-                document.getElementById('btn-reset-total').classList.remove('hidden');
-                updateUI();
+        cloudDB.ref('liga_pro_2026').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) { syncFromObject(data); } else {
+                document.getElementById('admin-setup-panel').style.display = "flex";
+                document.getElementById('btn-start').disabled = false;
+                document.getElementById('btn-start').innerText = "🚀 Iniciar Liga Global Sincronizada";
+                document.getElementById('turn-indicator').classList.add('hidden');
+                document.getElementById('btn-undo').classList.add('hidden');
+                document.getElementById('btn-reset-total').classList.add('hidden');
+                document.getElementById('main-container').innerHTML = "";
             }
         });
-        pubnub.subscribe({ channels: ['fantasy_liga_pro_2026'] });
 
         function switchTab(tabName) { activeTab = tabName; updateUI(); }
         function setPosFilter(pos) { selectedPosFilter = (selectedPosFilter === pos) ? 'ALL' : pos; updateUI(); }
         function setTeamFilter(teamName) { selectedTeamFilter = (selectedTeamFilter === teamName) ? 'ALL' : teamName; updateUI(); }
         function resetAllFilters() { selectedPosFilter = 'ALL'; selectedTeamFilter = 'ALL'; document.getElementById('search-player').value = ""; updateUI(); }
         function filterPlayers() { renderMarket(); }
-        
         function updateUI() {
             document.getElementById('pool-count').innerText = players.length;
             document.getElementById('round-number').innerText = `Ronda ${currentRound} / 23`;
@@ -243,8 +147,7 @@
                 return (p.name.toLowerCase().includes(search) || normPTeam.includes(search)) && (selectedPosFilter === 'ALL' || p.pos === selectedPosFilter) && (selectedTeamFilter === 'ALL' || normPTeam === normFTeam);
             });
             filtered.forEach(pObj => {
-                const idx = players.indexOf(pObj); let posClass = "pos-med";
-                if (pObj.pos.includes("POR")) posClass = "pos-por"; else if (pObj.pos.includes("DEF")) posClass = "pos-def"; else if (pObj.pos.includes("DEL")) posClass = "pos-del";
+                const idx = players.indexOf(pObj); let posClass = `pos-${pObj.pos}`;
                 const card = document.createElement('div'); card.className = "card";
                 card.innerHTML = `<div><span class="name">${pObj.name} <span class="pos-badge ${posClass}">${pObj.pos}</span></span><span class="team">${pObj.team}</span></div><div class="actions-box"><button class="btn-fichar" onclick="pickPlayerCloud(${idx})">Fichar</button></div>`;
                 pool.appendChild(card);
@@ -257,26 +160,18 @@
             managers.forEach(m => {
                 let html = `<div class="team-box"><h4 style="color:#38bdf8; font-size:12px; margin-bottom:6px;">👤 ${m}</h4><ul style="list-style:none; font-size:11px; display:flex; flex-direction:column; gap:4px;">`;
                 let mPlayers = teams[m] || [];
-                if (!mPlayers.length) html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;                else { 
-                    mPlayers.forEach(p => { 
-                        html += `<li style="background:rgba(255,255,255,0.01); padding:4px; border-radius:4px;">${p.player} <span style="font-size:9px; color:#64748b;">[${p.pos}]</span></li>`; 
-                    }); 
-                }
+                if (!mPlayers.length || (mPlayers.length === 1 && mPlayers.player === "Fichajes Vacíos")) html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;
+                else { mPlayers.forEach(p => { if(!p.player || p.player === "Fichajes Vacíos") return; html += `<li style="background:rgba(255,255,255,0.01); padding:4px; border-radius:4px;">${p.player} <span style="font-size:9px; color:#64748b;">[${p.pos}]</span></li>`; }); }
                 sGrid.innerHTML += html + `</ul></div>`;
             });
         }
+
         function renderHistory() {
-            const container = document.getElementById('draft-history'); 
-            container.innerHTML = "";
-            if(!history.length || history.length <= 1) { 
-                container.innerHTML = `<p style="color:#475569; text-align:center; padding:10px;">Esperando elecciones...</p>`; 
-                return; 
-            }
+            const container = document.getElementById('draft-history'); container.innerHTML = "";
+            if(!history.length || history.length <= 1) { container.innerHTML = `<p style="color:#475569; text-align:center; padding:10px;">Esperando elecciones...</p>`; return; }
             history.forEach(pick => {
                 if(pick.manager === "Comisionado") return;
-                const item = document.createElement('div'); 
-                item.className = "history-item"; 
-                item.style.borderColor = pick.round % 2 !== 0 ? "#06b6d4" : "#d946ef";
+                const item = document.createElement('div'); item.className = "history-item"; item.style.borderColor = pick.round % 2 !== 0 ? "#06b6d4" : "#d946ef";
                 item.innerHTML = `<strong>${pick.manager}</strong> ficha a <span style="color:#38bdf8; font-weight:700;">${pick.name}</span> [${pick.pos}] (R${pick.round})`;
                 container.appendChild(item);
             });
@@ -284,4 +179,3 @@
     </script>
 </body>
 </html>
-
