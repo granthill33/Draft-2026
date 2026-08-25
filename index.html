@@ -348,7 +348,7 @@
         <section class="panel">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px;">
                 <h2 style="border: none; padding: 0;">⚙️ Panel de Control</h2>
-                <button onclick="toggleAdminMode()" id="btn-admin-toggle" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; font-size: 10px; padding: 4px 8px; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-weight: bold;">🔑 Admin</button>
+                <button onclick="console.log('Admin clicked'); toggleAdminMode()" id="btn-admin-toggle" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; font-size: 10px; padding: 4px 8px; border-radius: 6px; cursor: pointer; text-transform: uppercase; font-weight: bold;">🔑 Admin</button>
             </div>
 
             <!-- Panel de Administrador (Oculto por defecto) -->
@@ -437,35 +437,120 @@
         let managers = [];
         const MAX_ROUNDS = 23;
         
-        let supabase = null;
+        let sbClient = null;
         let dbPlayers = [];
         let draftState = { current_round: 1, current_manager_index: 0, is_active: false };
         let activeTab = 'market', selectedPosFilter = 'ALL', selectedTeamFilter = 'ALL';
         let currentIdentity = "";
         let isAdminMode = false;
 
+        function enableAdminMode() {
+            isAdminMode = true;
+            document.getElementById('admin-controls').style.display = 'flex';
+            document.getElementById('btn-admin-toggle').innerText = "🔒 Cerrar";
+            document.getElementById('btn-admin-toggle').style.background = "#dc2626";
+            document.getElementById('btn-admin-toggle').style.color = "#fff";
+            populateAdminManagers();
+            searchAdminPlayers();
+            updateUI();
+        }
+
+        function disableAdminMode() {
+            isAdminMode = false;
+            document.getElementById('admin-controls').style.display = 'none';
+            document.getElementById('btn-admin-toggle').innerText = "🔑 Admin";
+            document.getElementById('btn-admin-toggle').style.background = "rgba(255,255,255,0.05)";
+            document.getElementById('btn-admin-toggle').style.color = "#94a3b8";
+            updateUI();
+        }
+
         function toggleAdminMode() {
             if (!isAdminMode) {
-                const password = prompt("Introduce la contraseña de administrador:");
-                if (password === "draft2026") {
-                    isAdminMode = true;
-                    document.getElementById('admin-controls').style.display = 'flex';
-                    document.getElementById('btn-admin-toggle').innerText = "🔒 Cerrar";
-                    document.getElementById('btn-admin-toggle').style.background = "#dc2626";
-                    document.getElementById('btn-admin-toggle').style.color = "#fff";
-                    populateAdminManagers();
-                    searchAdminPlayers();
-                    updateUI();
-                } else {
-                    alert("Contraseña incorrecta.");
-                }
+                openAdminPasswordModal();
             } else {
-                isAdminMode = false;
-                document.getElementById('admin-controls').style.display = 'none';
-                document.getElementById('btn-admin-toggle').innerText = "🔑 Admin";
-                document.getElementById('btn-admin-toggle').style.background = "rgba(255,255,255,0.05)";
-                document.getElementById('btn-admin-toggle').style.color = "#94a3b8";
-                updateUI();
+                disableAdminMode();
+            }
+        }
+
+        function openAdminPasswordModal() {
+            if (document.getElementById('admin-password-modal')) return;
+
+            const modalHtml = `
+                <div id="admin-password-modal" style="
+                    position: fixed;
+                    top: 0; left: 0; right: 0; bottom: 0;
+                    background: rgba(0,0,0,0.8);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 9999;
+                ">
+                    <div style="
+                        background: rgba(20,15,35,0.9);
+                        border: 1px solid rgba(255,255,255,0.1);
+                        border-radius: 20px;
+                        padding: 40px 30px;
+                        max-width: 360px;
+                        width: 90%;
+                        text-align: center;
+                        color: #fff;
+                    ">
+                        <h3 style="font-size: 20px; margin-bottom: 20px; color: #38bdf8;">Panel de Administrador</h3>
+                        <p style="font-size: 14px; margin-bottom: 25px; color: #64748b;">Contraseña requerida</p>
+                        <input type="password" id="admin-password-input" style="
+                            width: 100%;
+                            background: rgba(0,0,0,0.5);
+                            border: 1px solid rgba(255,255,255,0.1);
+                            border-radius: 10px;
+                            padding: 15px;
+                            font-size: 14px;
+                            color: #fff;
+                            margin-bottom: 20px;
+                            outline: none;
+                        " placeholder="Password">
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="verifyAdminPassword()" class="btn" style="flex: 1; background: linear-gradient(90deg, #3b82f6, #d946ef);">Entrar</button>
+                            <button onclick="closeAdminPasswordModal()" class="btn" style="flex: 1; background: rgba(0,0,0,0.3); color: #64748b;">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeEnd', modalHtml);
+
+            const input = document.getElementById('admin-password-input');
+            if (input) {
+                input.focus();
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') verifyAdminPassword();
+                });
+            }
+        }
+
+        function closeAdminPasswordModal() {
+            const modal = document.getElementById('admin-password-modal');
+            if (modal) modal.remove();
+        }
+
+        function verifyAdminPassword() {
+            const input = document.getElementById('admin-password-input');
+            const password = input ? input.value : '';
+            if (input) input.value = '';
+
+            if (password === 'draft2026') {
+                closeAdminPasswordModal();
+                enableAdminMode();
+            } else {
+                const errEl = document.getElementById('admin-password-error');
+                if (errEl) {
+                    errEl.textContent = 'Contraseña incorrecta.';
+                } else if (input) {
+                    const msg = document.createElement('p');
+                    msg.id = 'admin-password-error';
+                    msg.style.cssText = 'font-size: 13px; color: #f87171; margin-bottom: 12px;';
+                    msg.textContent = 'Contraseña incorrecta.';
+                    input.insertAdjacentElement('afterend', msg);
+                    input.focus();
+                }
             }
         }
 
@@ -499,7 +584,7 @@
         }
 
         async function retainPlayer() {
-            if (!supabase) return;
+            if (!sbClient) return;
             const playerId = document.getElementById('admin-player-select').value;
             const managerName = document.getElementById('admin-manager-select').value;
             
@@ -520,7 +605,7 @@
             
             if (!confirm(`¿Confirmar la retención de ${playerObj.name} por ${managerName} para la Ronda ${nextRetainedRound}?`)) return;
             
-            const { error } = await supabase
+            const { error } = await sbClient
                 .from('players')
                 .update({
                     drafted_by: managerName,
@@ -540,7 +625,7 @@
         }
 
         async function releaseRetained(playerId) {
-            if (!supabase) return;
+            if (!sbClient) return;
             const p = dbPlayers.find(x => x.id === playerId);
             if (!p) return;
             
@@ -548,7 +633,7 @@
             
             const managerName = p.drafted_by;
             
-            const { error } = await supabase
+            const { error } = await sbClient
                 .from('players')
                 .update({
                     drafted_by: null,
@@ -571,7 +656,7 @@
             for (let i = 0; i < remaining.length; i++) {
                 const newRound = i + 1;
                 if (remaining[i].round_drafted !== newRound) {
-                    await supabase
+                    await sbClient
                         .from('players')
                         .update({ round_drafted: newRound })
                         .eq('id', remaining[i].id);
@@ -611,7 +696,7 @@
             }
 
             try {
-                supabase = window['@supabase/supabase-js'].createClient(url, key);
+                sbClient = window.supabase.createClient(url, key);
                 document.getElementById('sb-status-dot').className = 'status-dot connected';
                 document.getElementById('sb-status-text').innerText = 'Conectado a Supabase';
                 document.getElementById('supabase-config-modal').style.display = 'none';
@@ -655,7 +740,7 @@
             await loadPlayers();
 
             // 2. Subscribe to realtime changes
-            supabase
+            sbClient
                 .channel('db-changes')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'draft_state' }, payload => {
                     if (payload.new) {
@@ -673,7 +758,7 @@
         }
 
         async function loadManagers() {
-            const { data, error } = await supabase
+            const { data, error } = await sbClient
                 .from('managers')
                 .select('*')
                 .order('draft_order', { ascending: true });
@@ -710,7 +795,7 @@
         }
 
         async function loadDraftState() {
-            const { data, error } = await supabase
+            const { data, error } = await sbClient
                 .from('draft_state')
                 .select('*')
                 .eq('id', 1)
@@ -724,7 +809,7 @@
         }
 
         async function loadPlayers() {
-            const { data, error } = await supabase
+            const { data, error } = await sbClient
                 .from('players')
                 .select('*')
                 .order('name', { ascending: true });
@@ -739,7 +824,7 @@
         }
 
         async function checkAndAutoAdvanceTurn() {
-            if (!draftState.is_active || !supabase || !managers.length) return;
+            if (!draftState.is_active || !sbClient || !managers.length) return;
             
             const turnManager = managers[draftState.current_manager_index];
             if (!turnManager) return;
@@ -780,7 +865,7 @@
                 
                 const isStillActive = nextRound <= MAX_ROUNDS;
                 
-                await supabase
+                await sbClient
                     .from('draft_state')
                     .update({
                         current_round: nextRound,
@@ -813,7 +898,7 @@
         }
 
         async function seedPlayersToSupabase() {
-            if (!supabase) return;
+            if (!sbClient) return;
             let raw = document.getElementById('players-input').value;
             let list = processText(raw);
             if (!list.length) { alert("🚨 Pega primero las filas de tu Excel."); return; }
@@ -822,13 +907,13 @@
             document.getElementById('btn-start').disabled = true;
 
             // Delete existing players first
-            await supabase.from('players').delete().neq('id', 0);
+            await sbClient.from('players').delete().neq('id', 0);
 
             // Insert new players in batches of 100
             const batchSize = 100;
             for (let i = 0; i < list.length; i += batchSize) {
                 const batch = list.slice(i, i + batchSize);
-                const { error } = await supabase.from('players').insert(batch);
+                const { error } = await sbClient.from('players').insert(batch);
                 if (error) {
                     alert("Error insertando jugadores: " + error.message);
                     break;
@@ -836,7 +921,7 @@
             }
 
             // Reset draft state
-            await supabase.from('draft_state').update({
+            await sbClient.from('draft_state').update({
                 current_round: 1,
                 current_manager_index: 0,
                 is_active: true
@@ -852,7 +937,7 @@
             if (!confirm("🚨 ¿Seguro que quieres resetear todo el borrador? Se borrarán todos los fichajes realizados.")) return;
 
             // Clear drafted fields in all players
-            await supabase.from('players').update({
+            await sbClient.from('players').update({
                 drafted_by: null,
                 round_drafted: null,
                 pick_number: null,
@@ -860,7 +945,7 @@
             }).neq('id', 0);
 
             // Reset draft state
-            await supabase.from('draft_state').update({
+            await sbClient.from('draft_state').update({
                 current_round: 1,
                 current_manager_index: 0,
                 is_active: true
@@ -872,14 +957,14 @@
         async function clearAllPlayersFromDB() {
             if (!confirm("🚨 ¿Seguro que quieres borrar TODOS los jugadores de la base de datos? Esto vaciará la lista por completo.")) return;
 
-            const { error } = await supabase.from('players').delete().neq('id', 0);
+            const { error } = await sbClient.from('players').delete().neq('id', 0);
             if (error) {
                 alert("Error al vaciar jugadores: " + error.message);
                 return;
             }
 
             // Reset draft state as well
-            await supabase.from('draft_state').update({
+            await sbClient.from('draft_state').update({
                 current_round: 1,
                 current_manager_index: 0,
                 is_active: false
@@ -1103,7 +1188,7 @@
             const nextPickNumber = draftedCount + 1;
 
             // Update player as drafted
-            const { error: playerErr } = await supabase
+            const { error: playerErr } = await sbClient
                 .from('players')
                 .update({
                     drafted_by: turnManager,
@@ -1141,7 +1226,7 @@
             const isStillActive = nextRound <= MAX_ROUNDS;
 
             // Update Draft State
-            const { error: stateErr } = await supabase
+            const { error: stateErr } = await sbClient
                 .from('draft_state')
                 .update({
                     current_round: nextRound,
@@ -1169,7 +1254,7 @@
             if (!confirm(`¿Deshacer la elección de ${lastPick.name} por ${lastPick.drafted_by}?`)) return;
 
             // Release player in DB
-            const { error: playerErr } = await supabase
+            const { error: playerErr } = await sbClient
                 .from('players')
                 .update({
                     drafted_by: null,
@@ -1186,7 +1271,7 @@
 
             // Revert draft state back to this manager's turn and round
             const lastManagerIndex = managers.indexOf(lastPick.drafted_by);
-            const { error: stateErr } = await supabase
+            const { error: stateErr } = await sbClient
                 .from('draft_state')
                 .update({
                     current_round: lastPick.round_drafted,
