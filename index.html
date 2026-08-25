@@ -54,6 +54,8 @@
         @media (min-width: 640px) { .summary-grid { grid-template-columns: 1fr 1fr; } }
         .team-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.04); }
     </style>
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
 </head>
 <body>
     <header>
@@ -61,14 +63,14 @@
         <div id="turn-indicator" class="turn-panel hidden">
             <div>
                 <small id="round-number" style="font-size:9px; color:#94a3b8; display:block; font-weight:700; letter-spacing:1px;">RONDA 1 / 23</small>
-                <strong id="current-drafter" style="font-size:15px; color:#fff;">Conectando a la red...</strong>
+                <strong id="current-drafter" style="font-size:15px; color:#fff;">Listo...</strong>
             </div>
             <div id="direction-tag" style="font-size:10px; font-weight:800; padding:5px 10px; border-radius:6px; text-transform:uppercase;">IDA</div>
         </div>
     </header>
     <main>
         <section class="panel" id="admin-setup-panel">
-            <h2>⚙️ Carga de Jugadores Excel (Soporta listas de 700+ sin cuelgues)</h2>
+            <h2>⚙️ Carga de Jugadores Excel (Soporta listas masivas)</h2>
             <div style="display:flex; flex-direction:column; gap:4px;">
                 <textarea id="participants-input" rows="4" style="color:#64748b; font-size:11px;" disabled>Las Palmas (Turu Flores)
 Oviedo (Obafemi)
@@ -91,7 +93,7 @@ Cadiz (Aitor55)
 Coruxo (Hill)
 Alaves (Torressss)</textarea>
             </div>
-            <textarea id="players-input" rows="5" placeholder="Pega aquí tus columnas de Excel."></textarea>
+            <textarea id="players-input" rows="5" placeholder="Pega aquí tus 3 columnas de Excel (Nombre, Equipo, Posición)."></textarea>
             <button onclick="initCloudDraft()" id="btn-start" class="btn">🚀 Iniciar Liga Global Sincronizada</button>
         </section>
         <section class="panel">
@@ -140,15 +142,10 @@ Alaves (Torressss)</textarea>
         </section>
         <section class="panel"><h2>📜 Historial Global en Vivo</h2><div id="draft-history" class="scroll" style="display:flex; flex-direction:column; gap:8px;"></div></section>
     </main>
-    <!-- IMPORTACIÓN DE LIBRERÍAS MODERNAS DE FIREBASE ENGINE V9 PARA PREVENIR BLOQUEOS SSL -->
-    <script type="module">
-        import { initializeApp } from "https://gstatic.com";
-        import { getDatabase, ref, set, update, onValue, remove } from "https://gstatic.com";
-
+    <script>
         const firebaseConfig = { databaseURL: "https://firebasedatabase.app" };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
+        firebase.initializeApp(firebaseConfig);
+        const cloudDB = firebase.database();
         let managers = ["Las Palmas (Turu Flores)", "Oviedo (Obafemi)", "Real Sociedad (Omar Little)", "Osasuna (Sens44)", "Huracán (Trosky)", "Levante (Celtics Fan)", "Lleida (Boibi2)", "Recreativo (JOSEDIN)", "Sporting (Rebekin)", "Celta (William)", "Guadalajara (Nikola Sarcevic)", "Deportivo (De la Penya)", "Valencia (Jraga)", "Barcelona (Malabar)", "Marino (Sauber)", "Eibar (Eragon86)", "Real Unión (Swes)", "Cadiz (Aitor55)", "Coruxo (Hill)", "Alaves (Torressss)"];
         let players = [], history = [], teams = {};
         let currentManagerIndex = 0, currentRound = 1;
@@ -173,6 +170,7 @@ Alaves (Torressss)</textarea>
             if (str.includes("villarreal")) return "villarreal";
             return str;
         }
+
         function processText(rawText) {
             let lines = rawText.replace(/\r/g, "").split('\n'); let list = [];
             lines.forEach((line) => {
@@ -190,23 +188,31 @@ Alaves (Torressss)</textarea>
             });
             return list;
         }
-
-        /* COMPRESIÓN DE INYECCIÓN DIRECTA: Envía la lista de 700 en un único nodo plano instantáneo */
-        window.initCloudDraft = function() {
+        function initCloudDraft() {
             let raw = document.getElementById('players-input').value;
-            if (!raw.trim()) { alert("🚨 Pega primero el Excel."); return; }
+            if (!raw.trim()) { alert("🚨 Pega primero las filas de tu Excel."); return; }
             let pool = processText(raw);
             if (!pool.length) { alert("🚨 Formato de filas incorrecto."); return; }
             
             let emptyTeams = {}; managers.forEach(m => { emptyTeams[m] = [{ player: "Fichajes Vacíos", team: "Ninguno", pos: "MED", round: 0 }]; });
             let baseNode = { players: pool, history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "INFO", round: 0, overallPick: 0 }], teams: emptyTeams, currentRound: 1, currentManagerIndex: 0 };
             
-            set(ref(db, 'liga_pro_2026'), baseNode).then(() => {
+            cloudDB.ref('liga_pro_2026').set(baseNode).then(() => {
                 document.getElementById('players-input').value = "";
-            }).catch((err) => { alert("Error de red: " + err.message); });
+            });
         }
 
-        window.pickPlayerCloud = function(idx) {
+        function syncFromObject(data) {
+            players = data.players || []; history = data.history || []; teams = data.teams || {};
+            currentRound = data.currentRound; currentManagerIndex = data.currentManagerIndex;
+            document.getElementById('admin-setup-panel').style.display = "none";
+            document.getElementById('turn-indicator').classList.remove('hidden');
+            document.getElementById('btn-undo').classList.remove('hidden');
+            document.getElementById('btn-reset-total').classList.remove('hidden');
+            updateUI();
+        }
+
+        function pickPlayerCloud(idx) {
             const p = players[idx], m = managers[currentManagerIndex];
             let updHistory = Array.from(history);
             updHistory.unshift({ manager: m, name: p.name, team: p.team, pos: p.pos, round: currentRound, overallPick: (updHistory.length) });
@@ -217,47 +223,26 @@ Alaves (Torressss)</textarea>
             let nIdx = currentManagerIndex, nRound = currentRound;
             if (currentRound % 2 !== 0) { if (currentManagerIndex === managers.length - 1) nRound++; else nIdx++; } 
             else { if (currentManagerIndex === 0) nRound++; else nIdx--; }
-            
-            let updates = {};
-            updates['liga_pro_2026/players'] = updPlayers;
-            updates['liga_pro_2026/history'] = updHistory;
-            updates[`liga_pro_2026/teams/${m}`] = updTeam;
-            updates['liga_pro_2026/currentRound'] = nRound;
-            updates['liga_pro_2026/currentManagerIndex'] = nIdx;
-            update(ref(db), updates);
+            cloudDB.ref('liga_pro_2026').update({ players: updPlayers, history: updHistory, [`teams/${m}`]: updTeam, currentRound: nRound, currentManagerIndex: nIdx });
         }
-        window.undoCloudPick = function() {
+
+        function undoCloudPick() {
             if (!history || history.length <= 1) return;
             let updHistory = Array.from(history); const last = updHistory.shift();
             let updPlayers = Array.from(players); updPlayers.push({ name: last.name, team: last.team, pos: last.pos });
             let updTeam = Array.from(teams[last.manager] || []).filter(p => p.player !== last.name);
             if(!updTeam.length) updTeam = [{ player: "Fichajes Vacíos", team: "Ninguno", pos: "MED", round: 0 }];
             let pIdx = managers.indexOf(last.manager);
-            
-            let updates = {};
-            updates['liga_pro_2026/players'] = updPlayers;
-            updates['liga_pro_2026/history'] = updHistory;
-            updates[`liga_pro_2026/teams/${last.manager}`] = updTeam;
-            updates['liga_pro_2026/currentRound'] = last.round;
-            updates['liga_pro_2026/currentManagerIndex'] = pIdx;
-            update(ref(db), updates);
+            cloudDB.ref('liga_pro_2026').update({ players: updPlayers, history: updHistory, [`teams/${last.manager}`]: updTeam, currentRound: last.round, currentManagerIndex: pIdx });
         }
 
-        window.hardCloudReset = function() {
-            if (confirm("⚠️ ¿Resetear la base de datos cloud de la liga?")) { remove(ref(db, 'liga_pro_2026')).then(() => { window.location.reload(); }); }
+        function hardCloudReset() {
+            if (confirm("⚠️ ¿Resetear liga?")) { cloudDB.ref('liga_pro_2026').remove(); window.location.reload(); }
         }
 
-        onValue(ref(db, 'liga_pro_2026'), (snapshot) => {
+        cloudDB.ref('liga_pro_2026').on('value', (snapshot) => {
             const data = snapshot.val();
-            if (data) {
-                players = data.players || []; history = data.history || []; teams = data.teams || {};
-                currentRound = data.currentRound; currentManagerIndex = data.currentManagerIndex;
-                document.getElementById('admin-setup-panel').style.display = "none";
-                document.getElementById('turn-indicator').classList.remove('hidden');
-                document.getElementById('btn-undo').classList.remove('hidden');
-                document.getElementById('btn-reset-total').classList.remove('hidden');
-                updateUI();
-            } else {
+            if (data) { syncFromObject(data); } else {
                 document.getElementById('admin-setup-panel').style.display = "flex";
                 document.getElementById('turn-indicator').classList.add('hidden');
                 document.getElementById('btn-undo').classList.add('hidden');
@@ -266,11 +251,11 @@ Alaves (Torressss)</textarea>
             }
         });
 
-        window.switchTab = function(tabName) { activeTab = tabName; updateUI(); }
-        window.setPosFilter = function(pos) { selectedPosFilter = (selectedPosFilter === pos) ? 'ALL' : pos; updateUI(); }
-        window.setTeamFilter = function(teamName) { selectedTeamFilter = (selectedTeamFilter === teamName) ? 'ALL' : teamName; updateUI(); }
-        window.resetAllFilters = function() { selectedPosFilter = 'ALL'; selectedTeamFilter = 'ALL'; document.getElementById('search-player').value = ""; updateUI(); }
-        window.filterPlayers = function() { renderMarket(); }
+        function switchTab(tabName) { activeTab = tabName; updateUI(); }
+        function setPosFilter(pos) { selectedPosFilter = (selectedPosFilter === pos) ? 'ALL' : pos; updateUI(); }
+        function setTeamFilter(teamName) { selectedTeamFilter = (selectedTeamFilter === teamName) ? 'ALL' : teamName; updateUI(); }
+        function resetAllFilters() { selectedPosFilter = 'ALL'; selectedTeamFilter = 'ALL'; document.getElementById('search-player').value = ""; updateUI(); }
+        function filterPlayers() { renderMarket(); }
         
         function updateUI() {
             document.getElementById('pool-count').innerText = players.length;
