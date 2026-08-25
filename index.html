@@ -93,7 +93,7 @@ Cadiz (Aitor55)
 Coruxo (Hill)
 Alaves (Torressss)</textarea>
             </div>
-            <textarea id="players-input" rows="5" placeholder="Pega aquí el Excel de jugadores y dale a Iniciar Liga."></textarea>
+            <textarea id="players-input" rows="5" placeholder="Pega aquí las filas copiadas de tu Excel."></textarea>
             <button onclick="initCloudDraft()" id="btn-start" class="btn">🚀 Iniciar Liga Global Sincronizada</button>
         </section>
         <section class="panel">
@@ -169,24 +169,19 @@ Alaves (Torressss)</textarea>
             if (str.includes("sevilla")) return "sevilla";
             if (str.includes("valencia")) return "valencia";
             if (str.includes("villarreal")) return "villarreal";
-            if (str.includes("elche")) return "elche";
-            if (str.includes("getafe")) return "getafe";
-            if (str.includes("levante")) return "levante";
-            if (str.includes("málaga") || str.includes("malaga")) return "málaga";
-            if (str.includes("rayo") || str.includes("vallecano")) return "rayo";
-            if (str.includes("espanyol") || str.includes("español")) return "espanyol";
             return str;
         }
 
+        /* MOTOR REPARADO: Elimina saltos ocultos \r que rompen el Excel */
         function processText(rawText) {
-            let lines = rawText.split('\n'); let list = [];
+            let lines = rawText.replace(/\r/g, "").split('\n'); let list = [];
             lines.forEach((line) => {
                 if (!line.trim()) return;
                 let parts = line.split('\t');
                 if (parts.length < 2) { parts = line.split(','); }
-                let name = parts ? parts[0].trim() : "";
-                let team = parts ? parts[1].trim() : "Agente Libre";
-                let pos = parts ? parts[2].trim().toUpperCase() : "MED";
+                let name = parts[0] ? parts[0].trim() : "";
+                let team = parts[1] ? parts[1].trim() : "Agente Libre";
+                let pos = parts[2] ? parts[2].trim().toUpperCase() : "MED";
                 if (!name) return;
                 if (pos.includes("DFC") || pos === "DF") pos = "DEF";
                 if (pos.includes("MD") || pos === "MC" || pos.includes("MED")) pos = "MED";
@@ -195,10 +190,9 @@ Alaves (Torressss)</textarea>
             });
             return list;
         }
-
         function initCloudDraft() {
             let raw = document.getElementById('players-input').value;
-            if (!raw.trim()) { alert("🚨 Pega primero el Excel."); return; }
+            if (!raw.trim()) { alert("🚨 Pega primero las celdas de tu Excel."); return; }
             let pool = processText(raw);
             if (!pool.length) { alert("🚨 Formato inválido."); return; }
             
@@ -214,6 +208,7 @@ Alaves (Torressss)</textarea>
                 syncFromObject(localData);
             });
         }
+
         function syncFromObject(data) {
             players = data.players || []; history = data.history || []; teams = data.teams || {};
             currentRound = data.currentRound; currentManagerIndex = data.currentManagerIndex;
