@@ -325,6 +325,19 @@
             border-color: rgba(217, 70, 239, 0.4);
             box-shadow: 0 0 12px rgba(217, 70, 239, 0.15);
         }
+        .pos-counts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 0 0 10px;
+        }
+        .pos-counts span {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.3px;
+        }
 
         .config-overlay {
             position: fixed;
@@ -409,13 +422,153 @@
             background: rgba(0,0,0,0.25);
             border-radius: 6px;
         }
-        .board-wrap { overflow-x: auto; width: 100%; border-radius: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
+        .board-wrap {
+            overflow: auto;
+            width: 100%;
+            max-height: min(75vh, 920px);
+            border-radius: 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+            -webkit-overflow-scrolling: touch;
+        }
+        .board-wrap table {
+            width: max-content;
+            min-width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            text-align: center;
+            color: #e2e8f0;
+        }
+        .board-wrap th,
+        .board-wrap td {
+            padding: 8px 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+            vertical-align: middle;
+        }
+        .board-wrap th {
+            min-width: 110px;
+            max-width: 140px;
+            font-weight: 800;
+            font-size: 10px;
+            line-height: 1.25;
+            white-space: normal;
+            word-break: break-word;
+            background: rgba(20, 15, 35, 0.98);
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        .board-wrap th:first-child,
+        .board-wrap td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 1;
+            min-width: 44px;
+            max-width: 52px;
+            background: rgba(12, 9, 20, 0.95);
+            font-weight: 800;
+            color: #64748b;
+        }
+        .board-wrap thead th:first-child {
+            z-index: 3;
+            color: #38bdf8;
+        }
+        .board-wrap td {
+            min-width: 110px;
+            max-width: 140px;
+            font-size: 10px;
+        }
+        #main-container.board-mode {
+            max-height: none;
+            overflow: visible;
+        }
         .quick-add-row { display: grid; grid-template-columns: 1fr; gap: 6px; }
         @media (min-width: 400px) {
             .quick-add-row { grid-template-columns: 1fr 1fr; }
             .quick-add-row .full { grid-column: 1 / -1; }
         }
         .slot-pending { color: #fbbf24; font-weight: 800; font-style: italic; }
+
+        .order-round-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+        .order-round-nav button {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #94a3b8;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .order-round-nav button.active {
+            background: rgba(56,189,248,0.15);
+            border-color: #38bdf8;
+            color: #38bdf8;
+        }
+        .order-round-block {
+            margin-bottom: 18px;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(0,0,0,0.2);
+        }
+        .order-round-block h3 {
+            margin: 0;
+            padding: 10px 12px;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #e2e8f0;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .order-round-block.ida h3 { border-left: 3px solid #06b6d4; }
+        .order-round-block.vuelta h3 { border-left: 3px solid #d946ef; }
+        .order-pick-row {
+            display: grid;
+            grid-template-columns: 52px 1fr;
+            gap: 8px;
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 12px;
+            align-items: start;
+        }
+        .order-pick-row:last-child { border-bottom: none; }
+        .order-pick-row.current {
+            background: rgba(56,189,248,0.1);
+            outline: 1px solid rgba(56,189,248,0.35);
+        }
+        .order-pick-num {
+            font-weight: 800;
+            color: #64748b;
+            font-size: 11px;
+            padding-top: 2px;
+        }
+        .order-pick-club { font-weight: 700; color: #f1f5f9; }
+        .order-pick-player { color: #38bdf8; font-weight: 700; }
+        .order-pick-meta { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+        .order-tag {
+            display: inline-block;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 1px 5px;
+            border-radius: 4px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+        .order-tag.ret { background: rgba(56,189,248,0.15); color: #38bdf8; }
+        .order-tag.pend { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .order-tag.now { background: rgba(56,189,248,0.2); color: #7dd3fc; }
+        .order-empty { color: #475569; font-style: italic; }
     </style>
 </head>
 <body>
@@ -541,8 +694,10 @@
             <div class="tabs">
                 <button id="tab-market" class="tab active" onclick="switchTab('market')">🛒 Mercado (<span id="pool-count">0</span>)</button>
                 <button id="tab-teams" class="tab" onclick="switchTab('teams')">👥 Plantillas</button>
-                <button id="tab-board" class="tab" onclick="switchTab('board')">📊 Tablero Draft</button>
+                <button id="tab-order" class="tab" onclick="switchTab('order')">📋 Orden Picks</button>
+                <button id="tab-board" class="tab" onclick="switchTab('board')">📊 Tablero</button>
             </div>
+            <div id="order-round-nav" style="display:none;" class="order-round-nav"></div>
             <div id="pending-resolve-banner" class="pending-banner" style="display:none;"></div>
             <div id="mdl-filter-wrapper" style="display:none;">
                 <div class="filter-section-title"><span>Filtrar plantilla:</span></div>
@@ -607,6 +762,7 @@
 
         let sbClient = null;
         let activeTab = 'market';
+        let selectedOrderRound = 'ALL';
         let selectedPosFilter = 'ALL';
         let selectedTeamFilter = 'ALL';
         let realtimeChannel = null;
@@ -625,6 +781,13 @@
         }
         function managerNames() {
             return managers.map(m => m.name);
+        }
+        /** "Las Palmas (Turu Flores)" → "Las Palmas" */
+        function shortClubName(fullName) {
+            if (!fullName) return '?';
+            const paren = fullName.indexOf(' (');
+            if (paren > 0) return fullName.slice(0, paren).trim();
+            return fullName.trim();
         }
 
         if (localStorage.getItem('draft_user_identity')) {
@@ -1596,6 +1759,7 @@
             activeTab = tabName;
             document.getElementById('tab-market').classList.toggle('active', tabName === 'market');
             document.getElementById('tab-teams').classList.toggle('active', tabName === 'teams');
+            document.getElementById('tab-order').classList.toggle('active', tabName === 'order');
             document.getElementById('tab-board').classList.toggle('active', tabName === 'board');
             if (tabName === 'teams' && currentIdentity) {
                 selectedMdlFilter = currentIdentity;
@@ -1681,21 +1845,138 @@
                 document.getElementById('filter-wrapper').style.display = 'block';
                 document.getElementById('search-box').style.display = 'block';
                 document.getElementById('mdl-filter-wrapper').style.display = 'none';
+                document.getElementById('order-round-nav').style.display = 'none';
+                document.getElementById('main-container').classList.remove('board-mode');
                 renderMarket();
             } else if (activeTab === 'teams') {
                 document.getElementById('filter-wrapper').style.display = 'none';
                 document.getElementById('search-box').style.display = 'none';
                 document.getElementById('mdl-filter-wrapper').style.display = 'block';
+                document.getElementById('order-round-nav').style.display = 'none';
+                document.getElementById('main-container').classList.remove('board-mode');
                 renderMdlFilters();
                 renderLiveTeams();
+            } else if (activeTab === 'order') {
+                document.getElementById('filter-wrapper').style.display = 'none';
+                document.getElementById('search-box').style.display = 'none';
+                document.getElementById('mdl-filter-wrapper').style.display = 'none';
+                document.getElementById('order-round-nav').style.display = 'flex';
+                document.getElementById('main-container').classList.remove('board-mode');
+                renderOrderRoundNav();
+                renderOrderPicks();
             } else if (activeTab === 'board') {
                 document.getElementById('filter-wrapper').style.display = 'none';
                 document.getElementById('search-box').style.display = 'none';
                 document.getElementById('mdl-filter-wrapper').style.display = 'none';
+                document.getElementById('order-round-nav').style.display = 'none';
+                document.getElementById('main-container').classList.add('board-mode');
                 renderDraftBoard();
             }
 
             renderHistory();
+        }
+
+        function managersInRoundOrder(round) {
+            if (!managers.length) return [];
+            return (round % 2 !== 0) ? managers.slice() : managers.slice().reverse();
+        }
+
+        function setOrderRoundFilter(round) {
+            selectedOrderRound = round;
+            renderOrderRoundNav();
+            renderOrderPicks();
+        }
+
+        function renderOrderRoundNav() {
+            const nav = document.getElementById('order-round-nav');
+            if (!nav) return;
+            nav.innerHTML = '';
+            const allBtn = document.createElement('button');
+            allBtn.className = selectedOrderRound === 'ALL' ? 'active' : '';
+            allBtn.innerText = 'Todas';
+            allBtn.onclick = () => setOrderRoundFilter('ALL');
+            nav.appendChild(allBtn);
+            for (let r = 1; r <= MAX_ROUNDS; r++) {
+                const btn = document.createElement('button');
+                btn.className = selectedOrderRound === r ? 'active' : '';
+                btn.innerText = `R${r}`;
+                btn.onclick = () => setOrderRoundFilter(r);
+                nav.appendChild(btn);
+            }
+        }
+
+        function renderOrderPicks() {
+            const pool = document.getElementById('players-pool');
+            if (!managers.length) {
+                pool.innerHTML = `<p style="color:#475569;text-align:center;padding-top:40px;font-size:12px;">Sin managers</p>`;
+                return;
+            }
+
+            const rounds = selectedOrderRound === 'ALL'
+                ? Array.from({ length: MAX_ROUNDS }, (_, i) => i + 1)
+                : [selectedOrderRound];
+
+            let html = '';
+            rounds.forEach(round => {
+                const isIda = round % 2 !== 0;
+                const ordered = managersInRoundOrder(round);
+                html += `<div class="order-round-block ${isIda ? 'ida' : 'vuelta'}" id="order-round-${round}">`;
+                html += `<h3><span>Ronda ${round}</span><span style="color:${isIda ? '#67e8f9' : '#e879f9'};font-size:10px;">${isIda ? 'Ida ➡️' : 'Vuelta ⬅️'}</span></h3>`;
+
+                ordered.forEach((m, idx) => {
+                    const pickInRound = idx + 1;
+                    const pick = draftPicks.find(dp =>
+                        (dp.manager_id === m.id || String(dp.manager_id) === String(m.id)) &&
+                        Number(dp.round) === Number(round)
+                    );
+                    const pending = pendingPicks.find(pp =>
+                        (pp.manager_id === m.id || String(pp.manager_id) === String(m.id)) &&
+                        Number(pp.round) === Number(round)
+                    );
+                    const isCurrent = draftState.is_active &&
+                        Number(draftState.current_round) === Number(round) &&
+                        managerAt(draftState.current_manager_index) &&
+                        managerAt(draftState.current_manager_index).id === m.id;
+
+                    let rowClass = 'order-pick-row' + (isCurrent ? ' current' : '');
+                    let choiceHtml = '';
+
+                    if (pick) {
+                        const player = (pick.players && !Array.isArray(pick.players) ? pick.players : null)
+                            || getPlayerById(pick.player_id);
+                        const pName = player ? player.name : 'Jugador';
+                        const pos = player ? player.position : '';
+                        const team = player ? player.real_team : '';
+                        const retTag = pick.is_retained ? '<span class="order-tag ret">RETENIDO</span>' : '';
+                        choiceHtml = `<div class="order-pick-player">${pName}${retTag}</div>
+                            <div class="order-pick-meta">${pos}${team ? ' · ' + team : ''}${pick.pick_number > 0 ? ' · Global #' + pick.pick_number : ''}</div>`;
+                    } else if (pending) {
+                        choiceHtml = `<div><span class="order-tag pend">PENDIENTE</span></div>`;
+                    } else if (isCurrent) {
+                        choiceHtml = `<div><span class="order-tag now">ELIGIENDO AHORA</span></div>`;
+                    } else {
+                        choiceHtml = `<div class="order-empty">Sin elegir</div>`;
+                    }
+
+                    html += `<div class="${rowClass}">
+                        <div class="order-pick-num">Pick ${pickInRound}</div>
+                        <div>
+                            <div class="order-pick-club">${shortClubName(m.name)}</div>
+                            ${choiceHtml}
+                        </div>
+                    </div>`;
+                });
+
+                html += `</div>`;
+            });
+
+            pool.innerHTML = html;
+
+            // Scroll to current round when viewing all
+            if (selectedOrderRound === 'ALL' && draftState.is_active) {
+                const el = document.getElementById(`order-round-${draftState.current_round}`);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
         }
 
         function renderMdlFilters() {
@@ -1710,13 +1991,14 @@
 
             managers.forEach(m => {
                 const btn = document.createElement('button');
-                const short = m.name.split(' ')[0];
+                const short = shortClubName(m.name);
                 const isYours = currentIdentity === m.name;
                 let cls = 'btn-filter';
                 if (selectedMdlFilter === m.name) cls += ' active';
                 if (isYours) cls += ' yours';
                 btn.className = cls;
                 btn.innerText = isYours ? `Tu plantilla (${short})` : short;
+                btn.title = m.name;
                 btn.onclick = () => setMdlFilter(m.name);
                 group.appendChild(btn);
             });
@@ -1728,22 +2010,23 @@
 
         function renderDraftBoard() {
             const pool = document.getElementById('players-pool');
-            pool.innerHTML = '<div class="board-wrap"><table id="board-table" style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: center; color: #e2e8f0;"></table></div>';
+            pool.innerHTML = '<div class="board-wrap"><table id="board-table"></table></div>';
             const table = document.getElementById('board-table');
 
-            let headerHtml = '<thead><tr style="background: rgba(20, 15, 35, 0.8); border-bottom: 2px solid rgba(255,255,255,0.08);">';
-            headerHtml += '<th style="padding: 12px; border: 1px solid rgba(255,255,255,0.05); font-weight: 800; text-transform: uppercase; color: #38bdf8;">Rda</th>';
+            let headerHtml = '<thead><tr>';
+            headerHtml += '<th>Rda</th>';
             managers.forEach(m => {
                 const isCurrent = draftState.is_active && managerAt(draftState.current_manager_index) && managerAt(draftState.current_manager_index).id === m.id;
-                const style = isCurrent ? 'background: rgba(56,189,248,0.15); color: #38bdf8; font-weight: bold; border: 1px solid #38bdf8;' : 'border: 1px solid rgba(255,255,255,0.05);';
-                headerHtml += `<th style="padding: 12px; min-width: 130px; ${style}">${m.name.split(' ')[0]}</th>`;
+                const style = isCurrent ? 'background: rgba(56,189,248,0.2); color: #38bdf8; border: 1px solid #38bdf8;' : '';
+                const label = shortClubName(m.name);
+                headerHtml += `<th style="${style}" title="${m.name}">${label}</th>`;
             });
             headerHtml += '</tr></thead>';
 
             let bodyHtml = '<tbody>';
             for (let r = 1; r <= MAX_ROUNDS; r++) {
-                bodyHtml += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.03); ${r % 2 === 0 ? 'background: rgba(255,255,255,0.01);' : ''}">`;
-                bodyHtml += `<td style="padding: 10px; font-weight: bold; color: #64748b; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2);">${r}</td>`;
+                bodyHtml += `<tr style="${r % 2 === 0 ? 'background: rgba(255,255,255,0.015);' : ''}">`;
+                bodyHtml += `<td>${r}</td>`;
 
                 managers.forEach((m) => {
                     const pick = draftPicks.find(dp =>
@@ -1759,23 +2042,24 @@
                         managerAt(draftState.current_manager_index) &&
                         managerAt(draftState.current_manager_index).id === m.id;
 
-                    let cellStyle = 'padding: 10px; border: 1px solid rgba(255,255,255,0.05); font-size: 10px;';
+                    let cellStyle = '';
                     let cellContent = '<span style="color: #475569; font-style: italic;">-</span>';
 
                     if (pick) {
-                        const player = getPlayerById(pick.player_id);
+                        const player = (pick.players && !Array.isArray(pick.players) ? pick.players : null)
+                            || getPlayerById(pick.player_id);
                         if (player) {
                             let posClass = `pos-${player.position}`;
                             const retTag = pick.is_retained ? ' 🔒' : '';
-                            cellContent = `<div style="font-weight: 700; color: #fff; margin-bottom: 3px;">${player.name}${retTag}</div><div style="font-size: 9px; color: #94a3b8; display: flex; align-items: center; justify-content: center; gap: 4px;"><span>${player.real_team}</span> <span class="pos-badge ${posClass}" style="margin: 0; padding: 1px 4px; font-size: 8px;">${player.position}</span></div>`;
+                            cellContent = `<div style="font-weight: 700; color: #fff; margin-bottom: 2px; line-height:1.2;">${player.name}${retTag}</div><div style="font-size: 9px; color: #94a3b8; line-height:1.2;">${player.real_team} <span class="pos-badge ${posClass}" style="margin: 0; padding: 1px 4px; font-size: 8px;">${player.position}</span></div>`;
                         } else {
                             cellContent = '<span style="color:#94a3b8;">Pick</span>';
                         }
                     } else if (pending) {
-                        cellStyle += 'background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245,158,11,0.4);';
+                        cellStyle = 'background: rgba(245, 158, 11, 0.12); border-color: rgba(245,158,11,0.4);';
                         cellContent = '<span class="slot-pending">PENDIENTE</span>';
                     } else if (isCurrentTurn) {
-                        cellStyle += 'background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; font-weight: 800;';
+                        cellStyle = 'background: rgba(56, 189, 248, 0.15); border-color: #38bdf8; color: #38bdf8; font-weight: 800;';
                         cellContent = '⚡ ELIGIENDO';
                     }
 
@@ -1824,7 +2108,7 @@
                     if (!draftState.is_active) {
                         buttonHtml = `<button class="btn-fichar" disabled>Inactivo</button>`;
                     } else {
-                        buttonHtml = `<button class="btn-fichar" onclick="pickPlayer(${pObj.id})">Fichar (${turnName.split(' ')[0] || '?'})</button>`;
+                        buttonHtml = `<button class="btn-fichar" onclick="pickPlayer(${pObj.id})">Fichar (${shortClubName(turnName) || '?'})</button>`;
                     }
                 } else if (!allowFichar) {
                     buttonHtml = `<button class="btn-fichar" disabled onclick="alert('No es tu turno. Le toca a ${turnName}')">Fichar</button>`;
@@ -1848,14 +2132,31 @@
 
             list.forEach(m => {
                 const isYours = currentIdentity === m.name;
-                let html = `<div class="team-box${isYours ? ' highlight' : ''}"><h4 style="color:#38bdf8; font-size:12px; margin-bottom:6px;">👤 ${m.name}${isYours ? ' · Tu plantilla' : ''}</h4><ul style="list-style:none; font-size:11px; display:flex; flex-direction:column; gap:4px;">`;
-
                 const mgrPicks = draftPicks
                     .filter(dp => dp.manager_id === m.id || String(dp.manager_id) === String(m.id))
                     .sort((a, b) => {
                         if (a.is_retained !== b.is_retained) return a.is_retained ? -1 : 1;
                         return (a.round || 0) - (b.round || 0) || (a.pick_number || 0) - (b.pick_number || 0);
                     });
+
+                const counts = { POR: 0, DEF: 0, MED: 0, DEL: 0 };
+                mgrPicks.forEach(dp => {
+                    const p = (dp.players && !Array.isArray(dp.players) ? dp.players : null) || getPlayerById(dp.player_id);
+                    if (p && counts[p.position] !== undefined) counts[p.position]++;
+                });
+
+                let html = `<div class="team-box${isYours ? ' highlight' : ''}">
+                    <h4 style="color:#38bdf8; font-size:12px; margin-bottom:8px;">👤 ${shortClubName(m.name)}${isYours ? ' · Tu plantilla' : ''}
+                        <span style="display:block;font-size:10px;color:#64748b;font-weight:600;margin-top:2px;">${m.name}</span>
+                    </h4>
+                    <div class="pos-counts">
+                        <span class="pos-badge pos-POR">POR ${counts.POR}</span>
+                        <span class="pos-badge pos-DEF">DEF ${counts.DEF}</span>
+                        <span class="pos-badge pos-MED">MED ${counts.MED}</span>
+                        <span class="pos-badge pos-DEL">DEL ${counts.DEL}</span>
+                        <span style="font-size:10px;color:#64748b;align-self:center;">Total ${mgrPicks.length}</span>
+                    </div>
+                    <ul style="list-style:none; font-size:11px; display:flex; flex-direction:column; gap:4px;">`;
 
                 const mgrPending = pendingPicks.filter(pp =>
                     pp.manager_id === m.id || String(pp.manager_id) === String(m.id)
@@ -1865,17 +2166,21 @@
                     html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;
                 } else {
                     mgrPicks.forEach(dp => {
-                        const p = getPlayerById(dp.player_id);
+                        const p = (dp.players && !Array.isArray(dp.players) ? dp.players : null) || getPlayerById(dp.player_id);
                         if (!p) return;
                         let releaseBtn = '';
                         if (isAdminMode && dp.is_retained) {
                             releaseBtn = `<button onclick="releaseRetained(${p.id})" style="background: rgba(239,68,68,0.2); border: 1px solid #ef4444; color:#f87171; font-size:8px; padding:4px 6px; border-radius:3px; cursor:pointer; min-height:28px;">Liberar</button>`;
                         }
-                        const label = dp.is_retained
-                            ? `Retenido R${dp.round}`
-                            : `R${dp.round} · #${dp.pick_number}`;
+                        const roundLabel = dp.is_retained
+                            ? `Ronda ${dp.round} · Retenido`
+                            : `Ronda ${dp.round}${dp.pick_number > 0 ? ' · Pick #' + dp.pick_number : ''}`;
                         html += `<li style="background:rgba(255,255,255,0.01); padding:6px; border-radius:4px; display:flex; justify-content:space-between; align-items:center; gap:6px;">
-                            <span>${p.name} <span style="font-size:9px; color:#64748b;">[${p.position}] (${label})</span></span>
+                            <span>
+                                <span style="font-weight:700;color:#f1f5f9;">${p.name}</span>
+                                <span class="pos-badge pos-${p.position}" style="margin-left:4px;">${p.position}</span>
+                                <span style="display:block;font-size:9px;color:#64748b;margin-top:2px;">${roundLabel}${p.real_team ? ' · ' + p.real_team : ''}</span>
+                            </span>
                             ${releaseBtn}
                         </li>`;
                     });
