@@ -162,6 +162,14 @@
             font-size: 10px;
         }
 
+        .panel-history .scroll {
+            max-height: 40vh;
+            min-height: 180px;
+        }
+        @media (min-width: 1280px) {
+            .panel-history .scroll { max-height: 70vh; min-height: 320px; }
+        }
+
         .scroll {
             overflow-y: auto;
             max-height: 50vh;
@@ -908,10 +916,16 @@
         async function loadDraftPicks() {
             const { data, error } = await sbClient
                 .from('draft_picks')
-                .select('*')
-                .order('pick_number', { ascending: true });
+                .select('*, players(id, name, position, real_team), managers(id, name)')
+                .order('created_at', { ascending: false });
             if (error) {
                 console.error("Error loading draft_picks:", error);
+                // Fallback without joins
+                const fallback = await sbClient.from('draft_picks').select('*').order('created_at', { ascending: false });
+                if (fallback.data) {
+                    draftPicks = fallback.data;
+                    updateUI();
+                }
             } else if (data) {
                 draftPicks = data;
                 updateUI();
@@ -1877,27 +1891,85 @@
             const container = document.getElementById('draft-history');
             container.innerHTML = "";
 
-            const normal = draftPicks
-                .filter(dp => !dp.is_retained && (dp.pick_number || 0) > 0)
-                .slice()
-                .sort((a, b) => (b.pick_number || 0) - (a.pick_number || 0));
+            const items = [];
 
-            if (!normal.length) {
+            // Completed picks (incl. retentions)
+            draftPicks.forEach(dp => {
+                const player = (dp.players && !Array.isArray(dp.players) ? dp.players : null)
+                    || getPlayerById(dp.player_id);
+                const mgr = (dp.managers && !Array.isArray(dp.managers) ? dp.managers : null)
+                    || managerById(dp.manager_id);
+                const sortKey = (dp.pick_number && dp.pick_number > 0)
+                    ? dp.pick_number * 100000
+                    : (dp.round || 0) * 10 + (dp.is_retained ? 1 : 0);
+                items.push({
+                    type: 'pick',
+                    sortKey,
+                    created: dp.created_at || '',
+                    dp,
+                    player,
+                    mgr
+                });
+            });
+
+            // Pending slots
+            pendingPicks.forEach(pp => {
+                const mgr = managerById(pp.manager_id);
+                items.push({
+                    type: 'pending',
+                    sortKey: -1,
+                    created: pp.created_at || '',
+                    pp,
+                    mgr
+                });
+            });
+
+            // Newest first: by pick_number for normal picks, then created_at
+            items.sort((a, b) => {
+                if (a.type === 'pending' && b.type !== 'pending') return -1;
+                if (b.type === 'pending' && a.type !== 'pending') return 1;
+                const pnA = a.dp ? (a.dp.pick_number || 0) : 0;
+                const pnB = b.dp ? (b.dp.pick_number || 0) : 0;
+                if (pnA > 0 || pnB > 0) {
+                    if (pnA !== pnB) return pnB - pnA;
+                }
+                return String(b.created).localeCompare(String(a.created));
+            });
+
+            if (!items.length) {
                 container.innerHTML = `<p style="color:#475569; text-align:center; padding-top:20px; font-size:11px;">Historial vacío</p>`;
                 return;
             }
 
-            normal.forEach(dp => {
-                const player = getPlayerById(dp.player_id);
-                const mgr = managerById(dp.manager_id);
+            items.forEach(entry => {
                 const item = document.createElement('div');
                 item.className = "history-item";
-                item.style.borderColor = dp.round % 2 !== 0 ? "#06b6d4" : "#d946ef";
-                const pName = player ? player.name : '?';
-                const pos = player ? player.position : '';
-                const mName = mgr ? mgr.name : '?';
-                const adminTag = dp.made_by_admin ? ' <span style="font-size:9px;color:#f87171;">(admin)</span>' : '';
-                item.innerHTML = `<strong>${mName}</strong> ficha a <span style="color:#38bdf8; font-weight:700;">${pName}</span> [${pos}] (R${dp.round} - Pick #${dp.pick_number})${adminTag}`;
+
+                if (entry.type === 'pending') {
+                    item.style.borderColor = "#f59e0b";
+                    const mName = entry.mgr ? entry.mgr.name : '?';
+                    item.innerHTML = `<span style="color:#fbbf24;font-weight:800;">PENDIENTE</span> · <strong>${mName}</strong> · Ronda ${entry.pp.round}`;
+                } else {
+                    const dp = entry.dp;
+                    item.style.borderColor = dp.is_retained
+                        ? "#38bdf8"
+                        : (dp.round % 2 !== 0 ? "#06b6d4" : "#d946ef");
+                    const pName = entry.player ? entry.player.name : '?';
+                    const pos = entry.player ? entry.player.position : '';
+                    const team = entry.player ? entry.player.real_team : '';
+                    const mName = entry.mgr ? entry.mgr.name : '?';
+                    const adminTag = dp.made_by_admin ? ' <span style="font-size:9px;color:#f87171;">(admin)</span>' : '';
+                    const retainTag = dp.is_retained
+                        ? ` <span style="font-size:9px;color:#38bdf8;font-weight:800;">RETENIDO</span>`
+                        : '';
+                    const pickLabel = dp.is_retained
+                        ? `R${dp.round}`
+                        : `R${dp.round} · Pick #${dp.pick_number}`;
+                    item.innerHTML = `<strong>${mName}</strong>${adminTag}${retainTag}<br>
+                        <span style="color:#38bdf8; font-weight:700;">${pName}</span>
+                        <span style="color:#94a3b8; font-size:10px;"> [${pos}] ${team}</span>
+                        <div style="font-size:10px;color:#64748b;margin-top:4px;">${pickLabel}</div>`;
+                }
                 container.appendChild(item);
             });
         }
