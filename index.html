@@ -143,7 +143,7 @@ Alaves (Torressss)</textarea>
         <section class="panel"><h2>📜 Historial Global en Vivo</h2><div id="draft-history" class="scroll" style="display:flex; flex-direction:column; gap:8px;"></div></section>
     </main>
     <script>
-        const firebaseConfig = { databaseURL: "https://firebasedatabase.app" };
+        const firebaseConfig = { databaseURL: "https://firebaseio.com" };
         firebase.initializeApp(firebaseConfig);
         const cloudDB = firebase.database();
         let managers = ["Las Palmas (Turu Flores)", "Oviedo (Obafemi)", "Real Sociedad (Omar Little)", "Osasuna (Sens44)", "Huracán (Trosky)", "Levante (Celtics Fan)", "Lleida (Boibi2)", "Recreativo (JOSEDIN)", "Sporting (Rebekin)", "Celta (William)", "Guadalajara (Nikola Sarcevic)", "Deportivo (De la Penya)", "Valencia (Jraga)", "Barcelona (Malabar)", "Marino (Sauber)", "Eibar (Eragon86)", "Real Unión (Swes)", "Cadiz (Aitor55)", "Coruxo (Hill)", "Alaves (Torressss)"];
@@ -190,16 +190,15 @@ Alaves (Torressss)</textarea>
         }
         function initCloudDraft() {
             let raw = document.getElementById('players-input').value;
-            if (!raw.trim()) { alert("🚨 Pega primero las filas de tu Excel."); return; }
+            if (!raw.trim()) { alert("🚨 Pega primero el Excel."); return; }
             let pool = processText(raw);
-            if (!pool.length) { alert("🚨 Formato de filas incorrecto."); return; }
-            
+            if (!pool.length) { alert("🚨 Formato inválido."); return; }
             let emptyTeams = {}; managers.forEach(m => { emptyTeams[m] = [{ player: "Fichajes Vacíos", team: "Ninguno", pos: "MED", round: 0 }]; });
-            let baseNode = { players: pool, history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "INFO", round: 0, overallPick: 0 }], teams: emptyTeams, currentRound: 1, currentManagerIndex: 0 };
-            
-            cloudDB.ref('liga_pro_2026').set(baseNode).then(() => {
-                document.getElementById('players-input').value = "";
-            });
+            cloudDB.ref('liga_pro_2026').set({
+                players: pool,
+                history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "INFO", round: 0, overallPick: 0 }],
+                teams: emptyTeams, currentRound: 1, currentManagerIndex: 0
+            }).then(() => { document.getElementById('players-input').value = ""; });
         }
 
         function syncFromObject(data) {
