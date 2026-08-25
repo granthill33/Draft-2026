@@ -58,7 +58,7 @@
 </head>
 <body>
     <header>
-        <div class="logo">⚽ CONEXIÓN MULTIJUGADOR DIRECTA PRO</div>
+        <div class="logo">⚽ CLOUD DRAFT LIGA PRO 26/27</div>
         <div id="turn-indicator" class="turn-panel hidden">
             <div>
                 <small id="round-number" style="font-size:9px; color:#94a3b8; display:block; font-weight:700; letter-spacing:1px;">RONDA 1 / 23</small>
@@ -69,31 +69,9 @@
     </header>
     <main>
         <section class="panel" id="admin-setup-panel">
-            <h2>⚙️ Carga de Jugadores Excel (Sincronización Masiva Activa)</h2>
-            <div style="display:flex; flex-direction:column; gap:4px;">
-                <textarea id="participants-input" rows="4" style="color:#64748b; font-size:11px;" disabled>Las Palmas (Turu Flores)
-Oviedo (Obafemi)
-Real Sociedad (Omar Little)
-Osasuna (Sens44)
-Huracán (Trosky)
-Levante (Celtics Fan)
-Lleida (Boibi2)
-Recreativo (JOSEDIN)
-Sporting (Rebekin)
-Celta (William)
-Guadalajara (Nikola Sarcevic)
-Deportivo (De la Penya)
-Valencia (Jraga)
-Barcelona (Malabar)
-Marino (Sauber)
-Eibar (Eragon86)
-Real Unión (Swes)
-Cadiz (Aitor55)
-Coruxo (Hill)
-Alaves (Torressss)</textarea>
-            </div>
-            <textarea id="players-input" rows="5" placeholder="Pega aquí tus 3 columnas de Excel de jugadores."></textarea>
-            <button onclick="initGlobalDraft()" id="btn-start" class="btn">🚀 Iniciar Liga Compartida Instantánea</button>
+            <h2>⚙️ Carga de Jugadores Excel (20 Participantes Internos)</h2>
+            <textarea id="players-input" rows="8" placeholder="Pega aquí las 3 columnas de tu Excel (Nombre, Equipo, Posición)."></textarea>
+            <button onclick="initGlobalDraft()" id="btn-start" class="btn">🚀 Iniciar Liga Global Sincronizada</button>
         </section>
         <section class="panel">
             <div class="tabs">
@@ -109,7 +87,7 @@ Alaves (Torressss)</textarea>
                     <button class="btn-filter" onclick="setPosFilter('MED')">MED</button>
                     <button class="btn-filter" onclick="setPosFilter('DEL')">DEL</button>
                 </div>
-                <div class="filter-section-title">Equipos Reales Liga 26/27:</div>
+                <div class="filter-section-title">Equipos Real Liga 26/27:</div>
                 <div class="filter-group scroll" id="team-filter-group" style="max-height: 95px;">
                     <button class="btn-filter active" onclick="setTeamFilter('ALL')">TODOS</button>
                     <button class="btn-filter" onclick="setTeamFilter('Athletic')">Athletic Club</button>
@@ -142,7 +120,7 @@ Alaves (Torressss)</textarea>
         <section class="panel"><h2>📜 Historial Global en Vivo</h2><div id="draft-history" class="scroll" style="display:flex; flex-direction:column; gap:8px;"></div></section>
     </main>
     <script>
-        const pubnub = new PubNub({ publishKey: 'pub-c-4b67f18b-6ef4-4d82-8a4d-ef696d594bbf', subscribeKey: 'sub-c-be4e5251-872f-4886-9a25-9ba44770fc5e', userId: "manager_" + Math.random().toString(36).substring(2, 9) });
+        const pubnub = new PubNub({ publishKey: 'pub-c-4b67f18b-6ef4-4d82-8a4d-ef696d594bbf', subscribeKey: 'sub-c-be4e5251-872f-4886-9a25-9ba44770fc5e', userId: "mgr_" + Math.random().toString(36).substring(2, 7) });
         let managers = ["Las Palmas (Turu Flores)", "Oviedo (Obafemi)", "Real Sociedad (Omar Little)", "Osasuna (Sens44)", "Huracán (Trosky)", "Levante (Celtics Fan)", "Lleida (Boibi2)", "Recreativo (JOSEDIN)", "Sporting (Rebekin)", "Celta (William)", "Guadalajara (Nikola Sarcevic)", "Deportivo (De la Penya)", "Valencia (Jraga)", "Barcelona (Malabar)", "Marino (Sauber)", "Eibar (Eragon86)", "Real Unión (Swes)", "Cadiz (Aitor55)", "Coruxo (Hill)", "Alaves (Torressss)"];
         let players = [], history = [], teams = {};
         let currentManagerIndex = 0, currentRound = 1;
@@ -194,6 +172,7 @@ Alaves (Torressss)</textarea>
             let state = { players: pool, history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "INFO", round: 0 }], teams: emptyTeams, currentRound: 1, currentManagerIndex: 0 };
             pubnub.publish({ channel: 'fantasy_liga_pro_2026', message: state });
         }
+
         function pickPlayerCloud(idx) {
             const p = players[idx], m = managers[currentManagerIndex];
             let updHistory = Array.from(history);
@@ -278,18 +257,26 @@ Alaves (Torressss)</textarea>
             managers.forEach(m => {
                 let html = `<div class="team-box"><h4 style="color:#38bdf8; font-size:12px; margin-bottom:6px;">👤 ${m}</h4><ul style="list-style:none; font-size:11px; display:flex; flex-direction:column; gap:4px;">`;
                 let mPlayers = teams[m] || [];
-                if (!mPlayers.length) html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;
-                else { mPlayers.forEach(p => { html += `<li style="background:rgba(255,255,255,0.01); padding:4px; border-radius:4px;">${p.player} <span style="font-size:9px; color:#64748b;">[${p.pos}]</span></li>`; }); }
+                if (!mPlayers.length) html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;                else { 
+                    mPlayers.forEach(p => { 
+                        html += `<li style="background:rgba(255,255,255,0.01); padding:4px; border-radius:4px;">${p.player} <span style="font-size:9px; color:#64748b;">[${p.pos}]</span></li>`; 
+                    }); 
+                }
                 sGrid.innerHTML += html + `</ul></div>`;
             });
         }
-
         function renderHistory() {
-            const container = document.getElementById('draft-history'); container.innerHTML = "";
-            if(!history.length || history.length <= 1) { container.innerHTML = `<p style="color:#475569; text-align:center; padding:10px;">Esperando elecciones...</p>`; return; }
+            const container = document.getElementById('draft-history'); 
+            container.innerHTML = "";
+            if(!history.length || history.length <= 1) { 
+                container.innerHTML = `<p style="color:#475569; text-align:center; padding:10px;">Esperando elecciones...</p>`; 
+                return; 
+            }
             history.forEach(pick => {
                 if(pick.manager === "Comisionado") return;
-                const item = document.createElement('div'); item.className = "history-item"; item.style.borderColor = pick.round % 2 !== 0 ? "#06b6d4" : "#d946ef";
+                const item = document.createElement('div'); 
+                item.className = "history-item"; 
+                item.style.borderColor = pick.round % 2 !== 0 ? "#06b6d4" : "#d946ef";
                 item.innerHTML = `<strong>${pick.manager}</strong> ficha a <span style="color:#38bdf8; font-weight:700;">${pick.name}</span> [${pick.pos}] (R${pick.round})`;
                 container.appendChild(item);
             });
@@ -297,3 +284,4 @@ Alaves (Torressss)</textarea>
     </script>
 </body>
 </html>
+
