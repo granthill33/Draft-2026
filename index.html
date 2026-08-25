@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>🏆 LIGA FANTASY PRO 26/27: EN DIRECTO 🏆</title>
+    <title>🏆 SALA DE GUERRA: DRAFT INTERNO PRO 🏆</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: system-ui, -apple-system, sans-serif; background: radial-gradient(circle at 50% 0%, #17122b 0%, #06040a 70%); color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 30px; }
@@ -12,8 +12,8 @@
         .turn-panel.hidden { display: none; }
         .neon-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.3); border-color: #06b6d4; }
         .neon-fuchsia { box-shadow: 0 0 15px rgba(217, 70, 239, 0.3); border-color: #d946ef; }
-        main { max-width: 1600px; width: 100%; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 1fr; gap: 20px; flex-grow: 1; }
-        @media (min-width: 1280px) { main { grid-template-columns: 340px 1fr 340px; } }
+        main { max-width: 1500px; width: 100%; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 1fr; gap: 20px; flex-grow: 1; }
+        @media (min-width: 1280px) { main { grid-template-columns: 330px 1fr 340px; } }
         .panel { background: rgba(20, 15, 35, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         h2 { font-size: 13px; text-transform: uppercase; color: #38bdf8; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; letter-spacing: 1px; }
         textarea, input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; color: #fff; font-size: 12px; outline: none; }
@@ -23,7 +23,7 @@
         .btn-undo { background: linear-gradient(90deg, #f59e0b, #d97706); margin-top: 4px; box-shadow: 0 4px 12px rgba(245,158,11,0.2); }
         .btn-clear { background: linear-gradient(90deg, #ef4444, #b91c1c); }
         .btn:hover { opacity: 0.95; }
-        .scroll { overflow-y: auto; max-height: 700px; flex-grow: 1; padding-right: 4px; }
+        .scroll { overflow-y: auto; max-height: 650px; flex-grow: 1; padding-right: 4px; }
         .scroll::-webkit-scrollbar { width: 5px; }
         .scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
         .tabs { display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; margin-bottom: 8px; }
@@ -38,7 +38,8 @@
         .btn-reset-filters:hover { background: rgba(239, 68, 68, 0.2); color: #fff; }
         .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
-        .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }        .card .name { font-weight: 700; color: #f1f5f9; font-size: 13px; display: block; margin-bottom: 2px; }
+        .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .card .name { font-weight: 700; color: #f1f5f9; font-size: 13px; display: block; margin-bottom: 2px; }
         .card .team { font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
         .pos-badge { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-family: monospace; display: inline-block; vertical-align: middle; }
         .pos-POR { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
@@ -56,24 +57,26 @@
 </head>
 <body>
     <header>
-        <div class="logo">⚽ DRAFT LOCAL LIGA PRO 26/27</div>
+        <div class="logo">⚽ SALA DE GUERRA: LIVE DRAFT</div>
         <div id="turn-indicator" class="turn-panel hidden">
             <div>
                 <small id="round-number" style="font-size:9px; color:#94a3b8; display:block; font-weight:700; letter-spacing:1px;">RONDA 1 / 23</small>
-                <strong id="current-drafter" style="font-size:15px; color:#fff;">Listo...</strong>
+                <strong id="current-drafter" style="font-size:15px; color:#fff;">-</strong>
             </div>
             <div id="direction-tag" style="font-size:10px; font-weight:800; padding:5px 10px; border-radius:6px; text-transform:uppercase;">IDA</div>
         </div>
     </header>
     <main>
-        <section class="panel" id="admin-setup-panel">
-            <h2>⚙️ Carga de Jugadores Excel (100% Local Instantáneo)</h2>
-            <textarea id="players-input" rows="8" placeholder="Pega aquí tus 3 columnas de Excel (Nombre, Equipo, Posición)."></textarea>
-            <button onclick="initLocalDraft()" id="btn-start" class="btn">🚀 Iniciar Mercado Central</button>
+        <section class="panel">
+            <h2>⚙️ Gestión del Mercado</h2>
+            <textarea id="players-input" rows="5" placeholder="Pega aquí tus columnas de Excel directamente."></textarea>
+            <button onclick="initLocalDraft()" id="btn-start" class="btn">🚀 Cargar base de datos local</button>
+            <button onclick="undoLocalPick()" id="btn-undo" class="btn btn-undo hidden">↩️ Deshacer Último Pick</button>
+            <button onclick="hardLocalReset()" id="btn-reset-total" class="btn btn-clear hidden" style="margin-top:15px; background:linear-gradient(90deg, #dc2626, #991b1b);">🚨 RESETEAR TODO DESDE CERO</button>
         </section>
         <section class="panel">
             <div class="tabs">
-                <button id="tab-market" class="tab active" onclick="switchTab('market')">🛒 Mercado Común (<span id="pool-count">0</span>)</button>
+                <button id="tab-market" class="tab active" onclick="switchTab('market')">🛒 Mercado (<span id="pool-count">0</span>)</button>
                 <button id="tab-teams" class="tab" onclick="switchTab('teams')">👥 Plantillas Directo</button>
             </div>
             <div id="filter-wrapper">
@@ -110,17 +113,22 @@
                     <button class="btn-filter" onclick="setTeamFilter('Villarreal')">Villarreal CF</button>
                 </div>
             </div>
-            <div id="search-box"><input type="text" id="search-player" oninput="filterPlayers()" placeholder="🔍 Escribe para buscar por nombre o equipo real..."></div>
-            <div id="main-container" class="scroll"><div id="players-pool" class="grid"></div></div>
-            <button onclick="undoLocalPick()" id="btn-undo" class="btn btn-undo hidden" style="margin-top:10px;">↩️ Deshacer Último Fichaje</button>
-            <button onclick="hardLocalReset()" id="btn-reset-total" class="btn btn-clear hidden" style="margin-top:15px; background:linear-gradient(90deg, #dc2626, #991b1b);">🚨 RESETEAR LIGA (BORRAR TODO DESDE CERO)</button>
+            <div id="search-box"><input type="text" id="search-player" oninput="filterPlayers()" placeholder="🔍 Escribe para buscar por nombre o equipo..."></div>
+            <div id="main-container" class="scroll"><div id="players-pool" class="grid"><p style="color:#475569; text-align:center; padding-top:50px; font-size:12px; font-weight:700; text-transform:uppercase;">Esperando que cargues los jugadores...</p></div></div>
         </section>
-        <section class="panel"><h2>📜 Historial Global de Picks</h2><div id="draft-history" class="scroll" style="display:flex; flex-direction:column; gap:8px;"></div></section>
+        <section class="panel"><h2>📜 Historial del Draft</h2><div id="draft-history" class="scroll" style="display:flex; flex-direction:column; gap:8px;"></div></section>
     </main>
-
     <script>
         let managers = ["Las Palmas (Turu Flores)", "Oviedo (Obafemi)", "Real Sociedad (Omar Little)", "Osasuna (Sens44)", "Huracán (Trosky)", "Levante (Celtics Fan)", "Lleida (Boibi2)", "Recreativo (JOSEDIN)", "Sporting (Rebekin)", "Celta (William)", "Guadalajara (Nikola Sarcevic)", "Deportivo (De la Penya)", "Valencia (Jraga)", "Barcelona (Malabar)", "Marino (Sauber)", "Eibar (Eragon86)", "Real Unión (Swes)", "Cadiz (Aitor55)", "Coruxo (Hill)", "Alaves (Torressss)"];
-        let players = [], history = [], teams = {}, currentManagerIndex = 0, currentRound = 1, activeTab = 'market', selectedPosFilter = 'ALL', selectedTeamFilter = 'ALL';
+        let players = [], history = [], teams = {}; 
+        let currentManagerIndex = 0, currentRound = 1;
+        const MAX_ROUNDS = 23;
+        let isDraftActive = false;
+        let activeTab = 'market', selectedPosFilter = 'ALL', selectedTeamFilter = 'ALL';
+
+        window.addEventListener('beforeunload', function (e) {
+            if (isDraftActive) { e.preventDefault(); e.returnValue = 'Alerta'; }
+        });
 
         function normalizeTeamName(tName) {
             let str = tName.toLowerCase().trim();
@@ -140,80 +148,88 @@
             if (str.includes("villarreal")) return "villarreal";
             return str;
         }
-
         function processText(rawText) {
             let lines = rawText.replace(/\r/g, "").split('\n'); let list = [];
             lines.forEach(line => {
                 if (!line.trim()) return;
                 let parts = line.split('\t');
-                if (parts.length < 2) parts = line.split(',');
-                let name = parts ? parts.trim() : "";
-                let team = parts ? parts.trim() : "Agente Libre";
-                let pos = parts ? parts.trim().toUpperCase() : "MED";
+                if (parts.length < 2) { parts = line.split(','); }
+                let name = parts ? parts[0].trim() : "";
+                let team = parts && parts[1] ? parts[1].trim() : "Agente Libre";
+                let pos = parts && parts[2] ? parts[2].trim().toUpperCase() : "MED";
                 if (!name) return;
-                if (pos.includes("DFC") || pos === "DF" || pos.includes("DEF")) pos = "DEF";
-                if (pos.includes("MD") || pos === "MC" || pos.includes("MED")) pos = "MED";
-                if (pos === "DL" || pos.includes("DEL") || pos.includes("DC")) pos = "DEL";
+                if (pos.includes("DFC") || pos === "DF" || pos === "DFC" || pos === "DEF") pos = "DEF";
+                if (pos.includes("MD") || pos === "MC" || pos.includes("MED") || pos === "MJS") pos = "MED";
+                if (pos === "DL" || pos.includes("DEL") || pos === "EXT" || pos === "DC") pos = "DEL";
                 list.push({ name: name, team: team, pos: pos });
             });
             return list;
         }
 
         function initLocalDraft() {
+            managers.forEach(m => teams[m] = []);
             let raw = document.getElementById('players-input').value;
-            let pool = processText(raw); if (!pool.length) { alert("Pega filas válidas."); return; }
-            let emptyTeams = {}; managers.forEach(m => emptyTeams[m] = []);
-            let data = { players: pool, history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "INFO", round: 0 }], teams: emptyTeams, currentRound: 1, currentManagerIndex: 0 };
-            localStorage.setItem('firme_backup_liga', JSON.stringify(data));
-            loadFromObject(data);
-        }
-
-        function loadFromObject(data) {
-            players = data.players || []; history = data.history || []; teams = data.teams || {};
-            currentRound = data.currentRound || 1; currentManagerIndex = data.currentManagerIndex || 0;
-            document.getElementById('admin-setup-panel').style.display = "none";
-            document.getElementById('turn-indicator').classList.remove('hidden');
+            players = processText(raw);
+            if (!players.length) { alert("🚨 Pega primero las filas de tu Excel."); return; }
+            document.getElementById('btn-start').style.display = "none";
             document.getElementById('btn-undo').classList.remove('hidden');
             document.getElementById('btn-reset-total').classList.remove('hidden');
-            updateUI();
+            isDraftActive = true;
+            document.getElementById('turn-indicator').classList.remove('hidden');
+            saveSession(); updateUI();
         }
 
-        function pickPlayer(idx) {
-            let p = players[idx], m = managers[currentManagerIndex];
-            history.unshift({ manager: m, name: p.name, team: p.team, pos: p.pos, round: currentRound });
-            if (!teams[m]) teams[m] = []; teams[m].push({ player: p.name, team: p.team, pos: p.pos, round: currentRound });
-            players.splice(idx, 1);
-            if (currentRound % 2 !== 0) { if (currentManagerIndex === managers.length - 1) currentRound++; else currentManagerIndex++; }
-            else { if (currentManagerIndex === 0) currentRound++; else currentManagerIndex--; }
-            localStorage.setItem('firme_backup_liga', JSON.stringify({ players, history, teams, currentRound, currentManagerIndex }));
-            updateUI();
+        function saveSession() {
+            localStorage.setItem('local_is_active', JSON.stringify(isDraftActive));
+            localStorage.setItem('local_players', JSON.stringify(players));
+            localStorage.setItem('local_history', JSON.stringify(history));
+            localStorage.setItem('local_teams', JSON.stringify(teams));
+            localStorage.setItem('local_round', currentRound);
+            localStorage.setItem('local_manager_idx', currentManagerIndex);
+        }
+        function checkSavedSession() {
+            let savedActive = localStorage.getItem('local_is_active');
+            if (savedActive && JSON.parse(savedActive) === true) {
+                isDraftActive = true;
+                players = JSON.parse(localStorage.getItem('local_players')) || [];
+                history = JSON.parse(localStorage.getItem('local_history')) || [];
+                teams = JSON.parse(localStorage.getItem('local_teams')) || {};
+                currentRound = parseInt(localStorage.getItem('local_round')) || 1;
+                currentManagerIndex = parseInt(localStorage.getItem('local_manager_idx')) || 0;
+                
+                document.getElementById('btn-start').style.display = "none";
+                document.getElementById('btn-undo').classList.remove('hidden');
+                document.getElementById('btn-reset-total').classList.remove('hidden');
+                document.getElementById('turn-indicator').classList.remove('hidden');
+                updateUI();
+                renderHistory();
+            }
         }
 
-        function undoLocalPick() {
-            if (history.length <= 1) return;
-            let last = history.shift(); players.push({ name: last.name, team: last.team, pos: last.pos });
-            teams[last.manager] = teams[last.manager].filter(p => p.player !== last.name);
-            currentRound = last.round; currentManagerIndex = managers.indexOf(last.manager);
-            localStorage.setItem('firme_backup_liga', JSON.stringify({ players, history, teams, currentRound, currentManagerIndex }));
-            updateUI();
+        function hardLocalReset() {
+            if (confirm("🚨 ¿Seguro que quieres borrar todos los fichajes guardados en este PC y empezar desde cero?")) {
+                localStorage.clear(); window.location.reload();
+            }
         }
 
-        function hardLocalReset() { if (confirm("¿Borrar todo?")) { localStorage.clear(); window.location.reload(); } }
-        function switchTab(t) { activeTab = t; updateUI(); }
+        function switchTab(tabName) { activeTab = tabName; updateUI(); }
         function setPosFilter(pos) { selectedPosFilter = (selectedPosFilter === pos) ? 'ALL' : pos; updateUI(); }
         function setTeamFilter(teamName) { selectedTeamFilter = (selectedTeamFilter === teamName) ? 'ALL' : teamName; updateUI(); }
-        function resetAllFilters() { selectedPosFilter = 'ALL'; selectedTeamFilter = 'ALL'; document.getElementById('search-player').value = ""; updateUI(); }
         function filterPlayers() { renderMarket(); }
+        function resetAllFilters() {
+            selectedPosFilter = 'ALL'; selectedTeamFilter = 'ALL';
+            document.getElementById('search-player').value = "";
+            updateUI();
+        }
 
         function updateUI() {
             document.getElementById('pool-count').innerText = players.length;
-            document.getElementById('round-number').innerText = `Ronda ${currentRound} / 23`;
+            document.getElementById('round-number').innerText = `Ronda ${currentRound} / ${MAX_ROUNDS}`;
             document.getElementById('current-drafter').innerText = managers[currentManagerIndex] || "COMPLETO";
             let tag = document.getElementById('direction-tag'), panel = document.getElementById('turn-indicator');
             if (currentRound % 2 !== 0) { tag.innerText = "Ida ➡️"; panel.className = "turn-panel neon-cyan"; } 
             else { tag.innerText = "Vuelta ⬅️"; panel.className = "turn-panel neon-fuchsia"; }
             if (activeTab === 'market') renderMarket(); else renderLiveTeams();
-            renderHistory();
         }
 
         function renderMarket() {
@@ -243,21 +259,34 @@
             });
         }
 
+        function pickPlayer(idx) {
+            const p = players[idx], m = managers[currentManagerIndex];
+            history.unshift({ manager: m, name: p.name, team: p.team, pos: p.pos, round: currentRound });
+            teams[m].push({ player: p.name, team: p.team, pos: p.pos, round: currentRound });
+            players.splice(idx, 1);
+            if (currentRound % 2 !== 0) { if (currentManagerIndex === managers.length - 1) currentRound++; else currentManagerIndex++; } 
+            else { if (currentManagerIndex === 0) currentRound++; else currentManagerIndex--; }
+            renderHistory(); saveSession(); updateUI();
+        }
+
+        function undoLocalPick() {
+            if (!history.length) return;
+            const last = history.shift(); players.push({ name: last.name, team: last.team, pos: last.pos });
+            teams[last.manager] = teams[last.manager].filter(p => p.player !== last.name);
+            currentRound = last.round; currentManagerIndex = managers.indexOf(last.manager);
+            renderHistory(); saveSession(); updateUI();
+        }
+
         function renderHistory() {
             const container = document.getElementById('draft-history'); container.innerHTML = "";
-            if(history.length <= 1) { container.innerHTML = `<p style="color:#475569; text-align:center; padding:10px;">Esperando elecciones...</p>`; return; }
-            history.forEach(p => {
-                if(p.manager === "Comisionado") return;
-                const item = document.createElement('div'); item.className = "history-item"; item.style.borderColor = p.round % 2 !== 0 ? "#06b6d4" : "#d946ef";
-                item.innerHTML = `<strong>${p.manager}</strong> ficha a <span style="color:#38bdf8; font-weight:700;">${p.name}</span> (R${p.round})`;
+            history.forEach(pick => {
+                const item = document.createElement('div'); item.className = "history-item"; item.style.borderColor = pick.round % 2 !== 0 ? "#06b6d4" : "#d946ef";
+                item.innerHTML = `<strong>${pick.manager}</strong> ficha a <span style="color:#38bdf8; font-weight:700;">${pick.name}</span> [${pick.pos}] (R${pick.round})`;
                 container.appendChild(item);
             });
         }
 
-        window.onload = function() {
-            let saved = localStorage.getItem('firme_backup_liga');
-            if (saved) loadFromObject(JSON.parse(saved));
-        }
+        window.onload = checkSavedSession;
     </script>
 </body>
 </html>
