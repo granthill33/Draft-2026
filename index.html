@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>🏆 FANTASY DRAFT - LIGA PRO 🏆</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: radial-gradient(circle at 50% 0%, #17122b 0%, #06040a 70%); color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 30px; }
+        header { background: rgba(0,0,0,0.6); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+        .logo { font-weight: 900; font-size: 20px; background: linear-gradient(135deg, #38bdf8, #d946ef); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
+        .turn-panel { background: #0c0914; border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 12px; display: flex; align-items: center; gap: 15px; }
+        .turn-panel.hidden { display: none; }
+        .neon-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.3); border-color: #06b6d4; }
+        .neon-fuchsia { box-shadow: 0 0 15px rgba(217, 70, 239, 0.3); border-color: #d946ef; }
+        main { max-width: 1500px; width: 100%; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 1fr; gap: 20px; flex-grow: 1; }
+        @media (min-width: 1280px) { main { grid-template-columns: 330px 1fr 340px; } }
+        .panel { background: rgba(20, 15, 35, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        h2 { font-size: 13px; text-transform: uppercase; color: #38bdf8; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; letter-spacing: 1px; }
+        textarea, input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; color: #fff; font-size: 12px; outline: none; }
+        textarea { resize: none; font-family: monospace; }
+        .btn { width: 100%; background: linear-gradient(90deg, #3b82f6, #d946ef); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 800; font-size: 11px; text-transform: uppercase; cursor: pointer; letter-spacing: 0.5px; }
+        .btn-green { background: linear-gradient(90deg, #10b981, #059669); margin-top: 4px; }
+        .btn-undo { background: linear-gradient(90deg, #f59e0b, #d97706); margin-top: 4px; box-shadow: 0 4px 12px rgba(245,158,11,0.2); }
+        .btn-clear { background: linear-gradient(90deg, #ef4444, #b91c1c); }
+        .btn:hover { opacity: 0.95; }
+        .scroll { overflow-y: auto; max-height: 650px; flex-grow: 1; padding-right: 4px; }
+        .scroll::-webkit-scrollbar { width: 5px; }
+        .scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .tabs { display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; margin-bottom: 8px; }
+        .tab { background: transparent; border: 1px solid rgba(255,255,255,0.05); color: #94a3b8; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        .tab.active { background: rgba(56,189,248,0.1); border-color: #38bdf8; color: #38bdf8; }
+        .filter-section-title { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .filter-group { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.03); }
+        .btn-filter { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: #94a3b8; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        .btn-filter:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .btn-filter.active { background: #38bdf8; color: #000; font-weight: 800; border-color: #38bdf8; }
+        .btn-reset-filters { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; font-size: 9px; padding: 2px 6px; border-radius: 4px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        .btn-reset-filters:hover { background: rgba(239, 68, 68, 0.2); color: #fff; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
+        .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .card .name { font-weight: 700; color: #f1f5f9; font-size: 13px; display: block; margin-bottom: 2px; }
+        .card .team { font-size: 10px; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+        .pos-badge { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-family: monospace; display: inline-block; vertical-align: middle; }
+        .pos-por { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
+        .pos-def { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .pos-med { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .pos-del { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .actions-box { display: flex; align-items: center; gap: 8px; }
+        .btn-del { background: transparent; border: none; color: #ef4444; font-size: 14px; cursor: pointer; padding: 4px; font-weight: bold; }
+        .btn-del:hover { color: #f87171; }
+        .card button.btn-fichar { background: #1a1528; border: 1px solid #3b2e5a; color: #e2e8f0; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        .card:hover button.btn-fichar { background: #38bdf8; color: #000; font-weight: 800; border-color: #38bdf8; }
+        .history-item { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; font-size: 12px; border-left: 4px solid #38bdf8; }
+        .summary-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        @media (min-width: 640px) { .summary-grid { grid-template-columns: 1fr 1fr; } }
+        .team-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.04); }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">⚽ SALA DE GUERRA: LIVE DRAFT</div>
+        <div id="turn-indicator" class="turn-panel hidden">
+            <div>
+                <small id="round-number" style="font-size:9px; color:#94a3b8; display:block; font-weight:700; letter-spacing:1px;">RONDA 1 / 23</small>
+                <strong id="current-drafter" style="font-size:15px; color:#fff;">-</strong>
+            </div>
+            <div id="direction-tag" style="font-size:10px; font-weight:800; padding:5px 10px; border-radius:6px; text-transform:uppercase;">IDA</div>
+        </div>
+    </header>
+    <main>
+        <section class="panel">
+            <h2>⚙️ Gestión del Mercado</h2>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <textarea id="participants-input" rows="5" style="color:#64748b; font-size:11px;" disabled>Las Palmas (Turu Flores)
+Oviedo (Obafemi)
+Real Sociedad (Omar Little)
+Osasuna (Sens44)
+Huracán (Trosky)
+Levante (Celtics Fan)
+Lleida (Boibi2)
+Recreativo (JOSEDIN)
+Sporting (Rebekin)
+Celta (William)
+Guadalajara (Nikola Sarcevic)
+Deportivo (De la Penya)
+Valencia (Jraga)
+Barcelona (Malabar)
+Marino (Sauber)
+Eibar (Eragon86)
+Real Unión (Swes)
+Cadiz (Aitor55)
+Coruxo (Hill)
+Alaves (Torressss)</textarea>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <label style="font-size:10px; color:#64748b; font-weight:700; text-transform:uppercase;">Panel de Carga/Añadido:</label>
+                <textarea id="players-input" rows="8" placeholder="Pega columnas de Excel (Nombre, Equipo, Posición). El sistema filtrará duplicados automáticamente."></textarea>
+            </div>
+            <button onclick="startDraft()" id="btn-start" class="btn">Iniciar Directo</button>
+            <button onclick="addPlayersLive()" id="btn-append" class="btn btn-green hidden">➕ Añadir al Mercado</button>
+            <button onclick="undoLastPick()" id="btn-undo" class="btn btn-undo hidden">↩️ Deshacer Último Pick</button>
+            <button onclick="clearPlayers()" id="btn-clear" class="btn btn-clear">🗑️ Vaciar Todo</button>
+        </section>
+        <section class="panel">
+            <div class="tabs">
+                <button id="tab-market" class="tab active" onclick="switchTab('market')">🛒 Mercado (<span id="pool-count">0</span>)</button>
+                <button id="tab-teams" class="tab" onclick="switchTab('teams')">👥 Plantillas Directo</button>
+            </div>
+            <div id="filter-wrapper">
+                <div class="filter-section-title">
+                    <span>Posición:</span>
+                    <button class="btn-reset-filters" onclick="resetAllFilters()">🔄 Resetear Filtros</button>
+                </div>
+                <div class="filter-group" id="pos-filter-group">
+                    <button class="btn-filter active" onclick="setPosFilter('ALL')">TODAS</button>
+                    <button class="btn-filter" onclick="setPosFilter('POR')">POR</button>
+                    <button class="btn-filter" onclick="setPosFilter('DEF')">DEF</button>
+                    <button class="btn-filter" onclick="setPosFilter('MED')">MED</button>
+                    <button class="btn-filter" onclick="setPosFilter('DEL')">DEL</button>
+                </div>
+                <div class="filter-section-title">Equipos Reales Liga 26/27:</div>
+                <div class="filter-group scroll" id="team-filter-group" style="max-height: 95px;">
+                    <button class="btn-filter active" onclick="setTeamFilter('ALL')">TODOS</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Athletic')">Athletic Club</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Atlético')">Atlético de Madrid</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Osasuna')">CA Osasuna</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Alavés')">Deportivo Alavés</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Elche')">Elche CF</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Barcelona')">FC Barcelona</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Getafe')">Getafe CF</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Levante')">Levante UD</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Málaga')">Málaga CF</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Rayo')">Rayo Vallecano</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Espanyol')">RCD Espanyol</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Celta')">RC Celta de Vigo</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Deportivo')">RC Deportivo</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Betis')">Real Betis</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Real Madrid')">Real Madrid</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Racing')">Real Racing Club</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Sociedad')">Real Sociedad</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Sevilla')">Sevilla FC</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Valencia')">Valencia CF</button>
+                    <button class="btn-filter" onclick="setTeamFilter('Villarreal')">Villarreal CF</button>
+                </div>
+            </div>
+            <div id="search-box"><input type="text" id="search-player" oninput="filterPlayers()" placeholder="🔍 Escribe para buscar por nombre de jugador..."></div>
+            <div id="main-container" class="scroll"><div id="players-pool" class="grid"><p style="color:#475569; text-align:center; padding-top:50px; font-size:12px; font-weight:700; text-transform:uppercase;">Esperando que cargues los jugadores...</p></div></div>
+        </section>
+        <section class="panel">
+            <h2>📜 Historial del Draft</h2>
+            <div id="draft-history" class="scroll" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </section>
+    </main>
+    <script>
+        let managers = [], players = [], history = [], teams = {}; 
+        let currentManagerIndex = 0, currentRound = 1;
+        const MAX_ROUNDS = 23;
+        let isDraftActive = false;
+        let activeTab = 'market';
+        let selectedPosFilter = 'ALL';
+        let selectedTeamFilter = 'ALL';
+
+        window.addEventListener('beforeunload', function (e) {
+            e.preventDefault();
+            e.returnValue = '¿Seguro que quieres salir? Perderás todo el progreso acumulado en el Draft.';
+        });
+
+        /* HOMOLOGACIÓN ESTRICTA POR IDENTIFICADOR DE BLOQUE ÚNICO */
+        function normalizeTeamName(tName) {
+            let str = tName.toLowerCase().trim();
+            if (str.includes("barça") || str.includes("barca") || str.includes("fcb") || str.includes("barcelona")) return "barcelona";
+            if (str.includes("racing") || str.includes("santander")) return "racing";
+            
+            // PRIORIDAD FILTRADO: Si detecta la raíz del Atlético, lo aísla por completo
+            if (str.includes("atletico") || str.includes("atleti")) return "atlético";
+            // Si solo tiene la palabra madrid sin rastro de atlético, es el Real Madrid puro
+            if (str.includes("madrid") || str.includes("real madrid")) return "real madrid";
+            
+            if (str.includes("athletic") || str.includes("bilbao")) return "athletic";
+            if (str.includes("osasuna") || str.includes("ca osasuna")) return "osasuna";
+            if (str.includes("alaves")) return "alavés";
+            if (str.includes("celta")) return "celta";
+            if (str.includes("depor") || str.includes("coruña")) return "deportivo";
+            if (str.includes("betis")) return "betis";
+            if (str.includes("sociedad")) return "sociedad";
+            if (str.includes("sevilla")) return "sevilla";
+            if (str.includes("valencia")) return "valencia";
+            if (str.includes("villarreal")) return "villarreal";
+            if (str.includes("elche")) return "elche";
+            if (str.includes("getafe")) return "getafe";
+            if (str.includes("levante")) return "levante";
+            if (str.includes("málaga") || str.includes("malaga")) return "málaga";
+            if (str.includes("rayo") || str.includes("vallecano")) return "rayo";
+            if (str.includes("espanyol") || str.includes("español")) return "espanyol";
+            return str;
+        }
+
+        function processText(rawText) {
+            let lines = rawText.split('\n');
+            let list = [];
+            lines.forEach(line => {
+                if (!line.trim()) return;
+                let parts = line.split('\t');
+                let name = parts ? parts[0].trim() : "Desconocido";
+                let team = parts ? parts[1].trim() : "Agente Libre";
+                let pos = parts ? parts[2].trim().toUpperCase() : "⚽";
+                
+                if (pos.includes("DFC") || pos === "DF") pos = "DEF";
+                if (pos.includes("MD") || pos === "MC" || pos.includes("MED")) pos = "MED";
+                if (pos === "DL") pos = "DEL";
+
+                let yaExisteEnBolsa = players.some(p => p.name.toLowerCase().trim() === name.toLowerCase().trim());
+                let yaExisteEnListaNueva = list.some(p => p.name.toLowerCase().trim() === name.toLowerCase().trim());
+                let yaFichado = false;
+                Object.values(teams).forEach(teamList => {
+                    if (teamList.some(p => p.player.toLowerCase().trim() === name.toLowerCase().trim())) yaFichado = true;
+                });
+                if (!yaExisteEnBolsa && !yaExisteEnListaNueva && !yaFichado) {
+                    list.push({ name: name, team: team, pos: pos });
+                }
+            });
+            return list;
+        }
+
+        function startDraft() {
+            managers = document.getElementById('participants-input').value.split('\n').map(m => m.trim()).filter(m => m !== "");
+            managers.forEach(m => teams[m] = []);
+            let raw = document.getElementById('players-input').value;
+            players = processText(raw);
+            if (!managers.length || !players.length) { alert("🚨 Carga tu lista masiva de Excel primero."); return; }
+            document.getElementById('search-player').disabled = false;
+            document.getElementById('btn-start').style.display = "none";
+            document.getElementById('btn-clear').style.display = "none";
+            document.getElementById('btn-append').classList.remove('hidden');
+            document.getElementById('btn-undo').classList.remove('hidden');
+            isDraftActive = true;
+            document.getElementById('turn-indicator').classList.remove('hidden');
+            updateUI();
+        }
+
+        function addPlayersLive() {
+            let raw = document.getElementById('players-input').value;
+            if (!raw.trim()) { alert("Escribe o pega jugadores en el cuadro para añadirlos."); return; }
+            let newPlayers = processText(raw);
+            players = players.concat(newPlayers);
+            document.getElementById('players-input').value = "";
+            updateUI();
+        }
+
+        function deletePlayerLive(idx) {
+            players.splice(idx, 1);
+            updateUI();
+        }
+
+        function switchTab(tabName) {
+            activeTab = tabName;
+            document.getElementById('tab-market').className = tabName === 'market' ? 'tab active' : 'tab';
+            document.getElementById('tab-teams').className = tabName === 'teams' ? 'tab active' : 'tab';
+            document.getElementById('search-box').style.display = tabName === 'market' ? 'block' : 'none';
+            document.getElementById('filter-wrapper').style.display = tabName === 'market' ? 'block' : 'none';
+            updateUI();
+        }
+        function setPosFilter(pos) {
+            if (selectedPosFilter === pos) { selectedPosFilter = 'ALL'; } else { selectedPosFilter = pos; }
+            const buttons = document.querySelectorAll('#pos-filter-group .btn-filter');
+            buttons.forEach(b => b.classList.remove('active'));
+            buttons.forEach(b => {
+                if ((selectedPosFilter === 'ALL' && b.innerText === 'TODAS') || b.innerText === selectedPosFilter) {
+                    b.classList.add('active');
+                }
+            });
+            updateUI();
+        }
+
+        function setTeamFilter(teamName) {
+            if (selectedTeamFilter === teamName) { selectedTeamFilter = 'ALL'; } else { selectedTeamFilter = teamName; }
+            const buttons = document.querySelectorAll('#team-filter-group .btn-filter');
+            buttons.forEach(b => b.classList.remove('active'));
+            buttons.forEach(b => {
+                if (selectedTeamFilter === 'ALL' && b.innerText === 'TODOS') {
+                    b.classList.add('active');
+                } else if (b.innerText.toLowerCase().includes(selectedTeamFilter.toLowerCase()) || teamName.toLowerCase().includes(b.innerText.toLowerCase())) {
+                    b.classList.add('active');
+                }
+            });
+            updateUI();
+        }
+
+        function resetAllFilters() {
+            selectedPosFilter = 'ALL';
+            selectedTeamFilter = 'ALL';
+            document.getElementById('search-player').value = "";
+            document.querySelectorAll('#pos-filter-group .btn-filter').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#team-filter-group .btn-filter').forEach(b => b.classList.remove('active'));
+            document.querySelector('#pos-filter-group .btn-filter').classList.add('active');
+            document.querySelector('#team-filter-group .btn-filter').classList.add('active');
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('pool-count').innerText = players.length;
+            document.getElementById('round-number').innerText = `Ronda ${currentRound} / ${MAX_ROUNDS}`;
+            document.getElementById('current-drafter').innerText = managers[currentManagerIndex];
+            let tag = document.getElementById('direction-tag'), panel = document.getElementById('turn-indicator');
+            if (currentRound % 2 !== 0) {
+                tag.innerText = "Ida ➡️"; tag.style.background = "rgba(6,182,212,0.15)"; tag.style.color = "#22d3ee";
+                panel.className = "turn-panel neon-cyan";
+            } else {
+                tag.innerText = "Vuelta ⬅️"; tag.style.background = "rgba(217,70,239,0.15)"; tag.style.color = "#f472b6";
+                panel.className = "turn-panel neon-fuchsia";
+            }
+            if (activeTab === 'market') { renderMarket(); } else { renderLiveTeams(); }
+        }
+
+        function filterPlayers() {
+            renderMarket();
+        }
+
+        function renderMarket() {
+            const search = document.getElementById('search-player').value.toLowerCase().trim();
+            const container = document.getElementById('main-container');
+            container.innerHTML = '<div id="players-pool" class="grid"></div>';
+            const pool = document.getElementById('players-pool');
+            
+            const filtered = players.filter(p => {
+                let normPTeam = normalizeTeamName(p.team);
+                let normFTeam = normalizeTeamName(selectedTeamFilter);
+                
+                const matchSearch = p.name.toLowerCase().includes(search) || normPTeam.includes(search);
+                const matchPos = selectedPosFilter === 'ALL' || p.pos.toUpperCase() === selectedPosFilter.toUpperCase();
+                
+                // COMPROBACIÓN POR ENGRANAJE EXACTO ABSOLUTO (Evita solapamientos por ciudad)
+                const matchTeam = selectedTeamFilter === 'ALL' || normPTeam === normFTeam;
+                
+                return matchSearch && matchPos && matchTeam;
+            });
+            if (!filtered.length) { pool.innerHTML = `<p style="color:#475569; text-align:center; grid-column:span 2; font-size:12px; padding:20px;">No hay jugadores libres</p>`; return; }
+            
+            filtered.forEach((pObj) => {
+                const idx = players.indexOf(pObj);
+                let posClass = "pos-med";
+                if (pObj.pos.includes("POR")) posClass = "pos-por";
+                else if (pObj.pos.includes("DEF")) posClass = "pos-def";
+                else if (pObj.pos.includes("DEL")) posClass = "pos-del";
+                
+                const card = document.createElement('div');
+                card.className = "card";
+                card.innerHTML = `<div>
+                        <span class="name">${pObj.name} <span class="pos-badge ${posClass}">${pObj.pos}</span></span>
+                        <span class="team">${pObj.team}</span>
+                    </div>
+                    <div class="actions-box">
+                        <button class="btn-fichar" onclick="pickPlayer(${idx})">Fichar</button>
+                        <button class="btn-del" onclick="deletePlayerLive(${idx})">❌</button>
+                    </div>`;
+                pool.appendChild(card);
+            });
+        }
+
+        function renderLiveTeams() {
+            const container = document.getElementById('main-container');
+            let html = `<div class="summary-grid">`;
+            managers.forEach(m => {
+                html += `<div class="team-box"><h4 style="color:#38bdf8; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:6px; margin-bottom:8px; font-size:12px;">👤 ${m}</h4><ul style="list-style:none; font-size:11px; max-height:150px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;">`;
+                if (!teams[m].length) html += `<li style="color:#475569; font-style:italic;">Sin fichajes aún</li>`;
+                teams[m].forEach(p => { html += `<li style="display:flex; justify-content:between; background:rgba(255,255,255,0.01); padding:4px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.02);"><span style="color:#e2e8f0;">${p.player}</span> <span style="color:#64748b; font-size:9px; margin-left:auto; font-weight:700;">${p.pos} - R${p.round}</span></li>`; });
+                html += `</ul></div>`;
+            });
+            container.innerHTML = html + `</div>`;
+        }
+
+        function pickPlayer(idx) {
+            const p = players[idx], m = managers[currentManagerIndex];
+            history.unshift({ manager: m, name: p.name, team: p.team, pos: p.pos, round: currentRound, overallPick: history.length + 1 });
+            teams[m].push({ player: p.name, team: p.team, pos: p.pos, round: currentRound });
+            players.splice(idx, 1);
+            document.getElementById('search-player').value = "";
+            if (currentRound % 2 !== 0) { 
+                if (currentManagerIndex === managers.length - 1) currentRound++; else currentManagerIndex++; 
+            } else { 
+                if (currentManagerIndex === 0) currentRound++; else currentManagerIndex--; 
+            }
+            renderHistory(); updateUI();
+        }
+
+        function undoLastPick() {
+            if (!history.length) { alert("No hay ningún fichaje registrado."); return; }
+            const lastPick = history.shift();
+            players.push({ name: lastPick.name, team: lastPick.team, pos: lastPick.pos });
+            const managerTeam = teams[lastPick.manager];
+            const targetIdx = managerTeam.findIndex(p => p.player === lastPick.name && p.round === lastPick.round);
+            if (targetIdx !== -1) managerTeam.splice(targetIdx, 1);
+            currentRound = lastPick.round;
+            currentManagerIndex = managers.indexOf(lastPick.manager);
+            isDraftActive = true;
+            renderHistory(); updateUI();
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('draft-history'); container.innerHTML = "";
+            history.forEach(pick => {
+                const item = document.createElement('div');
+                item.className = "history-item";
+                item.style.borderColor = pick.round % 2 !== 0 ? "#06b6d4" : "#d946ef";
+                item.innerHTML = `<div style="display:flex; justify-content:space-between;"><strong style="color:#fff;">${pick.manager}</strong> <span style="font-family:monospace; font-size:10px; color:#475569; font-weight:700;">PICK #${pick.overallPick}</span></div>
+                    <div style="margin-top:4px; color:#38bdf8; font-size:12px;">Fichaje: <span style="color:#e2e8f0; font-weight:700;">${pick.name}</span> [${pick.pos}] <span style="font-size:9px; color:#475569; float:right; font-weight:700; font-family:monospace;">R${pick.round}</span></div>`;
+                container.appendChild(item);
+            });
+        }
+
+        function finishDraft() {
+            isDraftActive = false; document.getElementById('search-player').disabled = true;
+            document.getElementById('turn-indicator').innerHTML = `<strong style="color:#10b981; font-size:13px; letter-spacing:1px;">🏆 DRAFT COMPLETADO</strong>`;
+            switchTab('teams');
+        }
+    </script>
+</body>
+</html>
