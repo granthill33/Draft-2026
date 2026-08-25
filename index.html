@@ -2,69 +2,60 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>🏆 DRAFT INTERNO PRO 26/27 🏆</title>
+    <title>🏆 DRAFT LOCAL FANTASY PRO 🏆</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: system-ui, sans-serif; background: radial-gradient(circle at 50% 0%, #17122b 0%, #06040a 70%); color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 30px; }
-        header { background: rgba(0,0,0,0.6); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-weight: 900; font-size: 20px; background: linear-gradient(135deg, #38bdf8, #d946ef); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .turn-panel { background: #0c0914; border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 12px; display: flex; align-items: center; gap: 15px; }
+        body { font-family: sans-serif; background: #0c0914; color: #e2e8f0; padding: 20px; }
+        header { background: #17122b; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; margin-bottom: 20px; }
+        .logo { font-weight: 900; font-size: 20px; color: #38bdf8; }
+        .turn-panel { background: #000; padding: 10px; border-radius: 8px; border: 1px solid #d946ef; }
         .turn-panel.hidden { display: none; }
-        main { max-width: 1500px; width: 100%; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: 1fr; gap: 20px; }
-        @media (min-width: 1280px) { main { grid-template-columns: 330px 1fr 340px; } }
-        .panel { background: rgba(20, 15, 35, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-        h2 { font-size: 13px; text-transform: uppercase; color: #38bdf8; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; }
-        textarea, input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; color: #fff; font-size: 12px; outline: none; }
-        .btn { width: 100%; background: linear-gradient(90deg, #3b82f6, #d946ef); color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
-        .btn-green { background: linear-gradient(90deg, #10b981, #059669); margin-top: 4px; }
-        .btn-undo { background: linear-gradient(90deg, #f59e0b, #d97706); margin-top: 4px; }
-        .btn-clear { background: linear-gradient(90deg, #ef4444, #b91c1c); margin-top: 4px; }
-        .scroll { overflow-y: auto; max-height: 650px; }
-        .tabs { display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; }
-        .tab { background: transparent; border: 1px solid rgba(255,255,255,0.05); color: #94a3b8; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
-        .tab.active { background: rgba(56,189,248,0.1); border-color: #38bdf8; color: #38bdf8; }
-        .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        main { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 1280px) { main { grid-template-columns: 320px 1fr 320px; } }
+        .panel { background: #140f23; border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; }
+        h2 { font-size: 13px; color: #38bdf8; text-transform: uppercase; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #221a3f; }
+        textarea, input { width: 100%; background: #000; border: 1px solid #221a3f; border-radius: 8px; padding: 10px; color: #fff; font-size: 12px; }
+        .btn { width: 100%; background: linear-gradient(90deg, #3b82f6, #d946ef); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
+        .btn-undo { background: #f59e0b; margin-top: 5px; }
+        .btn-clear { background: #ef4444; margin-top: 5px; }
+        .scroll { overflow-y: auto; max-height: 600px; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 10px; }
+        .tab { background: #221a3f; border: none; color: #94a3b8; padding: 8px; border-radius: 6px; cursor: pointer; flex-grow: 1; }
+        .tab.active { background: #38bdf8; color: #000; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
         @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
-        .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .pos-badge { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
-        .pos-POR { background: rgba(234, 179, 8, 0.2); color: #facc15; }
-        .pos-DEF { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
-        .pos-MED { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-        .pos-DEL { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-        .btn-fichar { background: #1a1528; border: 1px solid #3b2e5a; color: #e2e8f0; padding: 6px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-        .btn-fichar:hover { background: #38bdf8; color: #000; }
-        .history-item { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; font-size: 12px; border-left: 4px solid #38bdf8; }
-        .team-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.04); margin-bottom: 10px; }
+        .card { background: rgba(255,255,255,0.02); border: 1px solid #221a3f; border-radius: 8px; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-fichar { background: #221a3f; border: 1px solid #38bdf8; color: #fff; padding: 5px 12px; border-radius: 6px; cursor: pointer; }
+        .history-item { background: #000; padding: 8px; border-radius: 6px; font-size: 12px; border-left: 3px solid #38bdf8; margin-bottom: 5px; }
+        .team-box { background: #000; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #221a3f; }
     </style>
 </head>
 <body>
     <header>
         <div class="logo">🏆 ENGINE DRAFT LOCAL FANTASY</div>
         <div id="turn-indicator" class="turn-panel hidden">
-            <div>
-                <small id="round-number" style="font-size:9px; color:#94a3b8; display:block; font-weight:700;">RONDA 1 / 23</small>
-                <strong id="current-drafter" style="font-size:15px; color:#fff;">Listo...</strong>
-            </div>
-            <div id="direction-tag" style="font-size:10px; font-weight:800; padding:5px 10px; border-radius:6px;">IDA</div>
+            <small id="round-number" style="font-size:10px; color:#94a3b8; display:block;">RONDA 1 / 23</small>
+            <strong id="current-drafter" style="color:#fff; font-size:14px;">Listo...</strong>
+            <span id="direction-tag" style="font-size:11px; margin-left:10px;">IDA</span>
         </div>
     </header>
     <main>
         <section class="panel" id="admin-setup-panel">
-            <h2>⚙️ Carga de Jugadores Excel (100% Local Instantáneo)</h2>
-            <textarea id="players-input" rows="8" placeholder="Pega aquí tus 3 columnas de Excel (Nombre, Equipo, Posición)."></textarea>
-            <button onclick="initLocalDraft()" id="btn-start" class="btn">🚀 Cargar base de datos completa</button>
+            <h2>⚙️ Cargar Base de Datos Excel</h2>
+            <textarea id="players-input" rows="6" placeholder="Pega aquí tus columnas de Excel (Nombre, Equipo, Posición)."></textarea>
+            <button onclick="initLocalDraft()" id="btn-start" class="btn">🚀 Cargar 700 Jugadores</button>
         </section>
         <section class="panel">
             <div class="tabs">
-                <button id="tab-market" class="tab active" onclick="switchTab('market')">🛒 Mercado Común (<span id="pool-count">0</span>)</button>
-                <button id="tab-teams" class="tab" onclick="switchTab('teams')">👥 Plantillas Directo</button>
+                <button id="tab-market" class="tab active" onclick="switchTab('market')">🛒 Mercado (<span id="pool-count">0</span>)</button>
+                <button id="tab-teams" class="tab" onclick="switchTab('teams')">👥 Plantillas</button>
             </div>
-            <input type="text" id="search-player" oninput="filterPlayers()" placeholder="🔍 Filtrar inmediatamente por nombre o equipo...">
+            <input type="text" id="search-player" oninput="filterPlayers()" placeholder="🔍 Escribe para buscar por nombre o equipo..." style="margin-bottom:10px;">
             <div id="main-container" class="scroll"><div id="players-pool" class="grid"></div></div>
             <button onclick="undoLocalPick()" id="btn-undo" class="btn btn-undo hidden">↩️ Deshacer Último Fichaje</button>
-            <button onclick="hardLocalReset()" id="btn-reset-total" class="btn btn-clear hidden">🚨 RESETEAR TOTALMENTE (BORRAR ESTE PC)</button>
+            <button onclick="hardLocalReset()" id="btn-reset-total" class="btn btn-clear hidden">🚨 RESETEAR LIGA COMPLETA</button>
         </section>
-        <section class="panel"><h2>📜 Historial de Elecciones</h2><div id="draft-history" class="scroll"></div></section>
+        <section class="panel"><h2>📜 Historial de Picks</h2><div id="draft-history" class="scroll"></div></section>
     </main>
     <script>
         let managers = ["Las Palmas (Turu Flores)", "Oviedo (Obafemi)", "Real Sociedad (Omar Little)", "Osasuna (Sens44)", "Huracán (Trosky)", "Levante (Celtics Fan)", "Lleida (Boibi2)", "Recreativo (JOSEDIN)", "Sporting (Rebekin)", "Celta (William)", "Guadalajara (Nikola Sarcevic)", "Deportivo (De la Penya)", "Valencia (Jraga)", "Barcelona (Malabar)", "Marino (Sauber)", "Eibar (Eragon86)", "Real Unión (Swes)", "Cadiz (Aitor55)", "Coruxo (Hill)", "Alaves (Torressss)"];
@@ -76,11 +67,10 @@
                 if (!line.trim()) return;
                 let parts = line.split('\t');
                 if (parts.length < 2) parts = line.split(',');
-                let name = parts[0] ? parts[0].trim() : "";
-                let team = parts[1] ? parts[1].trim() : "Libre";
-                let pos = parts[2] ? parts[2].trim().toUpperCase() : "MED";
+                let name = parts ? parts.trim() : "";
+                let team = parts ? parts.trim() : "Libre";
+                let pos = parts ? parts.trim().toUpperCase() : "MED";
                 if (!name) return;
-                if (pos.includes("DF")) pos = "DEF"; if (pos.includes("MC") || pos.includes("MED")) pos = "MED"; if (pos.includes("DEL") || pos.includes("DL")) pos = "DEL";
                 list.push({ name: name, team: team, pos: pos });
             });
             return list;
@@ -88,7 +78,7 @@
 
         function initLocalDraft() {
             let raw = document.getElementById('players-input').value;
-            let pool = processText(raw); if (!pool.length) { alert("Pega filas válidas de Excel."); return; }
+            let pool = processText(raw); if (!pool.length) { alert("Pega filas válidas."); return; }
             let emptyTeams = {}; managers.forEach(m => emptyTeams[m] = []);
             let data = { players: pool, history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "MED", round: 0 }], teams: emptyTeams, currentRound: 1, currentManagerIndex: 0 };
             localStorage.setItem('firme_backup_liga', JSON.stringify(data));
@@ -141,11 +131,11 @@
         function renderMarket() {
             let search = document.getElementById('search-player').value.toLowerCase().trim();
             let pool = document.getElementById('players-pool'); pool.innerHTML = "";
-            let filtered = players.filter(p => p.name.toLowerCase().includes(search) || p.team.toLowerCase().includes(search) || p.pos.toLowerCase().includes(search));
+            let filtered = players.filter(p => p.name.toLowerCase().includes(search) || p.team.toLowerCase().includes(search));
             filtered.forEach(p => {
                 let idx = players.indexOf(p);
                 let div = document.createElement('div'); div.className = "card";
-                div.innerHTML = `<div><strong>${p.name}</strong><span class="pos-badge pos-${p.pos}">${p.pos}</span><br><small style="color:#94a3b8">${p.team}</small></div><button class="btn-fichar" onclick="pickPlayer(${idx})">Fichar</button>`;
+                div.innerHTML = `<div><strong>${p.name}</strong> [${p.pos}]<br><small style="color:#94a3b8">${p.team}</small></div><button class="btn-fichar" onclick="pickPlayer(${idx})">Fichar</button>`;
                 pool.appendChild(div);
             });
         }
@@ -157,7 +147,7 @@
                 let html = `<div class="team-box"><h4>👤 ${m}</h4><ul style="list-style:none; font-size:11px; margin-top:5px;">`;
                 let mPlayers = teams[m] || [];
                 if (!mPlayers.length) html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;
-                else mPlayers.forEach(p => html += `<li>${p.player} <span style="color:#64748b">[${p.pos}]</span></li>`);
+                else mPlayers.forEach(p => html += `<li>${p.player} [${p.pos}]</li>`);
                 grid.innerHTML += html + '</ul></div>';
             });
         }
@@ -168,7 +158,7 @@
             history.forEach(p => {
                 if (p.manager === "Comisionado") return;
                 let div = document.createElement('div'); div.className = "history-item";
-                div.innerHTML = `<strong>${p.manager}</strong> ficha a <span style="color:#38bdf8">${p.name}</span> [${p.pos}] (R${p.round})`;
+                div.innerHTML = `<strong>${p.manager}</strong> ficha a <span style="color:#38bdf8">${p.name}</span> (R${p.round})`;
                 container.appendChild(div);
             });
         }
