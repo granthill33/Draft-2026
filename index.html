@@ -47,8 +47,6 @@
         .pos-med { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
         .pos-del { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
         .actions-box { display: flex; align-items: center; gap: 8px; }
-        .btn-del { background: transparent; border: none; color: #ef4444; font-size: 14px; cursor: pointer; padding: 4px; font-weight: bold; }
-        .btn-del:hover { color: #f87171; }
         .card button.btn-fichar { background: #1a1528; border: 1px solid #3b2e5a; color: #e2e8f0; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
         .card:hover button.btn-fichar { background: #38bdf8; color: #000; font-weight: 800; border-color: #38bdf8; }
         .history-item { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.04); border-radius: 10px; padding: 10px; font-size: 12px; border-left: 4px solid #38bdf8; }
@@ -95,7 +93,7 @@ Cadiz (Aitor55)
 Coruxo (Hill)
 Alaves (Torressss)</textarea>
             </div>
-            <textarea id="players-input" rows="5" placeholder="Pega aquí el Excel de jugadores y dale a Iniciar Liga. Automáticamente se les cargará a todos los mánagers a la vez en tiempo real."></textarea>
+            <textarea id="players-input" rows="5" placeholder="Pega aquí el Excel de jugadores y dale a Iniciar Liga."></textarea>
             <button onclick="initCloudDraft()" id="btn-start" class="btn">🚀 Iniciar Liga Global Sincronizada</button>
         </section>
         <section class="panel">
@@ -110,7 +108,6 @@ Alaves (Torressss)</textarea>
                     <button class="btn-filter" onclick="setPosFilter('POR')">POR</button>
                     <button class="btn-filter" onclick="setPosFilter('DEF')">DEF</button>
                     <button class="btn-filter" onclick="setPosFilter('MED')">MED</button>
-                    <!-- CORRECCIÓN DEL BOTÓN DE DELANTEROS: setPosFilter asignado de forma fija -->
                     <button class="btn-filter" onclick="setPosFilter('DEL')">DEL</button>
                 </div>
                 <div class="filter-section-title">Equipos Reales Liga 26/27:</div>
@@ -146,18 +143,14 @@ Alaves (Torressss)</textarea>
         <section class="panel"><h2>📜 Historial Global en Vivo</h2><div id="draft-history" class="scroll" style="display:flex; flex-direction:column; gap:8px;"></div></section>
     </main>
     <script>
-        // INFRAESTRUCTURA EN LA NUBE ASIGNADA PARA VUESTRA COMUNIDAD
         const firebaseConfig = { databaseURL: "https://firebasedatabase.app" };
         firebase.initializeApp(firebaseConfig);
         const cloudDB = firebase.database();
-
         let managers = ["Las Palmas (Turu Flores)", "Oviedo (Obafemi)", "Real Sociedad (Omar Little)", "Osasuna (Sens44)", "Huracán (Trosky)", "Levante (Celtics Fan)", "Lleida (Boibi2)", "Recreativo (JOSEDIN)", "Sporting (Rebekin)", "Celta (William)", "Guadalajara (Nikola Sarcevic)", "Deportivo (De la Penya)", "Valencia (Jraga)", "Barcelona (Malabar)", "Marino (Sauber)", "Eibar (Eragon86)", "Real Unión (Swes)", "Cadiz (Aitor55)", "Coruxo (Hill)", "Alaves (Torressss)"];
         let players = [], history = [], teams = {};
         let currentManagerIndex = 0, currentRound = 1;
         let activeTab = 'market', selectedPosFilter = 'ALL', selectedTeamFilter = 'ALL';
-
         window.addEventListener('beforeunload', function (e) { e.preventDefault(); e.returnValue = 'Alerta'; });
-
         function normalizeTeamName(tName) {
             let str = tName.toLowerCase().trim();
             if (str.includes("barça") || str.includes("barca") || str.includes("fcb") || str.includes("barcelona")) return "barcelona";
@@ -182,15 +175,16 @@ Alaves (Torressss)</textarea>
             if (str.includes("espanyol") || str.includes("español")) return "espanyol";
             return str;
         }
-
         function processText(rawText) {
             let lines = rawText.split('\n'); let list = [];
-            lines.forEach(line => {
+            lines.forEach((line) => {
                 if (!line.trim()) return;
                 let parts = line.split('\t');
-                let name = parts[0] ? parts[0].trim() : "Desconocido";
-                let team = parts[1] ? parts[1].trim() : "Agente Libre";
-                let pos = parts[2] ? parts[2].trim().toUpperCase() : "MED";
+                if (parts.length < 2) { parts = line.split(','); }
+                let name = parts ? parts.trim() : "";
+                let team = parts ? parts.trim() : "Agente Libre";
+                let pos = parts ? parts.trim().toUpperCase() : "MED";
+                if (!name) return;
                 if (pos.includes("DFC") || pos === "DF") pos = "DEF";
                 if (pos.includes("MD") || pos === "MC" || pos.includes("MED")) pos = "MED";
                 if (pos === "DL" || pos.includes("DEL")) pos = "DEL";
@@ -198,63 +192,44 @@ Alaves (Torressss)</textarea>
             });
             return list;
         }
-
-        /* CORRECCIÓN INTERNA CRÍTICA: Empaqueta la orden de inicio formateando los nodos de Firebase de forma estricta */
         function initCloudDraft() {
             let raw = document.getElementById('players-input').value;
+            if (!raw.trim()) { alert("🚨 Pega primero el Excel."); return; }
             let pool = processText(raw);
-            if (!pool.length) { alert("🚨 Pega la lista del Excel primero."); return; }
-            
+            if (!pool.length) { alert("🚨 Formato inválido."); return; }
             let emptyTeams = {}; 
             managers.forEach(m => { emptyTeams[m] = [{ player: "Fichajes Vacíos", team: "Ninguno", pos: "MED", round: 0 }]; });
-            
             cloudDB.ref('liga_pro_2026').set({
                 players: pool,
-                history: [{ manager: "Comisionado", name: "Draft Iniciado de Forma Exitosa", team: "LaLiga", pos: "INFO", round: 0, overallPick: 0 }],
-                teams: emptyTeams,
-                currentRound: 1,
-                currentManagerIndex: 0
-            }).then(() => {
-                document.getElementById('players-input').value = "";
-            }).catch((error) => {
-                alert("Error al inyectar datos en la nube: " + error.message);
-            });
+                history: [{ manager: "Comisionado", name: "Draft Iniciado", team: "LaLiga", pos: "INFO", round: 0, overallPick: 0 }],
+                teams: emptyTeams, currentRound: 1, currentManagerIndex: 0
+            }).then(() => { document.getElementById('players-input').value = ""; }).catch((err) => { alert("Error: " + err.message); });
         }
         function pickPlayerCloud(idx) {
             const p = players[idx], m = managers[currentManagerIndex];
             let updHistory = Array.from(history);
             updHistory.unshift({ manager: m, name: p.name, team: p.team, pos: p.pos, round: currentRound, overallPick: (updHistory.length) });
-            
             let updTeam = Array.from(teams[m] || []);
-            if (updTeam.length === 1 && updTeam[0].player === "Fichajes Vacíos") updTeam = [];
+            if (updTeam.length === 1 && updTeam.player === "Fichajes Vacíos") updTeam = [];
             updTeam.push({ player: p.name, team: p.team, pos: p.pos, round: currentRound });
-            
             let updPlayers = Array.from(players); updPlayers.splice(idx, 1);
-            
             let nIdx = currentManagerIndex, nRound = currentRound;
             if (currentRound % 2 !== 0) { if (currentManagerIndex === managers.length - 1) nRound++; else nIdx++; } 
             else { if (currentManagerIndex === 0) nRound++; else nIdx--; }
-
             cloudDB.ref('liga_pro_2026').update({ players: updPlayers, history: updHistory, [`teams/${m}`]: updTeam, currentRound: nRound, currentManagerIndex: nIdx });
         }
-
         function undoCloudPick() {
             if (!history || history.length <= 1) return;
             let updHistory = Array.from(history); const last = updHistory.shift();
             let updPlayers = Array.from(players); updPlayers.push({ name: last.name, team: last.team, pos: last.pos });
             let updTeam = Array.from(teams[last.manager] || []).filter(p => p.player !== last.name);
-            
             if(!updTeam.length) updTeam = [{ player: "Fichajes Vacíos", team: "Ninguno", pos: "MED", round: 0 }];
             let pIdx = managers.indexOf(last.manager);
             cloudDB.ref('liga_pro_2026').update({ players: updPlayers, history: updHistory, [`teams/${last.manager}`]: updTeam, currentRound: last.round, currentManagerIndex: pIdx });
         }
-
         function hardCloudReset() {
-            if (confirm("⚠️ ¿Estás seguro de que deseas borrar los datos de la nube de todos los mánagers?")) {
-                cloudDB.ref('liga_pro_2026').remove(); window.location.reload();
-            }
+            if (confirm("⚠️ ¿Resetear liga?")) { cloudDB.ref('liga_pro_2026').remove(); window.location.reload(); }
         }
-
         cloudDB.ref('liga_pro_2026').on('value', (snapshot) => {
             const data = snapshot.val();
             if (!data) {
@@ -262,35 +237,31 @@ Alaves (Torressss)</textarea>
                 document.getElementById('turn-indicator').classList.add('hidden');
                 document.getElementById('btn-undo').classList.add('hidden');
                 document.getElementById('btn-reset-total').classList.add('hidden');
-                document.getElementById('main-container').innerHTML = "";
-                return;
+                document.getElementById('main-container').innerHTML = ""; return;
             }
             players = data.players || []; history = data.history || []; teams = data.teams || {};
             currentRound = data.currentRound; currentManagerIndex = data.currentManagerIndex;
-            
             document.getElementById('admin-setup-panel').style.display = "none";
             document.getElementById('turn-indicator').classList.remove('hidden');
             document.getElementById('btn-undo').classList.remove('hidden');
             document.getElementById('btn-reset-total').classList.remove('hidden');
             updateUI();
         });
-
         function switchTab(tabName) { activeTab = tabName; updateUI(); }
         function setPosFilter(pos) { selectedPosFilter = (selectedPosFilter === pos) ? 'ALL' : pos; updateUI(); }
         function setTeamFilter(teamName) { selectedTeamFilter = (selectedTeamFilter === teamName) ? 'ALL' : teamName; updateUI(); }
         function resetAllFilters() { selectedPosFilter = 'ALL'; selectedTeamFilter = 'ALL'; document.getElementById('search-player').value = ""; updateUI(); }
         function filterPlayers() { renderMarket(); }
-
         function updateUI() {
             document.getElementById('pool-count').innerText = players.length;
-            document.getElementById('round-number').innerText = `Ronda ${currentRound} / ${MAX_ROUNDS}`;
+            document.getElementById('round-number').innerText = `Ronda ${currentRound} / 23`;
             document.getElementById('current-drafter').innerText = managers[currentManagerIndex] || "COMPLETO";
-            let tag = document.getElementById('direction-tag');
-            if (currentRound % 2 !== 0) tag.innerText = "Ida ➡️"; else tag.innerText = "Vuelta ⬅️";
+            let tag = document.getElementById('direction-tag'), panel = document.getElementById('turn-indicator');
+            if (currentRound % 2 !== 0) { tag.innerText = "Ida ➡️"; panel.className = "turn-panel neon-cyan"; } 
+            else { tag.innerText = "Vuelta ⬅️"; panel.className = "turn-panel neon-fuchsia"; }
             if (activeTab === 'market') renderMarket(); else renderLiveTeams();
             renderHistory();
         }
-
         function renderMarket() {
             const search = document.getElementById('search-player').value.toLowerCase().trim();
             const pool = document.getElementById('players-pool'); pool.innerHTML = "";
@@ -306,22 +277,20 @@ Alaves (Torressss)</textarea>
                 pool.appendChild(card);
             });
         }
-
         function renderLiveTeams() {
             const pool = document.getElementById('players-pool'); pool.innerHTML = '<div class="summary-grid" id="s-grid"></div>';
             const sGrid = document.getElementById('s-grid');
             managers.forEach(m => {
                 let html = `<div class="team-box"><h4 style="color:#38bdf8; font-size:12px; margin-bottom:6px;">👤 ${m}</h4><ul style="list-style:none; font-size:11px; display:flex; flex-direction:column; gap:4px;">`;
                 let mPlayers = teams[m] || [];
-                if (!mPlayers.length || (mPlayers.length === 1 && mPlayers[0].player === "Fichajes Vacíos")) html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;
-                else { mPlayers.forEach(p => { html += `<li style="background:rgba(255,255,255,0.01); padding:4px; border-radius:4px;">${p.player} <span style="font-size:9px; color:#64748b;">[${p.pos}]</span></li>`; }); }
+                if (!mPlayers.length || (mPlayers.length === 1 && mPlayers.player === "Fichajes Vacíos")) html += `<li style="color:#475569; font-style:italic;">Sin fichajes</li>`;
+                else { mPlayers.forEach(p => { if(!p.player) return; html += `<li style="background:rgba(255,255,255,0.01); padding:4px; border-radius:4px;">${p.player} <span style="font-size:9px; color:#64748b;">[${p.pos}]</span></li>`; }); }
                 sGrid.innerHTML += html + `</ul></div>`;
             });
         }
-
         function renderHistory() {
             const container = document.getElementById('draft-history'); container.innerHTML = "";
-            if(!history.length || history.length <= 1) { container.innerHTML = `<p style="color:#475569; text-align:center; padding:10px;">Esperando que empiece el draft...</p>`; return; }
+            if(!history.length || history.length <= 1) { container.innerHTML = `<p style="color:#475569; text-align:center; padding:10px;">Esperando elecciones...</p>`; return; }
             history.forEach(pick => {
                 if(pick.manager === "Comisionado") return;
                 const item = document.createElement('div'); item.className = "history-item"; item.style.borderColor = pick.round % 2 !== 0 ? "#06b6d4" : "#d946ef";
