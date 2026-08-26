@@ -2511,34 +2511,6 @@
         container.appendChild(item);
     });
 }
-
-// --- CONTROL VISUAL DE FILTROS (PEGA EL CÓDIGO AQUÍ) ---
-if (typeof updateUI === 'function') {
-    const originalUpdateUI = updateUI;
-    updateUI = function() {
-        originalUpdateUI(); 
-        
-        if (typeof selectedPosFilter !== 'undefined') {
-            document.querySelectorAll('#pos-filter-group .btn-filter').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('onclick')?.includes(`'${selectedPosFilter}'`)) {
-                    btn.classList.add('active');
-                }
-            });
-        }
-        
-        if (typeof selectedTeamFilter !== 'undefined') {
-            document.querySelectorAll('#team-filter-group .btn-filter').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('onclick')?.includes(`'${selectedTeamFilter}'`)) {
-                    btn.classList.add('active');
-                }
-            });
-        }
-    };
-}
-// --------------------------------------------------------
-
-    </script>
+</script>
 </body>
 </html>
