@@ -2009,6 +2009,15 @@
                 if (mainEl) mainEl.classList.remove('layout-wide-center');
                 if (poolEl) poolEl.className = 'grid';
                 renderMarket();
+                        // --- ILUMINAR BOTONES FILTRADOS ---
+        document.querySelectorAll('#pos-filter-group .btn-filter').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('onclick')?.includes(`'${selectedPosFilter}'`));
+        });
+        document.querySelectorAll('#team-filter-group .btn-filter').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('onclick')?.includes(`'${selectedTeamFilter}'`));
+        });
+        // ----------------------------------
+
             } else if (activeTab === 'teams') {
                 document.getElementById('filter-wrapper').style.display = 'none';
                 document.getElementById('search-box').style.display = 'none';
