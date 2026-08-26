@@ -228,56 +228,125 @@
         @media (min-width: 640px) { .tab { font-size: 11px; padding: 6px 12px; } }
         .tab.active { background: var(--accent-soft); border-color: var(--accent-border); color: var(--accent); }
 
-        .filter-section-title {
-            font-size: 10px;
+        .filter-toolbar {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px;
+        }
+        .filter-row-label {
+            font-size: 9px;
             font-weight: 800;
             color: var(--muted-2);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            letter-spacing: 0.4px;
+            min-width: 42px;
+            flex-shrink: 0;
         }
-        .filter-group {
+        .filter-chips {
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
-            margin-bottom: 8px;
-            background: rgba(0,0,0,0.18);
-            padding: 8px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
+            gap: 4px;
+            flex: 1;
+            min-width: 0;
+        }
+        .filter-chips.grow {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+            width: 100%;
         }
         .btn-filter {
             background: rgba(255,255,255,0.03);
             border: 1px solid var(--border);
             color: var(--muted);
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 10px;
+            padding: 3px 7px;
+            border-radius: 5px;
+            font-size: 9px;
             font-weight: 700;
             cursor: pointer;
-            text-transform: uppercase;
-            min-height: 32px;
+            text-transform: none;
+            min-height: 26px;
+            line-height: 1.1;
+            text-align: center;
         }
+        #pos-filter-group .btn-filter { text-transform: uppercase; letter-spacing: 0.2px; }
         .btn-filter:hover { background: rgba(255,255,255,0.07); color: var(--text-strong); }
         .btn-filter.active { background: var(--accent); color: #0b1220; font-weight: 800; border-color: var(--accent); }
         .btn-filter.yours { border-color: var(--mine-border); color: var(--mine); }
         .btn-filter.yours.active { background: var(--mine); color: #140f1a; border-color: var(--mine); }
+        #pos-filter-group .btn-filter[data-filter="POR"].active { background: #c4a35a; border-color: #c4a35a; color: #0b1220; }
+        #pos-filter-group .btn-filter[data-filter="DEF"].active { background: #5b9fb8; border-color: #5b9fb8; color: #0b1220; }
+        #pos-filter-group .btn-filter[data-filter="MED"].active { background: #3d9a7a; border-color: #3d9a7a; color: #0b1220; }
+        #pos-filter-group .btn-filter[data-filter="DEL"].active { background: #c07070; border-color: #c07070; color: #0b1220; }
         .btn-reset-filters {
             background: var(--danger-soft);
             border: 1px solid rgba(192, 112, 112, 0.35);
             color: var(--danger);
             font-size: 9px;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 3px 7px;
+            border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
             text-transform: uppercase;
-            min-height: 28px;
+            min-height: 26px;
+            margin-left: auto;
         }
         .btn-reset-filters:hover { filter: brightness(1.08); color: var(--text-strong); }
+        .btn-team-toggle {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 9px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 5px;
+            min-height: 26px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-team-toggle.has-filter {
+            border-color: var(--accent-border);
+            color: var(--accent);
+            background: var(--accent-soft);
+        }
+        .btn-team-toggle .chev { color: var(--muted-2); font-size: 10px; }
+        #team-filter-group {
+            display: none;
+            margin-top: 2px;
+        }
+        #team-filter-group.open { display: grid; }
+        /* legacy titles used by plantillas filter */
+        .filter-section-title {
+            font-size: 9px;
+            font-weight: 800;
+            color: var(--muted-2);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 4px;
+            background: transparent;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+        }
 
         .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
@@ -293,7 +362,8 @@
             gap: 8px;
         }
         .card .name { font-weight: 700; color: var(--text-strong); font-size: 13px; display: block; margin-bottom: 2px; }
-        .card .team { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+        .card .team { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; display: block; }
+        .card .pts { font-size: 10px; color: var(--muted); font-weight: 600; margin-top: 2px; display: block; }
 
         .pos-badge {
             font-size: 9px;
@@ -682,14 +752,14 @@
                 <!-- 1. Seed excel -->
                 <div class="admin-section" style="border-top: none; padding-top: 0; margin-top: 0;">
                     <span class="admin-section-title">1. Cargar Excel</span>
-                    <textarea id="players-input" rows="4" placeholder="Cargar Base de Datos: Pega columnas de Excel (Nombre, Equipo, Posición)"></textarea>
+                    <textarea id="players-input" rows="4" placeholder="Cargar Base de Datos: Pega columnas de Excel (Nombre, Equipo, Posición, Puntos totales, Media)"></textarea>
                     <button onclick="seedPlayersToSupabase()" id="btn-start" class="btn btn-green">🚀 Inicializar DB con Jugadores</button>
                 </div>
 
                 <!-- 2. Quick add + edit -->
                 <div class="admin-section">
                     <span class="admin-section-title">2. Alta / edición de jugadores</span>
-                    <small style="color:#64748b;font-size:10px;">Añadir uno nuevo o corregir nombre, equipo o posición.</small>
+                    <small style="color:#64748b;font-size:10px;">Añadir, editar o borrar jugadores (nombre, equipo, posición, puntos).</small>
                     <div class="quick-add-row">
                         <input type="text" id="quick-player-name" class="full" placeholder="Nombre">
                         <input type="text" id="quick-player-team" placeholder="Equipo real">
@@ -699,6 +769,8 @@
                             <option value="MED" selected>MED</option>
                             <option value="DEL">DEL</option>
                         </select>
+                        <input type="text" id="quick-player-pts" placeholder="Pts totales" inputmode="decimal">
+                        <input type="text" id="quick-player-avg" placeholder="Media" inputmode="decimal">
                     </div>
                     <button onclick="addSinglePlayer()" class="btn" style="background: #5b9fb8;">➕ Añadir Jugador</button>
 
@@ -715,8 +787,13 @@
                                 <option value="MED">MED</option>
                                 <option value="DEL">DEL</option>
                             </select>
+                            <input type="text" id="edit-player-pts" placeholder="Pts totales" inputmode="decimal">
+                            <input type="text" id="edit-player-avg" placeholder="Media" inputmode="decimal">
                         </div>
-                        <button onclick="saveEditedPlayer()" class="btn" style="background: #c4a35a;">💾 Guardar cambios</button>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <button onclick="saveEditedPlayer()" class="btn" style="background: #c4a35a; flex:1;">💾 Guardar cambios</button>
+                            <button onclick="deleteSelectedPlayer()" class="btn" style="background: #c07070; flex:1;">🗑️ Borrar jugador</button>
+                        </div>
                     </div>
                 </div>
 
@@ -783,38 +860,55 @@
                 <div class="filter-section-title"><span>Filtrar plantilla:</span></div>
                 <div class="filter-group" id="mdl-filter-group"></div>
             </div>
-            <div id="filter-wrapper">
-                <div class="filter-section-title"><span>Posición:</span><button class="btn-reset-filters" onclick="resetAllFilters()">🔄 Resetear</button></div>
-                <div class="filter-group" id="pos-filter-group">
-                    <button class="btn-filter active" onclick="setPosFilter('ALL')">TODAS</button>
-                    <button class="btn-filter" onclick="setPosFilter('POR')">POR</button>
-                    <button class="btn-filter" onclick="setPosFilter('DEF')">DEF</button>
-                    <button class="btn-filter" onclick="setPosFilter('MED')">MED</button>
-                    <button class="btn-filter" onclick="setPosFilter('DEL')">DEL</button>
+            <div id="filter-wrapper" class="filter-toolbar">
+                <div class="filter-row">
+                    <span class="filter-row-label">Pos</span>
+                    <div class="filter-chips" id="pos-filter-group">
+                        <button type="button" class="btn-filter active" data-filter="ALL" onclick="setPosFilter('ALL')">Todas</button>
+                        <button type="button" class="btn-filter" data-filter="POR" onclick="setPosFilter('POR')">POR</button>
+                        <button type="button" class="btn-filter" data-filter="DEF" onclick="setPosFilter('DEF')">DEF</button>
+                        <button type="button" class="btn-filter" data-filter="MED" onclick="setPosFilter('MED')">MED</button>
+                        <button type="button" class="btn-filter" data-filter="DEL" onclick="setPosFilter('DEL')">DEL</button>
+                    </div>
+                    <button type="button" class="btn-reset-filters" onclick="resetAllFilters()">Reset</button>
                 </div>
-                <div class="filter-section-title">Equipos Reales Liga 26/27:</div>
-                <div class="filter-group scroll" id="team-filter-group" style="max-height: 95px;">
-                    <button class="btn-filter active" onclick="setTeamFilter('ALL')">TODOS</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Athletic')">Athletic Club</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Atlético')">Atlético de Madrid</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Osasuna')">CA Osasuna</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Alavés')">Deportivo Alavés</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Elche')">Elche CF</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Barcelona')">FC Barcelona</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Getafe')">Getafe CF</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Levante')">Levante UD</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Málaga')">Málaga CF</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Rayo')">Rayo Vallecano</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Espanyol')">RCD Espanyol</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Celta')">RC Celta de Vigo</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Deportivo')">RC Deportivo</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Betis')">Real Betis</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Real Madrid')">Real Madrid</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Racing')">Real Racing Club</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Sociedad')">Real Sociedad</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Sevilla')">Sevilla FC</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Valencia')">Valencia CF</button>
-                    <button class="btn-filter" onclick="setTeamFilter('Villarreal')">Villarreal CF</button>
+                <div class="filter-row">
+                    <span class="filter-row-label">Orden</span>
+                    <div class="filter-chips" id="sort-filter-group">
+                        <button type="button" class="btn-filter" data-sort="name" onclick="setMarketSort('name')">Nombre</button>
+                        <button type="button" class="btn-filter active" data-sort="points_total" onclick="setMarketSort('points_total')">Pts ↓</button>
+                        <button type="button" class="btn-filter" data-sort="points_avg" onclick="setMarketSort('points_avg')">Media ↓</button>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <span class="filter-row-label">Equipo</span>
+                    <button type="button" id="team-filter-toggle" class="btn-team-toggle" onclick="toggleTeamFilters()">
+                        <span id="team-filter-label">Todos</span>
+                        <span class="chev" id="team-filter-chev">▾</span>
+                    </button>
+                </div>
+                <div class="filter-chips grow" id="team-filter-group">
+                    <button type="button" class="btn-filter active" data-filter="ALL" onclick="setTeamFilter('ALL')">Todos</button>
+                    <button type="button" class="btn-filter" data-filter="Athletic" onclick="setTeamFilter('Athletic')">Athletic</button>
+                    <button type="button" class="btn-filter" data-filter="Atlético" onclick="setTeamFilter('Atlético')">Atlético</button>
+                    <button type="button" class="btn-filter" data-filter="Osasuna" onclick="setTeamFilter('Osasuna')">Osasuna</button>
+                    <button type="button" class="btn-filter" data-filter="Alavés" onclick="setTeamFilter('Alavés')">Alavés</button>
+                    <button type="button" class="btn-filter" data-filter="Elche" onclick="setTeamFilter('Elche')">Elche</button>
+                    <button type="button" class="btn-filter" data-filter="Barcelona" onclick="setTeamFilter('Barcelona')">Barcelona</button>
+                    <button type="button" class="btn-filter" data-filter="Getafe" onclick="setTeamFilter('Getafe')">Getafe</button>
+                    <button type="button" class="btn-filter" data-filter="Levante" onclick="setTeamFilter('Levante')">Levante</button>
+                    <button type="button" class="btn-filter" data-filter="Málaga" onclick="setTeamFilter('Málaga')">Málaga</button>
+                    <button type="button" class="btn-filter" data-filter="Rayo" onclick="setTeamFilter('Rayo')">Rayo</button>
+                    <button type="button" class="btn-filter" data-filter="Espanyol" onclick="setTeamFilter('Espanyol')">Espanyol</button>
+                    <button type="button" class="btn-filter" data-filter="Celta" onclick="setTeamFilter('Celta')">Celta</button>
+                    <button type="button" class="btn-filter" data-filter="Deportivo" onclick="setTeamFilter('Deportivo')">Deportivo</button>
+                    <button type="button" class="btn-filter" data-filter="Betis" onclick="setTeamFilter('Betis')">Betis</button>
+                    <button type="button" class="btn-filter" data-filter="Real Madrid" onclick="setTeamFilter('Real Madrid')">R. Madrid</button>
+                    <button type="button" class="btn-filter" data-filter="Racing" onclick="setTeamFilter('Racing')">Racing</button>
+                    <button type="button" class="btn-filter" data-filter="Sociedad" onclick="setTeamFilter('Sociedad')">R. Sociedad</button>
+                    <button type="button" class="btn-filter" data-filter="Sevilla" onclick="setTeamFilter('Sevilla')">Sevilla</button>
+                    <button type="button" class="btn-filter" data-filter="Valencia" onclick="setTeamFilter('Valencia')">Valencia</button>
+                    <button type="button" class="btn-filter" data-filter="Villarreal" onclick="setTeamFilter('Villarreal')">Villarreal</button>
                 </div>
             </div>
             <div id="search-box"><input type="text" id="search-player" oninput="filterPlayers()" placeholder="🔍 Escribe para buscar por nombre o equipo..."></div>
@@ -845,6 +939,8 @@
         let selectedOrderRound = 'ALL';
         let selectedPosFilter = 'ALL';
         let selectedTeamFilter = 'ALL';
+        let selectedMarketSort = 'points_total';
+        let teamFiltersOpen = false;
         let realtimeChannel = null;
 
         const defaultSbUrl = "https://jyiaoohrklcedvsefpkz.supabase.co";
@@ -1684,6 +1780,26 @@
             await loadPlayers();
         }
 
+        function parseOptionalNumber(raw) {
+            if (raw == null) return null;
+            const s = String(raw).trim().replace(/\s/g, '').replace(',', '.');
+            if (!s) return null;
+            const n = Number(s);
+            return Number.isFinite(n) ? n : null;
+        }
+
+        function formatPlayerPtsLine(p) {
+            const total = p.points_total != null && p.points_total !== '' ? Number(p.points_total) : null;
+            const avg = p.points_avg != null && p.points_avg !== '' ? Number(p.points_avg) : null;
+            const hasTotal = total != null && Number.isFinite(total);
+            const hasAvg = avg != null && Number.isFinite(avg);
+            if (!hasTotal && !hasAvg) return '';
+            const parts = [];
+            if (hasTotal) parts.push(`Pts ${total}`);
+            if (hasAvg) parts.push(`Media ${avg}`);
+            return parts.join(' · ');
+        }
+
         function processText(rawText) {
             let lines = rawText.replace(/\r/g, "").split('\n');
             let list = [];
@@ -1699,7 +1815,9 @@
                 if (pos.includes("MD") || pos === "MC" || pos.includes("MED") || pos === "MJS") pos = "MED";
                 if (pos === "DL" || pos.includes("DEL") || pos === "EXT" || pos === "DC") pos = "DEL";
                 if (pos === "PT" || pos.includes("POR") || pos === "GK") pos = "POR";
-                list.push({ name: name, real_team: team, position: pos });
+                const points_total = parseOptionalNumber(parts[3]);
+                const points_avg = parseOptionalNumber(parts[4]);
+                list.push({ name: name, real_team: team, position: pos, points_total, points_avg });
             });
             return list;
         }
@@ -1749,17 +1867,21 @@
             const name = document.getElementById('quick-player-name').value.trim();
             const real_team = document.getElementById('quick-player-team').value.trim() || "Agente Libre";
             const position = document.getElementById('quick-player-pos').value;
+            const points_total = parseOptionalNumber(document.getElementById('quick-player-pts').value);
+            const points_avg = parseOptionalNumber(document.getElementById('quick-player-avg').value);
             if (!name) {
                 alert("El nombre es obligatorio.");
                 return;
             }
-            const { error } = await sbClient.from('players').insert({ name, real_team, position });
+            const { error } = await sbClient.from('players').insert({ name, real_team, position, points_total, points_avg });
             if (error) {
                 alert("Error al añadir jugador: " + error.message);
                 return;
             }
             document.getElementById('quick-player-name').value = "";
             document.getElementById('quick-player-team').value = "";
+            document.getElementById('quick-player-pts').value = "";
+            document.getElementById('quick-player-avg').value = "";
             alert(`✅ ${name} añadido.`);
             await loadPlayers();
             searchEditPlayers();
@@ -1799,6 +1921,8 @@
             document.getElementById('edit-player-name').value = p.name || '';
             document.getElementById('edit-player-team').value = p.real_team || '';
             document.getElementById('edit-player-pos').value = ['POR','DEF','MED','DEL'].includes(p.position) ? p.position : 'MED';
+            document.getElementById('edit-player-pts').value = p.points_total != null ? String(p.points_total) : '';
+            document.getElementById('edit-player-avg').value = p.points_avg != null ? String(p.points_avg) : '';
         }
 
         async function saveEditedPlayer() {
@@ -1812,13 +1936,15 @@
             const name = document.getElementById('edit-player-name').value.trim();
             const real_team = document.getElementById('edit-player-team').value.trim() || "Agente Libre";
             const position = document.getElementById('edit-player-pos').value;
+            const points_total = parseOptionalNumber(document.getElementById('edit-player-pts').value);
+            const points_avg = parseOptionalNumber(document.getElementById('edit-player-avg').value);
             if (!name) {
                 alert("El nombre es obligatorio.");
                 return;
             }
             const { error } = await sbClient
                 .from('players')
-                .update({ name, real_team, position })
+                .update({ name, real_team, position, points_total, points_avg })
                 .eq('id', playerId);
             if (error) {
                 alert("Error al guardar: " + error.message);
@@ -1833,6 +1959,45 @@
                 sel.value = String(playerId);
                 fillEditPlayerForm();
             }
+        }
+
+        async function deleteSelectedPlayer() {
+            if (!sbClient || !isAdminMode) return;
+            const selectEl = document.getElementById('edit-player-select');
+            const playerId = selectEl ? selectEl.value : '';
+            if (!playerId) {
+                alert("Selecciona un jugador.");
+                return;
+            }
+            const p = getPlayerById(playerId);
+            if (!p) {
+                alert("Jugador no encontrado.");
+                return;
+            }
+            const draftedNote = p.drafted_by
+                ? `\n⚠️ Está fichado por ${p.drafted_by}; también se borrará ese pick.`
+                : '';
+            if (!confirm(`¿Borrar a ${p.name} (${p.real_team} · ${p.position})?${draftedNote}`)) return;
+
+            const { error: pickErr } = await sbClient.from('draft_picks').delete().eq('player_id', playerId);
+            if (pickErr) {
+                alert("Error al borrar el pick asociado: " + pickErr.message);
+                return;
+            }
+            const { error } = await sbClient.from('players').delete().eq('id', playerId);
+            if (error) {
+                alert("Error al borrar jugador: " + error.message);
+                return;
+            }
+            document.getElementById('edit-player-name').value = '';
+            document.getElementById('edit-player-team').value = '';
+            document.getElementById('edit-player-pts').value = '';
+            document.getElementById('edit-player-avg').value = '';
+            alert(`✅ ${p.name} eliminado.`);
+            await loadDraftPicks();
+            await loadPlayers();
+            searchEditPlayers();
+            renderUI();
         }
 
         function renderAdminsList() {
@@ -1922,13 +2087,60 @@
             updateUI();
         }
 
+        function teamFilterDisplayLabel(key) {
+            if (!key || key === 'ALL') return 'Todos';
+            const btn = document.querySelector('#team-filter-group .btn-filter[data-filter="' + key.replace(/"/g, '\\"') + '"]');
+            return btn ? btn.textContent.trim() : key;
+        }
+
+        function syncTeamFilterToggle() {
+            const toggle = document.getElementById('team-filter-toggle');
+            const label = document.getElementById('team-filter-label');
+            const chev = document.getElementById('team-filter-chev');
+            const group = document.getElementById('team-filter-group');
+            if (!toggle || !label || !group) return;
+            label.textContent = teamFilterDisplayLabel(selectedTeamFilter);
+            toggle.classList.toggle('has-filter', selectedTeamFilter !== 'ALL');
+            group.classList.toggle('open', teamFiltersOpen);
+            if (chev) chev.textContent = teamFiltersOpen ? '▴' : '▾';
+        }
+
+        function toggleTeamFilters() {
+            teamFiltersOpen = !teamFiltersOpen;
+            syncTeamFilterToggle();
+        }
+
+        function syncMarketFilterButtons() {
+            document.querySelectorAll('#pos-filter-group .btn-filter').forEach(btn => {
+                const val = btn.getAttribute('data-filter');
+                btn.classList.toggle('active', val === selectedPosFilter);
+            });
+            document.querySelectorAll('#team-filter-group .btn-filter').forEach(btn => {
+                const val = btn.getAttribute('data-filter');
+                btn.classList.toggle('active', val === selectedTeamFilter);
+            });
+            document.querySelectorAll('#sort-filter-group .btn-filter').forEach(btn => {
+                const val = btn.getAttribute('data-sort');
+                btn.classList.toggle('active', val === selectedMarketSort);
+            });
+            syncTeamFilterToggle();
+        }
+
         function setPosFilter(pos) {
-            selectedPosFilter = (selectedPosFilter === pos) ? 'ALL' : pos;
+            selectedPosFilter = (selectedPosFilter === pos && pos !== 'ALL') ? 'ALL' : pos;
+            syncMarketFilterButtons();
             updateUI();
         }
         function setTeamFilter(teamName) {
-            selectedTeamFilter = (selectedTeamFilter === teamName) ? 'ALL' : teamName;
+            selectedTeamFilter = (selectedTeamFilter === teamName && teamName !== 'ALL') ? 'ALL' : teamName;
+            teamFiltersOpen = false;
+            syncMarketFilterButtons();
             updateUI();
+        }
+        function setMarketSort(sortKey) {
+            selectedMarketSort = sortKey;
+            syncMarketFilterButtons();
+            renderMarket();
         }
         function setMdlFilter(name) {
             selectedMdlFilter = name;
@@ -1938,8 +2150,33 @@
         function resetAllFilters() {
             selectedPosFilter = 'ALL';
             selectedTeamFilter = 'ALL';
+            selectedMarketSort = 'points_total';
+            teamFiltersOpen = false;
             document.getElementById('search-player').value = "";
+            syncMarketFilterButtons();
             updateUI();
+        }
+
+        function sortMarketPlayers(list) {
+            const sorted = list.slice();
+            const numVal = (v) => {
+                if (v == null || v === '') return null;
+                const n = Number(v);
+                return Number.isFinite(n) ? n : null;
+            };
+            sorted.sort((a, b) => {
+                if (selectedMarketSort === 'points_total' || selectedMarketSort === 'points_avg') {
+                    const av = numVal(a[selectedMarketSort]);
+                    const bv = numVal(b[selectedMarketSort]);
+                    if (av == null && bv == null) return a.name.localeCompare(b.name, 'es');
+                    if (av == null) return 1;
+                    if (bv == null) return -1;
+                    if (bv !== av) return bv - av;
+                    return a.name.localeCompare(b.name, 'es');
+                }
+                return a.name.localeCompare(b.name, 'es');
+            });
+            return sorted;
         }
 
         function updatePendingBanner() {
@@ -2008,6 +2245,7 @@
                 mainContainer.classList.remove('board-mode');
                 if (mainEl) mainEl.classList.remove('layout-wide-center');
                 if (poolEl) poolEl.className = 'grid';
+                syncMarketFilterButtons();
                 renderMarket();
                     
             } else if (activeTab === 'teams') {
@@ -2308,13 +2546,13 @@
             pool.innerHTML = "";
 
             const available = dbPlayers.filter(p => !p.drafted_by);
-            const filtered = available.filter(p => {
+            const filtered = sortMarketPlayers(available.filter(p => {
                 let normPTeam = normalizeTeamName(p.real_team);
                 let normFTeam = normalizeTeamName(selectedTeamFilter);
                 return (p.name.toLowerCase().includes(search) || normPTeam.includes(search)) &&
                        (selectedPosFilter === 'ALL' || p.position === selectedPosFilter) &&
                        (selectedTeamFilter === 'ALL' || normPTeam === normFTeam);
-            });
+            }));
 
             if (!filtered.length) {
                 pool.innerHTML = `<p style="color:#475569; text-align:center; padding-top:50px; font-size:12px; font-weight:700; text-transform:uppercase;">Ningún jugador disponible coincide con los filtros</p>`;
@@ -2347,7 +2585,9 @@
                     buttonHtml = `<button class="btn-fichar" onclick="pickPlayer(${pObj.id})">Fichar</button>`;
                 }
 
-                card.innerHTML = `<div><span class="name">${pObj.name} <span class="pos-badge ${posClass}">${pObj.position}</span></span><span class="team">${pObj.real_team}</span></div><div class="actions-box">${buttonHtml}</div>`;
+                const ptsLine = formatPlayerPtsLine(pObj);
+                const ptsHtml = ptsLine ? `<span class="pts">${ptsLine}</span>` : '';
+                card.innerHTML = `<div><span class="name">${pObj.name} <span class="pos-badge ${posClass}">${pObj.position}</span></span><span class="team">${pObj.real_team}</span>${ptsHtml}</div><div class="actions-box">${buttonHtml}</div>`;
                 pool.appendChild(card);
             });
         }
