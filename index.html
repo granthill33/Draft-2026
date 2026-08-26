@@ -1963,27 +1963,30 @@
                 <button class="btn btn-sm" style="background:rgba(0,0,0,0.4); width:auto;" onclick="cancelResolvePending()">Cancelar</button>`;
         }
 
-        function updateUI() {function updateUI() {
-    // 1. PEGA EL CÓDIGO AQUÍ (JUSTO DESPUÉS DE LA LLAVE ABIERTA):
-    const posButtons = document.querySelectorAll('#pos-filter-group .btn-filter');
-    posButtons.forEach(btn => {
-        if (btn.getAttribute('onclick').includes(`'${selectedPosFilter}'`)) {
+        function updateUI() {    // --- CONTROL DE PESTAÑAS ACTIVAS (MÉTODO SEGURO) ---
+    // 1. Limpiar y activar botones de posición
+    document.querySelectorAll('#pos-filter-group .btn-filter').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.innerText === 'TODAS' && selectedPosFilter === 'ALL') {
             btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
+        } else if (btn.innerText === selectedPosFilter) {
+            btn.classList.add('active');
         }
     });
 
-    const teamButtons = document.querySelectorAll('#team-filter-group .btn-filter');
-    teamButtons.forEach(btn => {
-        if (btn.getAttribute('onclick').includes(`'${selectedTeamFilter}'`)) {
+    // 2. Limpiar y activar botones de equipo
+    document.querySelectorAll('#team-filter-group .btn-filter').forEach(btn => {
+        btn.classList.remove('active');
+        // Buscamos si el texto del botón empieza igual o si el onclick contiene el nombre del equipo
+        const onclickText = btn.getAttribute('onclick') || '';
+        if (selectedTeamFilter === 'ALL' && btn.innerText === 'TODOS') {
             btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
+        } else if (onclickText.includes(`'${selectedTeamFilter}'`)) {
+            btn.classList.add('active');
         }
     });
+    // ----------------------------------------------------
 
-    // 2. AQUÍ COMIENZA TU CÓDIGO ACTUAL (NO TOQUES NADA DE ESTO):
     const activePlayers = dbPlayers.filter(p => !p.drafted_by);
     document.getElementById('pool-count').innerText = activePlayers.length;
 
