@@ -1963,7 +1963,30 @@
                 <button class="btn btn-sm" style="background:rgba(0,0,0,0.4); width:auto;" onclick="cancelResolvePending()">Cancelar</button>`;
         }
 
-        function updateUI() {
+        function updateUI() {function updateUI() {
+    // 1. PEGA EL CÓDIGO AQUÍ (JUSTO DESPUÉS DE LA LLAVE ABIERTA):
+    const posButtons = document.querySelectorAll('#pos-filter-group .btn-filter');
+    posButtons.forEach(btn => {
+        if (btn.getAttribute('onclick').includes(`'${selectedPosFilter}'`)) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    const teamButtons = document.querySelectorAll('#team-filter-group .btn-filter');
+    teamButtons.forEach(btn => {
+        if (btn.getAttribute('onclick').includes(`'${selectedTeamFilter}'`)) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    // 2. AQUÍ COMIENZA TU CÓDIGO ACTUAL (NO TOQUES NADA DE ESTO):
+    const activePlayers = dbPlayers.filter(p => !p.drafted_by);
+    document.getElementById('pool-count').innerText = activePlayers.length;
+
             const activePlayers = dbPlayers.filter(p => !p.drafted_by);
             document.getElementById('pool-count').innerText = activePlayers.length;
 
