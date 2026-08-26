@@ -1964,13 +1964,10 @@
         }
 
         function updateUI() { 
-    const activePlayers = dbPlayers.filter(p => !p.drafted_by);
-    document.getElementById('pool-count').innerText = activePlayers.length;
-
             const activePlayers = dbPlayers.filter(p => !p.drafted_by);
             document.getElementById('pool-count').innerText = activePlayers.length;
 
-            const turnMgr = managerAt(draftState.current_manager_index);
+             const turnMgr = managerAt(draftState.current_manager_index);
 
             if (draftState.is_active && turnMgr) {
                 document.getElementById('turn-indicator').classList.remove('hidden');
