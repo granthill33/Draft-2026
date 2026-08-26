@@ -2498,14 +2498,16 @@
                     const pickLabel = dp.is_retained
                         ? `R${dp.round}`
                         : `R${dp.round} · Pick #${dp.pick_number}`;
-                    item.innerHTML = `<strong>${mName}</strong>${adminTag}${retainTag}<br>
-                        <span style="color:#5b9fb8; font-weight:700;">${pName}</span>
-                        <span style="color:#94a3b8; font-size:10px;"> [${pos}] ${team}</span>
-                        <div style="font-size:10px;color:#64748b;margin-top:4px;">${pickLabel}</div>`;
-                }
-               container.appendChild(item);
+            item.innerHTML = `<strong>${mName}</strong>${adminTag}${retainTag}<br>
+                <span style="color:#5b9fb8; font-weight:700;">${pName}</span>
+                <span style="color:#94a3b8; font-size:10px;"> [${pos}] ${team}</span>
+                <div style="font-size:10px; color:#64748b; margin-top:4px;">${pickLabel}</div>`;
+        }
+        container.appendChild(item);
     });
 }
 </script>
 </body>
 </html>
+
+
