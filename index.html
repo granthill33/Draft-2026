@@ -695,6 +695,119 @@
         }
         .wl-rank-btns button:hover { color: var(--text-strong); background: rgba(255,255,255,0.08); }
         .wl-hint { font-size: 10px; color: var(--muted); margin: 0 0 8px; line-height: 1.35; }
+
+        .wl-list {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(0,0,0,0.12);
+        }
+        .wl-list-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid var(--border);
+        }
+        .wl-list-header .wl-col-rank { width: 28px; flex-shrink: 0; text-align: center; }
+        .wl-list-header .wl-col-move { width: 52px; flex-shrink: 0; }
+        .wl-list-header .wl-col-info { flex: 1; min-width: 0; }
+        .wl-list-header .wl-col-pts { width: 52px; flex-shrink: 0; text-align: right; }
+        .wl-list-header .wl-col-avg { width: 44px; flex-shrink: 0; text-align: right; }
+        .wl-list-header .wl-col-actions { width: 120px; flex-shrink: 0; text-align: right; }
+        @media (max-width: 640px) {
+            .wl-list-header .wl-col-avg { display: none; }
+            .wl-list-row .wl-col-avg { display: none; }
+        }
+        .wl-list-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 10px;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            min-height: 34px;
+        }
+        .wl-list-row:last-child { border-bottom: none; }
+        .wl-list-row:hover { background: rgba(255,255,255,0.03); }
+        .wl-list-row .wl-col-rank {
+            width: 28px;
+            flex-shrink: 0;
+            text-align: center;
+            font-weight: 800;
+            color: #5b9fb8;
+            font-size: 10px;
+        }
+        .wl-list-row .wl-col-move { width: 52px; flex-shrink: 0; }
+        .wl-list-row .wl-col-info { flex: 1; min-width: 0; overflow: hidden; }
+        .wl-list-row .wl-col-pts,
+        .wl-list-row .wl-col-avg {
+            flex-shrink: 0;
+            text-align: right;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+        }
+        .wl-list-row .wl-col-pts { width: 52px; color: var(--text); }
+        .wl-list-row .wl-col-avg { width: 44px; }
+        .wl-list-row .wl-col-actions {
+            width: 120px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+        }
+        .wl-list-name {
+            font-weight: 700;
+            color: var(--text-strong);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+        .wl-list-meta {
+            font-size: 9px;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 1px;
+        }
+        .wl-rank-btns.inline { flex-direction: row; gap: 1px; }
+        .wl-rank-btns.inline button {
+            width: 16px;
+            height: 16px;
+            font-size: 8px;
+            line-height: 1;
+            padding: 0;
+        }
+        .wl-list-row .btn-fichar {
+            background: var(--bg-2);
+            border: 1px solid var(--border-strong);
+            color: var(--text);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            min-height: 26px;
+        }
+        .wl-list-row .btn-fichar:not(:disabled):hover { background: var(--accent); color: #0b1220; border-color: var(--accent); }
+        .wl-list-row .btn-fichar:disabled { opacity: 0.45; cursor: not-allowed; }
+        .wl-list-row .btn-wishlist { font-size: 14px; padding: 2px 4px; min-height: 26px; }
+        .wl-list.no-rank .wl-col-rank,
+        .wl-list.no-rank .wl-col-move { display: none; }
         .manager-account-row {
             display: flex;
             justify-content: space-between;
@@ -1191,6 +1304,13 @@
                     </div>
                 </div>
                 <div class="filter-row">
+                    <span class="filter-row-label">Vista</span>
+                    <div class="filter-chips" id="wl-view-group">
+                        <button type="button" class="btn-filter active" data-wl-view="cards" onclick="setWlViewMode('cards')">▦ Tarjetas</button>
+                        <button type="button" class="btn-filter" data-wl-view="list" onclick="setWlViewMode('list')">☰ Lista</button>
+                    </div>
+                </div>
+                <div class="filter-row">
                     <span class="filter-row-label">Equipo</span>
                     <button type="button" id="wl-team-filter-toggle" class="btn-team-toggle" onclick="toggleWlTeamFilters()">
                         <span id="wl-team-filter-label">Todos</span>
@@ -1225,6 +1345,7 @@
         let wlTeamFilter = 'ALL';
         let wlSortMode = 'priority';
         let wlTeamFiltersOpen = false;
+        let wlViewMode = localStorage.getItem('wlViewMode') || 'cards';
         let isAdminMode = false;
         let resolvingPendingId = null;
         let selectedMdlFilter = 'ALL';
@@ -1322,6 +1443,9 @@
             document.querySelectorAll('#wl-sort-group .btn-filter').forEach(btn => {
                 btn.classList.toggle('active', btn.getAttribute('data-wl-sort') === wlSortMode);
             });
+            document.querySelectorAll('#wl-view-group .btn-filter').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-wl-view') === wlViewMode);
+            });
             document.querySelectorAll('#wl-team-filter-group .btn-filter').forEach(btn => {
                 btn.classList.toggle('active', btn.getAttribute('data-wl-filter') === wlTeamFilter);
             });
@@ -1343,6 +1467,13 @@
 
         function setWlSortMode(mode) {
             wlSortMode = mode;
+            syncWishlistFilterButtons();
+            renderWishlist();
+        }
+
+        function setWlViewMode(mode) {
+            wlViewMode = mode === 'list' ? 'list' : 'cards';
+            localStorage.setItem('wlViewMode', wlViewMode);
             syncWishlistFilterButtons();
             renderWishlist();
         }
@@ -1817,18 +1948,39 @@
             return starBtn + buttonHtml;
         }
 
+        function buildWlRankBtns(playerId, inline) {
+            const cls = 'wl-rank-btns' + (inline ? ' inline' : '');
+            return `<div class="${cls}">
+                <button type="button" title="Subir" onclick="moveWishlistPlayer(${playerId}, 'up')">▲</button>
+                <button type="button" title="Bajar" onclick="moveWishlistPlayer(${playerId}, 'down')">▼</button>
+                <button type="button" title="Al top" onclick="moveWishlistPlayer(${playerId}, 'top')">⤒</button>
+            </div>`;
+        }
+
+        function formatWlPts(pObj) {
+            const total = pObj.points_total != null && pObj.points_total !== '' ? Number(pObj.points_total) : null;
+            const avg = pObj.points_avg != null && pObj.points_avg !== '' ? Number(pObj.points_avg) : null;
+            return {
+                pts: total != null && !Number.isNaN(total) ? total.toFixed(0) : '—',
+                avg: avg != null && !Number.isNaN(avg) ? avg.toFixed(1) : '—'
+            };
+        }
+
         function renderWishlist() {
             const pool = document.getElementById('players-pool');
             if (!pool) return;
             pool.innerHTML = '';
+            pool.className = wlViewMode === 'list' ? 'wl-list' : 'grid';
             ensureWlTeamFilterButtons();
             syncWishlistFilterButtons();
             if (!isLoggedIn()) {
+                pool.className = 'grid';
                 pool.innerHTML = `<p style="color:#475569;text-align:center;padding-top:50px;font-size:12px;font-weight:700;">Inicia sesión para ver tu wishlist</p>`;
                 return;
             }
             const sorted = getWishlistPlayersFilteredSorted();
             if (!sorted.length) {
+                pool.className = 'grid';
                 const msg = wishlistRows.length
                     ? 'Ningún jugador coincide con los filtros'
                     : 'Tu wishlist está vacía. Pulsa ★ en el mercado.';
@@ -1838,6 +1990,44 @@
             const turnName = (managerAt(draftState.current_manager_index) || {}).name || '';
             const allowFichar = canFichar();
             const showRank = wlSortMode === 'priority';
+
+            if (wlViewMode === 'list') {
+                if (!showRank) pool.classList.add('no-rank');
+                const header = document.createElement('div');
+                header.className = 'wl-list-header' + (showRank ? '' : ' no-rank');
+                header.innerHTML = `
+                    <span class="wl-col-rank">${showRank ? '#' : ''}</span>
+                    <span class="wl-col-move">${showRank ? 'Ord' : ''}</span>
+                    <span class="wl-col-info">Jugador</span>
+                    <span class="wl-col-pts">Pts</span>
+                    <span class="wl-col-avg">Med</span>
+                    <span class="wl-col-actions"></span>`;
+                pool.appendChild(header);
+                sorted.forEach((pObj, i) => {
+                    const row = document.createElement('div');
+                    row.className = 'wl-list-row';
+                    const posClass = `pos-${pObj.position}`;
+                    const { pts, avg } = formatWlPts(pObj);
+                    const rankCol = showRank ? `<span class="wl-col-rank">${i + 1}</span>` : '<span class="wl-col-rank"></span>';
+                    const moveCol = showRank
+                        ? `<span class="wl-col-move">${buildWlRankBtns(pObj.id, true)}</span>`
+                        : '<span class="wl-col-move"></span>';
+                    const actions = buildPlayerActionHtml(pObj, turnName, allowFichar);
+                    row.innerHTML = `
+                        ${rankCol}
+                        ${moveCol}
+                        <div class="wl-col-info">
+                            <span class="wl-list-name">${pObj.name} <span class="pos-badge ${posClass}">${pObj.position}</span></span>
+                            <span class="wl-list-meta">${pObj.real_team}</span>
+                        </div>
+                        <span class="wl-col-pts">${pts}</span>
+                        <span class="wl-col-avg">${avg}</span>
+                        <div class="wl-col-actions">${actions}</div>`;
+                    pool.appendChild(row);
+                });
+                return;
+            }
+
             sorted.forEach((pObj, i) => {
                 const card = document.createElement('div');
                 card.className = 'card';
@@ -1845,11 +2035,7 @@
                 const ptsLine = formatPlayerPtsLine(pObj);
                 const ptsHtml = ptsLine ? `<span class="pts">${ptsLine}</span>` : '';
                 const rankHtml = showRank ? `<span class="pts" style="color:#5b9fb8;">#${i + 1} en tu lista</span>` : '';
-                const rankBtns = showRank ? `<div class="wl-rank-btns">
-                    <button type="button" title="Subir" onclick="moveWishlistPlayer(${pObj.id}, 'up')">▲</button>
-                    <button type="button" title="Bajar" onclick="moveWishlistPlayer(${pObj.id}, 'down')">▼</button>
-                    <button type="button" title="Al top" onclick="moveWishlistPlayer(${pObj.id}, 'top')">⤒</button>
-                </div>` : '';
+                const rankBtns = showRank ? buildWlRankBtns(pObj.id, false) : '';
                 const actions = rankBtns + buildPlayerActionHtml(pObj, turnName, allowFichar);
                 card.innerHTML = `<div><span class="name">${pObj.name} <span class="pos-badge ${posClass}">${pObj.position}</span></span><span class="team">${pObj.real_team}</span>${ptsHtml}${rankHtml}</div><div class="actions-box">${actions}</div>`;
                 pool.appendChild(card);
@@ -3247,7 +3433,7 @@
                 document.getElementById('order-round-nav').style.display = 'none';
                 mainContainer.classList.remove('board-mode');
                 if (mainEl) mainEl.classList.remove('layout-wide-center');
-                if (poolEl) poolEl.className = 'grid';
+                if (poolEl) poolEl.className = wlViewMode === 'list' ? 'wl-list' : 'grid';
                 renderWishlist();
 
             } else if (activeTab === 'teams') {
