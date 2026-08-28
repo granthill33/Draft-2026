@@ -105,6 +105,151 @@
         .neon-cyan { border-color: var(--accent-border); box-shadow: none; }
         .neon-fuchsia { border-color: var(--mine-border); box-shadow: none; }
 
+        .draft-status-banner {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px 16px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.03);
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .draft-status-banner.draft-idle {
+            border-color: var(--border);
+            background: rgba(100, 116, 139, 0.08);
+        }
+        .draft-status-banner.draft-live {
+            border-color: var(--accent-border);
+            background: linear-gradient(135deg, rgba(91,159,184,0.12) 0%, rgba(17,24,39,0.5) 100%);
+        }
+        .draft-status-banner.draft-live.your-turn {
+            border-color: rgba(61, 154, 122, 0.55);
+            background: linear-gradient(135deg, rgba(61,154,122,0.18) 0%, rgba(17,24,39,0.5) 100%);
+            box-shadow: 0 0 0 1px rgba(61, 154, 122, 0.15);
+        }
+        .draft-status-banner.draft-finished {
+            border-color: rgba(61, 154, 122, 0.35);
+            background: rgba(61, 154, 122, 0.08);
+        }
+        .dsb-pill {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 5px 10px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+        .dsb-pill.idle { background: rgba(100,116,139,0.2); color: var(--muted); }
+        .dsb-pill.live { background: var(--accent-soft); color: var(--accent); }
+        .dsb-pill.live-pulse { background: var(--success-soft); color: #6fbfa0; animation: dsb-pulse 2s ease-in-out infinite; }
+        .dsb-pill.finished { background: var(--success-soft); color: #6fbfa0; }
+        @keyframes dsb-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.65; }
+        }
+        .dsb-main { flex: 1; min-width: 180px; }
+        .dsb-round-row {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+        .dsb-round-big {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--text-strong);
+            line-height: 1;
+        }
+        .dsb-round-big span { font-size: 13px; font-weight: 700; color: var(--muted); }
+        .dsb-direction {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .dsb-direction.ida { background: var(--accent-soft); color: var(--accent); }
+        .dsb-direction.vuelta { background: var(--mine-soft); color: var(--mine); }
+        .dsb-turn-name {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-strong);
+            line-height: 1.2;
+        }
+        .dsb-turn-sub {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+        .dsb-progress-wrap {
+            height: 6px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .dsb-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #6fbfa0);
+            border-radius: 999px;
+            transition: width 0.35s ease;
+            min-width: 2%;
+        }
+        .dsb-your-turn {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: var(--success);
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+            animation: dsb-pulse 1.5s ease-in-out infinite;
+        }
+        .dsb-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .dsb-pick-count {
+            font-size: 10px;
+            color: var(--muted);
+            font-weight: 700;
+            text-align: right;
+        }
+        .header-draft-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04);
+            font-size: 11px;
+            max-width: min(420px, 100%);
+        }
+        .header-draft-status.live { border-color: var(--accent-border); }
+        .header-draft-status.your-turn { border-color: rgba(61,154,122,0.5); background: rgba(61,154,122,0.1); }
+        .header-draft-status.idle { color: var(--muted); }
+        .header-draft-status.finished { border-color: rgba(61,154,122,0.35); color: #6fbfa0; }
+        .header-draft-status strong { color: var(--text-strong); font-size: 12px; }
+        .header-draft-dot {
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+            background: var(--muted);
+        }
+        .header-draft-status.live .header-draft-dot { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+        .header-draft-status.your-turn .header-draft-dot { background: var(--success); box-shadow: 0 0 8px var(--success); animation: dsb-pulse 1.5s infinite; }
+        .header-draft-status.finished .header-draft-dot { background: var(--success); }
+
         main {
             max-width: 1500px;
             width: 100%;
@@ -491,6 +636,76 @@
             flex-direction: column;
             gap: 8px;
         }
+        .auth-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+        .auth-actions .btn { flex: 1; min-width: 100px; font-size: 10px; padding: 8px; }
+        .auth-status { font-size: 11px; color: var(--text-strong); }
+        .auth-status small { display: block; color: var(--muted); font-size: 10px; margin-top: 2px; }
+        .pwd-field-wrap { position: relative; margin-bottom: 12px; }
+        .pwd-field-wrap input {
+            width: 100%;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 12px 40px 12px 12px;
+            font-size: 14px;
+            color: #fff;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .pwd-toggle {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 6px;
+            line-height: 1;
+        }
+        .pwd-toggle:hover { color: var(--text-strong); }
+        .btn-wishlist {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 14px;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        .btn-wishlist.active { color: #c4a35a; border-color: rgba(196,163,90,0.45); background: rgba(196,163,90,0.12); }
+        .btn-wishlist:disabled { opacity: 0.35; cursor: not-allowed; }
+        .card.drafted-wish { opacity: 0.5; }
+        .wl-rank-btns { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+        .wl-rank-btns button {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            min-height: 20px;
+            line-height: 1;
+        }
+        .wl-rank-btns button:hover { color: var(--text-strong); background: rgba(255,255,255,0.08); }
+        .wl-hint { font-size: 10px; color: var(--muted); margin: 0 0 8px; line-height: 1.35; }
+        .manager-account-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            font-size: 10px;
+            padding: 6px 8px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
 
         .pending-banner {
             background: var(--warn-soft);
@@ -729,12 +944,9 @@
                 <span id="sb-status-dot" class="status-dot"></span>
                 <span id="sb-status-text" class="status-label">Desconectado</span>
             </div>
-            <div id="turn-indicator" class="turn-panel hidden">
-                <div>
-                    <small id="round-number" style="font-size:9px; color:#94a3b8; display:block; font-weight:700; letter-spacing:1px;">RONDA 1 / 23</small>
-                    <strong id="current-drafter" style="font-size:15px; color:#fff;">-</strong>
-                </div>
-                <div id="direction-tag" style="font-size:10px; font-weight:800; padding:5px 10px; border-radius:6px; text-transform:uppercase;">IDA</div>
+            <div id="header-draft-status" class="header-draft-status idle">
+                <span class="header-draft-dot"></span>
+                <span id="header-draft-text">Draft no iniciado</span>
             </div>
         </div>
     </header>
@@ -828,9 +1040,16 @@
                     </div>
                 </div>
 
-                <!-- 7. Start / Undo / Reset / Disconnect -->
+                <!-- 7. Cuentas mánager -->
                 <div class="admin-section">
-                    <span class="admin-section-title">7. Control del Draft</span>
+                    <span class="admin-section-title">7. Cuentas mánager</span>
+                    <small style="color:#64748b;font-size:10px;">Resetear contraseña si alguien la pierde. La wishlist se conserva.</small>
+                    <div id="manager-accounts-list" style="display:flex; flex-direction:column; gap:4px;"></div>
+                </div>
+
+                <!-- 8. Start / Undo / Reset / Disconnect -->
+                <div class="admin-section">
+                    <span class="admin-section-title">8. Control del Draft</span>
                     <button onclick="startDraft()" id="btn-start-draft" class="btn btn-green">▶️ Iniciar Draft</button>
                     <button onclick="undoLastPick()" id="btn-undo" class="btn btn-undo">↩️ Deshacer Último Pick</button>
                     <button onclick="resetDraftInSupabase()" id="btn-reset-total" class="btn btn-clear" style="margin-top:5px; background:#c07070;">🚨 RESETEAR DRAFT DESDE CERO</button>
@@ -838,21 +1057,53 @@
                 </div>
             </div>
 
-            <div class="manager-select-panel">
-                <span style="font-weight: bold; color: #94a3b8;">Tu Identidad (Mánager Actual):</span>
-                <select id="user-identity" onchange="updateIdentity()">
-                    <option value="">Espectador / Todos</option>
-                </select>
-                <small style="color: #64748b; font-size: 10px;">Elige tu nombre si vas a fichar. En modo espectador, no podrás realizar fichajes.</small>
+            <div class="manager-select-panel" id="auth-panel">
+                <div id="auth-logged-out">
+                    <span style="font-weight: bold; color: #94a3b8;">Entrar como mánager</span>
+                    <select id="auth-manager-select"></select>
+                    <div class="auth-actions">
+                        <button type="button" onclick="openManagerAuthFlow()" class="btn" style="background:#5b9fb8;">Entrar / Crear cuenta</button>
+                    </div>
+                    <small style="color: #64748b; font-size: 10px;">Sin sesión = espectador (mercado y plantillas, sin fichar ni wishlist).</small>
+                </div>
+                <div id="auth-logged-in" style="display:none;">
+                    <div class="auth-status">
+                        <span>Sesión: <strong id="auth-manager-name"></strong></span>
+                        <small id="auth-wishlist-count"></small>
+                    </div>
+                    <div class="auth-actions">
+                        <button type="button" onclick="openChangePasswordModal()" class="btn" style="background:rgba(91,159,184,0.2); color:#5b9fb8;">Cambiar contraseña</button>
+                        <button type="button" onclick="logoutManager()" class="btn" style="background:rgba(0,0,0,0.3); color:#94a3b8;">Cerrar sesión</button>
+                    </div>
+                </div>
             </div>
         </section>
 
         <section class="panel">
             <div class="tabs">
                 <button id="tab-market" class="tab active" onclick="switchTab('market')">🛒 Mercado (<span id="pool-count">0</span>)</button>
+                <button id="tab-wishlist" class="tab" onclick="switchTab('wishlist')" style="display:none;">★ Wishlist (<span id="wishlist-count">0</span>)</button>
                 <button id="tab-teams" class="tab" onclick="switchTab('teams')">👥 Plantillas</button>
                 <button id="tab-order" class="tab" onclick="switchTab('order')">📋 Orden Picks</button>
                 <button id="tab-board" class="tab" onclick="switchTab('board')">📊 Tablero</button>
+            </div>
+            <div id="draft-status-banner" class="draft-status-banner draft-idle">
+                <span id="dsb-pill" class="dsb-pill idle">En espera</span>
+                <div class="dsb-main">
+                    <div id="dsb-progress-wrap" class="dsb-progress-wrap" style="display:none;">
+                        <div id="dsb-progress-bar" class="dsb-progress-bar" style="width:0%;"></div>
+                    </div>
+                    <div class="dsb-round-row">
+                        <div id="dsb-round-big" class="dsb-round-big">Draft no iniciado</div>
+                        <span id="dsb-direction" class="dsb-direction ida" style="display:none;">Ida ➡️</span>
+                    </div>
+                    <div id="dsb-turn-name" class="dsb-turn-name" style="display:none;"></div>
+                    <div id="dsb-turn-sub" class="dsb-turn-sub">El admin debe pulsar «Iniciar Draft» para comenzar.</div>
+                </div>
+                <div class="dsb-meta">
+                    <span id="dsb-your-turn" class="dsb-your-turn" style="display:none;">¡Es tu turno!</span>
+                    <span id="dsb-pick-count" class="dsb-pick-count"></span>
+                </div>
             </div>
             <div id="order-round-nav" style="display:none;" class="order-round-nav"></div>
             <div id="pending-resolve-banner" class="pending-banner" style="display:none;"></div>
@@ -878,6 +1129,12 @@
                         <button type="button" class="btn-filter" data-sort="name" onclick="setMarketSort('name')">Nombre</button>
                         <button type="button" class="btn-filter active" data-sort="points_total" onclick="setMarketSort('points_total')">Pts ↓</button>
                         <button type="button" class="btn-filter" data-sort="points_avg" onclick="setMarketSort('points_avg')">Media ↓</button>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <span class="filter-row-label">Extra</span>
+                    <div class="filter-chips" id="wishlist-filter-group">
+                        <button type="button" class="btn-filter" id="btn-wishlist-only" onclick="toggleWishlistOnlyFilter()">★ Solo wishlist</button>
                     </div>
                 </div>
                 <div class="filter-row">
@@ -911,7 +1168,39 @@
                     <button type="button" class="btn-filter" data-filter="Villarreal" onclick="setTeamFilter('Villarreal')">Villarreal</button>
                 </div>
             </div>
+            <div id="wishlist-toolbar" style="display:none;" class="filter-toolbar">
+                <p class="wl-hint">Mi orden: ▲▼ sube tus favoritos. Los jugadores fichados (por cualquiera) desaparecen solos de la lista.</p>
+                <div class="filter-row">
+                    <span class="filter-row-label">Pos</span>
+                    <div class="filter-chips" id="wl-pos-filter-group">
+                        <button type="button" class="btn-filter active" data-wl-filter="ALL" onclick="setWlPosFilter('ALL')">Todas</button>
+                        <button type="button" class="btn-filter" data-wl-filter="POR" onclick="setWlPosFilter('POR')">POR</button>
+                        <button type="button" class="btn-filter" data-wl-filter="DEF" onclick="setWlPosFilter('DEF')">DEF</button>
+                        <button type="button" class="btn-filter" data-wl-filter="MED" onclick="setWlPosFilter('MED')">MED</button>
+                        <button type="button" class="btn-filter" data-wl-filter="DEL" onclick="setWlPosFilter('DEL')">DEL</button>
+                    </div>
+                    <button type="button" class="btn-reset-filters" onclick="resetWishlistFilters()">Reset</button>
+                </div>
+                <div class="filter-row">
+                    <span class="filter-row-label">Orden</span>
+                    <div class="filter-chips" id="wl-sort-group">
+                        <button type="button" class="btn-filter active" data-wl-sort="priority" onclick="setWlSortMode('priority')">Mi orden</button>
+                        <button type="button" class="btn-filter" data-wl-sort="points_total" onclick="setWlSortMode('points_total')">Pts ↓</button>
+                        <button type="button" class="btn-filter" data-wl-sort="points_avg" onclick="setWlSortMode('points_avg')">Media ↓</button>
+                        <button type="button" class="btn-filter" data-wl-sort="name" onclick="setWlSortMode('name')">Nombre</button>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <span class="filter-row-label">Equipo</span>
+                    <button type="button" id="wl-team-filter-toggle" class="btn-team-toggle" onclick="toggleWlTeamFilters()">
+                        <span id="wl-team-filter-label">Todos</span>
+                        <span class="chev" id="wl-team-filter-chev">▾</span>
+                    </button>
+                </div>
+                <div class="filter-chips grow" id="wl-team-filter-group"></div>
+            </div>
             <div id="search-box"><input type="text" id="search-player" oninput="filterPlayers()" placeholder="🔍 Escribe para buscar por nombre o equipo..."></div>
+            <div id="wishlist-search-box" style="display:none;"><input type="text" id="search-wishlist" oninput="renderWishlist()" placeholder="🔍 Buscar en tu wishlist..."></div>
             <div id="main-container" class="scroll"><div id="players-pool" class="grid"><p style="color:#475569; text-align:center; padding-top:50px; font-size:12px; font-weight:700; text-transform:uppercase;">Esperando que cargues los jugadores...</p></div></div>
         </section>
 
@@ -929,6 +1218,13 @@
         let adminsList = [];
         let draftState = { current_round: 1, current_manager_index: 0, is_active: false };
         let currentIdentity = "";
+        let loggedInManager = null;
+        let wishlistRows = [];
+        let showWishlistOnly = false;
+        let wlPosFilter = 'ALL';
+        let wlTeamFilter = 'ALL';
+        let wlSortMode = 'priority';
+        let wlTeamFiltersOpen = false;
         let isAdminMode = false;
         let resolvingPendingId = null;
         let selectedMdlFilter = 'ALL';
@@ -966,8 +1262,598 @@
             return fullName.trim();
         }
 
-        if (localStorage.getItem('draft_user_identity')) {
-            currentIdentity = localStorage.getItem('draft_user_identity');
+        function managerAuthEmail(managerId) {
+            return `manager${managerId}@draft2026.com`;
+        }
+
+        function isLoggedIn() {
+            return !!(loggedInManager && currentIdentity);
+        }
+
+        function isInWishlist(playerId) {
+            return wishlistRows.some(r => String(r.player_id) === String(playerId));
+        }
+
+        const WL_TEAM_OPTIONS = [
+            ['ALL', 'Todos'], ['Athletic', 'Athletic'], ['Atlético', 'Atlético'], ['Osasuna', 'Osasuna'],
+            ['Alavés', 'Alavés'], ['Elche', 'Elche'], ['Barcelona', 'Barcelona'], ['Getafe', 'Getafe'],
+            ['Levante', 'Levante'], ['Málaga', 'Málaga'], ['Rayo', 'Rayo'], ['Espanyol', 'Espanyol'],
+            ['Celta', 'Celta'], ['Deportivo', 'Deportivo'], ['Betis', 'Betis'], ['Real Madrid', 'R. Madrid'],
+            ['Racing', 'Racing'], ['Sociedad', 'R. Sociedad'], ['Sevilla', 'Sevilla'], ['Valencia', 'Valencia'],
+            ['Villarreal', 'Villarreal']
+        ];
+
+        function ensureWlTeamFilterButtons() {
+            const group = document.getElementById('wl-team-filter-group');
+            if (!group || group.childElementCount) return;
+            WL_TEAM_OPTIONS.forEach(([val, label]) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn-filter' + (val === 'ALL' ? ' active' : '');
+                btn.dataset.wlFilter = val;
+                btn.textContent = label;
+                btn.onclick = () => setWlTeamFilter(val);
+                group.appendChild(btn);
+            });
+        }
+
+        function wlTeamFilterDisplayLabel(key) {
+            if (!key || key === 'ALL') return 'Todos';
+            const found = WL_TEAM_OPTIONS.find(o => o[0] === key);
+            return found ? found[1] : key;
+        }
+
+        function syncWlTeamFilterToggle() {
+            const toggle = document.getElementById('wl-team-filter-toggle');
+            const label = document.getElementById('wl-team-filter-label');
+            const chev = document.getElementById('wl-team-filter-chev');
+            const group = document.getElementById('wl-team-filter-group');
+            if (!toggle || !label || !group) return;
+            label.textContent = wlTeamFilterDisplayLabel(wlTeamFilter);
+            toggle.classList.toggle('has-filter', wlTeamFilter !== 'ALL');
+            group.classList.toggle('open', wlTeamFiltersOpen);
+            if (chev) chev.textContent = wlTeamFiltersOpen ? '▴' : '▾';
+        }
+
+        function syncWishlistFilterButtons() {
+            document.querySelectorAll('#wl-pos-filter-group .btn-filter').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-wl-filter') === wlPosFilter);
+            });
+            document.querySelectorAll('#wl-sort-group .btn-filter').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-wl-sort') === wlSortMode);
+            });
+            document.querySelectorAll('#wl-team-filter-group .btn-filter').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-wl-filter') === wlTeamFilter);
+            });
+            syncWlTeamFilterToggle();
+        }
+
+        function setWlPosFilter(pos) {
+            wlPosFilter = (wlPosFilter === pos && pos !== 'ALL') ? 'ALL' : pos;
+            syncWishlistFilterButtons();
+            renderWishlist();
+        }
+
+        function setWlTeamFilter(team) {
+            wlTeamFilter = (wlTeamFilter === team && team !== 'ALL') ? 'ALL' : team;
+            wlTeamFiltersOpen = false;
+            syncWishlistFilterButtons();
+            renderWishlist();
+        }
+
+        function setWlSortMode(mode) {
+            wlSortMode = mode;
+            syncWishlistFilterButtons();
+            renderWishlist();
+        }
+
+        function toggleWlTeamFilters() {
+            wlTeamFiltersOpen = !wlTeamFiltersOpen;
+            syncWlTeamFilterToggle();
+        }
+
+        function resetWishlistFilters() {
+            wlPosFilter = 'ALL';
+            wlTeamFilter = 'ALL';
+            wlSortMode = 'priority';
+            wlTeamFiltersOpen = false;
+            const search = document.getElementById('search-wishlist');
+            if (search) search.value = '';
+            syncWishlistFilterButtons();
+            renderWishlist();
+        }
+
+        function getWishlistPlayersFilteredSorted() {
+            const search = (document.getElementById('search-wishlist')?.value || '').toLowerCase().trim();
+            let players = wishlistRows
+                .map(r => {
+                    const p = getPlayerById(r.player_id);
+                    return p ? { ...p, _wlId: r.id, _wlSort: r.sort_order ?? 0 } : null;
+                })
+                .filter(p => p && !p.drafted_by);
+
+            players = players.filter(p => {
+                const normPTeam = normalizeTeamName(p.real_team);
+                const normFTeam = normalizeTeamName(wlTeamFilter);
+                return (p.name.toLowerCase().includes(search) || normPTeam.includes(search)) &&
+                    (wlPosFilter === 'ALL' || p.position === wlPosFilter) &&
+                    (wlTeamFilter === 'ALL' || normPTeam === normFTeam);
+            });
+
+            if (wlSortMode === 'priority') {
+                players.sort((a, b) => (a._wlSort - b._wlSort) || a.name.localeCompare(b.name, 'es'));
+            } else if (wlSortMode === 'name') {
+                players.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+            } else {
+                const prev = selectedMarketSort;
+                selectedMarketSort = wlSortMode;
+                players = sortMarketPlayers(players);
+                selectedMarketSort = prev;
+            }
+            return players;
+        }
+
+        async function moveWishlistPlayer(playerId, direction) {
+            if (!sbClient || !isLoggedIn() || wlSortMode !== 'priority') return;
+            const rows = wishlistRows.slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+            const idx = rows.findIndex(r => String(r.player_id) === String(playerId));
+            if (idx < 0) return;
+
+            if (direction === 'top') {
+                if (idx === 0) return;
+                const minOrder = Math.min(...rows.map(r => r.sort_order ?? 0));
+                const { error } = await sbClient.from('wishlist_items').update({ sort_order: minOrder - 10 }).eq('player_id', playerId);
+                if (error) { alert('Error: ' + error.message); return; }
+            } else if (direction === 'up') {
+                if (idx === 0) return;
+                const a = rows[idx], b = rows[idx - 1];
+                const { error: e1 } = await sbClient.from('wishlist_items').update({ sort_order: b.sort_order }).eq('id', a.id);
+                const { error: e2 } = await sbClient.from('wishlist_items').update({ sort_order: a.sort_order }).eq('id', b.id);
+                if (e1 || e2) { alert('Error al reordenar.'); return; }
+            } else if (direction === 'down') {
+                if (idx >= rows.length - 1) return;
+                const a = rows[idx], b = rows[idx + 1];
+                const { error: e1 } = await sbClient.from('wishlist_items').update({ sort_order: b.sort_order }).eq('id', a.id);
+                const { error: e2 } = await sbClient.from('wishlist_items').update({ sort_order: a.sort_order }).eq('id', b.id);
+                if (e1 || e2) { alert('Error al reordenar.'); return; }
+            }
+            await loadWishlist();
+            renderWishlist();
+        }
+
+        function updateAuthPanelUI() {
+            const loggedOut = document.getElementById('auth-logged-out');
+            const loggedIn = document.getElementById('auth-logged-in');
+            const nameEl = document.getElementById('auth-manager-name');
+            const countEl = document.getElementById('auth-wishlist-count');
+            const tabWishlist = document.getElementById('tab-wishlist');
+            const wlCount = document.getElementById('wishlist-count');
+            if (!loggedOut || !loggedIn) return;
+            if (isLoggedIn()) {
+                loggedOut.style.display = 'none';
+                loggedIn.style.display = 'block';
+                if (nameEl) nameEl.textContent = loggedInManager.name;
+                if (countEl) countEl.textContent = `Wishlist: ${wishlistRows.length} jugadores`;
+                if (tabWishlist) tabWishlist.style.display = '';
+            } else {
+                loggedOut.style.display = 'block';
+                loggedIn.style.display = 'none';
+                if (tabWishlist) tabWishlist.style.display = 'none';
+                if (activeTab === 'wishlist') activeTab = 'market';
+            }
+            if (wlCount) wlCount.textContent = wishlistRows.length;
+        }
+
+        function populateAuthManagerSelect() {
+            const selectEl = document.getElementById('auth-manager-select');
+            if (!selectEl) return;
+            const prev = selectEl.value;
+            selectEl.innerHTML = '';
+            managers.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                const status = m.auth_user_id ? ' · cuenta activa' : ' · sin cuenta';
+                opt.innerText = m.name + status;
+                selectEl.appendChild(opt);
+            });
+            if (prev) selectEl.value = prev;
+        }
+
+        function setLoggedInManager(mgr) {
+            loggedInManager = mgr;
+            currentIdentity = mgr ? mgr.name : '';
+            updateAuthPanelUI();
+            if (mgr && activeTab === 'teams') selectedMdlFilter = mgr.name;
+        }
+
+        async function restoreAuthSession() {
+            if (!sbClient) return;
+            const { data: { session } } = await sbClient.auth.getSession();
+            if (!session || !session.user) {
+                setLoggedInManager(null);
+                wishlistRows = [];
+                updateAuthPanelUI();
+                return;
+            }
+            const mgr = managers.find(m => m.auth_user_id === session.user.id);
+            if (!mgr) {
+                await sbClient.auth.signOut();
+                setLoggedInManager(null);
+                wishlistRows = [];
+                updateAuthPanelUI();
+                return;
+            }
+            setLoggedInManager(mgr);
+            await loadWishlist();
+        }
+
+        function passwordFieldHtml(id, placeholder) {
+            return `<div class="pwd-field-wrap">
+                <input type="password" id="${id}" placeholder="${placeholder}">
+                <button type="button" class="pwd-toggle" onclick="togglePasswordVisibility('${id}', this)" title="Ver contraseña">👁</button>
+            </div>`;
+        }
+
+        function togglePasswordVisibility(inputId, btn) {
+            const el = document.getElementById(inputId);
+            if (!el || !btn) return;
+            const show = el.type === 'password';
+            el.type = show ? 'text' : 'password';
+            btn.textContent = show ? '🙈' : '👁';
+            btn.title = show ? 'Ocultar contraseña' : 'Ver contraseña';
+        }
+
+        function openManagerAuthFlow() {
+            const selectEl = document.getElementById('auth-manager-select');
+            const managerId = selectEl ? selectEl.value : '';
+            if (!managerId) {
+                alert('Elige tu mánager.');
+                return;
+            }
+            const mgr = managerById(managerId);
+            if (!mgr) return;
+            const isRegister = !mgr.auth_user_id;
+            openManagerPasswordModal(mgr, isRegister);
+        }
+
+        function openManagerPasswordModal(mgr, isRegister) {
+            if (document.getElementById('manager-auth-modal')) return;
+            const title = isRegister ? 'Crea tu contraseña' : 'Entrar';
+            const subtitle = isRegister
+                ? `Primera vez como ${mgr.name}. Elige una contraseña (mín. 6 caracteres).`
+                : `Contraseña de ${mgr.name}`;
+            const confirmField = isRegister ? passwordFieldHtml('manager-auth-confirm', 'Confirmar contraseña') : '';
+            const modalHtml = `
+                <div id="manager-auth-modal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:9999;">
+                    <div style="background:rgba(20,15,35,0.95);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:28px 24px;max-width:360px;width:90%;color:#fff;">
+                        <h3 style="font-size:18px;margin-bottom:8px;color:#5b9fb8;">${title}</h3>
+                        <p style="font-size:12px;margin-bottom:16px;color:#64748b;">${subtitle}</p>
+                        ${passwordFieldHtml('manager-auth-password', 'Contraseña')}
+                        ${confirmField}
+                        <p id="manager-auth-error" style="font-size:12px;color:#c07070;margin-bottom:10px;display:none;"></p>
+                        <div style="display:flex;gap:8px;">
+                            <button type="button" onclick="submitManagerAuth(${mgr.id}, ${isRegister})" class="btn" style="flex:1;">${isRegister ? 'Crear cuenta' : 'Entrar'}</button>
+                            <button type="button" onclick="closeManagerAuthModal()" class="btn" style="flex:1;background:rgba(0,0,0,0.3);color:#64748b;">Cancelar</button>
+                        </div>
+                    </div>
+                </div>`;
+            document.body.insertAdjacentHTML('beforeEnd', modalHtml);
+            const input = document.getElementById('manager-auth-password');
+            if (input) {
+                input.focus();
+                input.addEventListener('keydown', e => { if (e.key === 'Enter') submitManagerAuth(mgr.id, isRegister); });
+            }
+        }
+
+        function closeManagerAuthModal() {
+            const modal = document.getElementById('manager-auth-modal');
+            if (modal) modal.remove();
+        }
+
+        function showManagerAuthError(msg) {
+            const err = document.getElementById('manager-auth-error');
+            if (err) { err.style.display = 'block'; err.textContent = msg; }
+        }
+
+        async function submitManagerAuth(managerId, isRegister) {
+            const pwdEl = document.getElementById('manager-auth-password');
+            const confirmEl = document.getElementById('manager-auth-confirm');
+            const password = pwdEl ? pwdEl.value : '';
+            const confirm = confirmEl ? confirmEl.value : password;
+            if (password.length < 6) {
+                showManagerAuthError('La contraseña debe tener al menos 6 caracteres.');
+                return;
+            }
+            if (isRegister && password !== confirm) {
+                showManagerAuthError('Las contraseñas no coinciden.');
+                return;
+            }
+            const mgr = managerById(managerId);
+            if (!mgr || !sbClient) return;
+            const email = managerAuthEmail(managerId);
+
+            if (isRegister) {
+                const { data: fnData, error: fnErr } = await sbClient.functions.invoke('register-manager', {
+                    body: { manager_id: Number(managerId), password }
+                });
+                if (fnErr) {
+                    showManagerAuthError(fnErr.message || 'Error al crear la cuenta.');
+                    return;
+                }
+                if (fnData && fnData.error) {
+                    showManagerAuthError(fnData.error);
+                    return;
+                }
+                const { error: signInErr } = await sbClient.auth.signInWithPassword({ email, password });
+                if (signInErr) {
+                    showManagerAuthError('Cuenta creada pero no se pudo iniciar sesión: ' + signInErr.message);
+                    return;
+                }
+                await loadManagers();
+                const updated = managerById(managerId);
+                closeManagerAuthModal();
+                setLoggedInManager(updated);
+                await loadWishlist();
+                alert(`✅ Cuenta creada. Bienvenido, ${updated.name}.`);
+                updateUI();
+                return;
+            }
+
+            const { error } = await sbClient.auth.signInWithPassword({ email, password });
+            if (error) {
+                showManagerAuthError(error.message);
+                return;
+            }
+            await loadManagers();
+            const updated = managerById(managerId);
+            if (!updated || updated.auth_user_id !== (await sbClient.auth.getUser()).data.user?.id) {
+                showManagerAuthError('Esta contraseña no corresponde a ese mánager.');
+                await sbClient.auth.signOut();
+                return;
+            }
+            closeManagerAuthModal();
+            setLoggedInManager(updated);
+            await loadWishlist();
+            updateUI();
+        }
+
+        function openChangePasswordModal() {
+            if (!isLoggedIn() || !loggedInManager) {
+                alert('Inicia sesión para cambiar la contraseña.');
+                return;
+            }
+            if (document.getElementById('change-password-modal')) return;
+            const modalHtml = `
+                <div id="change-password-modal" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:9999;">
+                    <div style="background:rgba(20,15,35,0.95);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:28px 24px;max-width:360px;width:90%;color:#fff;">
+                        <h3 style="font-size:18px;margin-bottom:8px;color:#5b9fb8;">Cambiar contraseña</h3>
+                        <p style="font-size:12px;margin-bottom:16px;color:#64748b;">${loggedInManager.name}</p>
+                        ${passwordFieldHtml('change-pwd-current', 'Contraseña actual')}
+                        ${passwordFieldHtml('change-pwd-new', 'Nueva contraseña')}
+                        ${passwordFieldHtml('change-pwd-confirm', 'Confirmar nueva contraseña')}
+                        <p id="change-pwd-error" style="font-size:12px;color:#c07070;margin-bottom:10px;display:none;"></p>
+                        <div style="display:flex;gap:8px;">
+                            <button type="button" onclick="submitChangePassword()" class="btn" style="flex:1;">Guardar</button>
+                            <button type="button" onclick="closeChangePasswordModal()" class="btn" style="flex:1;background:rgba(0,0,0,0.3);color:#64748b;">Cancelar</button>
+                        </div>
+                    </div>
+                </div>`;
+            document.body.insertAdjacentHTML('beforeEnd', modalHtml);
+            document.getElementById('change-pwd-current')?.focus();
+        }
+
+        function closeChangePasswordModal() {
+            const modal = document.getElementById('change-password-modal');
+            if (modal) modal.remove();
+        }
+
+        function showChangePasswordError(msg) {
+            const err = document.getElementById('change-pwd-error');
+            if (err) { err.style.display = 'block'; err.textContent = msg; }
+        }
+
+        async function submitChangePassword() {
+            if (!sbClient || !loggedInManager) return;
+            const current = document.getElementById('change-pwd-current')?.value || '';
+            const newPwd = document.getElementById('change-pwd-new')?.value || '';
+            const confirm = document.getElementById('change-pwd-confirm')?.value || '';
+            if (newPwd.length < 6) {
+                showChangePasswordError('La nueva contraseña debe tener al menos 6 caracteres.');
+                return;
+            }
+            if (newPwd !== confirm) {
+                showChangePasswordError('La confirmación no coincide.');
+                return;
+            }
+            const email = managerAuthEmail(loggedInManager.id);
+            const { error: verifyErr } = await sbClient.auth.signInWithPassword({ email, password: current });
+            if (verifyErr) {
+                showChangePasswordError('La contraseña actual no es correcta.');
+                return;
+            }
+            const { error: updateErr } = await sbClient.auth.updateUser({ password: newPwd });
+            if (updateErr) {
+                showChangePasswordError(updateErr.message);
+                return;
+            }
+            closeChangePasswordModal();
+            alert('✅ Contraseña actualizada.');
+        }
+
+        async function logoutManager() {
+            if (!sbClient) return;
+            await sbClient.auth.signOut();
+            setLoggedInManager(null);
+            wishlistRows = [];
+            showWishlistOnly = false;
+            updateAuthPanelUI();
+            updateUI();
+        }
+
+        async function loadWishlist() {
+            if (!sbClient || !isLoggedIn()) {
+                wishlistRows = [];
+                updateAuthPanelUI();
+                return;
+            }
+            const { data, error } = await sbClient
+                .from('wishlist_items')
+                .select('id, player_id, sort_order')
+                .order('sort_order', { ascending: true })
+                .order('created_at', { ascending: true });
+            if (error) {
+                console.error('Error loading wishlist:', error);
+                wishlistRows = [];
+            } else {
+                const rows = data || [];
+                const keep = [];
+                for (const w of rows) {
+                    const p = getPlayerById(w.player_id);
+                    if (p && p.drafted_by) {
+                        await sbClient.from('wishlist_items').delete().eq('id', w.id);
+                    } else {
+                        keep.push(w);
+                    }
+                }
+                wishlistRows = keep;
+            }
+            updateAuthPanelUI();
+            if (activeTab === 'wishlist') renderWishlist();
+            else if (activeTab === 'market') renderMarket();
+        }
+
+        async function toggleWishlistPlayer(playerId) {
+            if (!sbClient || !isLoggedIn()) {
+                alert('Inicia sesión como mánager para usar la wishlist.');
+                return;
+            }
+            if (isInWishlist(playerId)) {
+                const { error } = await sbClient.from('wishlist_items').delete().eq('player_id', playerId);
+                if (error) { alert('Error: ' + error.message); return; }
+            } else {
+                const maxOrder = wishlistRows.reduce((m, r) => Math.max(m, r.sort_order ?? 0), 0);
+                const { error } = await sbClient.from('wishlist_items').insert({
+                    manager_id: loggedInManager.id,
+                    player_id: playerId,
+                    sort_order: maxOrder + 10
+                });
+                if (error) { alert('Error: ' + error.message); return; }
+            }
+            await loadWishlist();
+            updateUI();
+        }
+
+        function toggleWishlistOnlyFilter() {
+            if (!isLoggedIn()) {
+                alert('Inicia sesión para filtrar por tu wishlist.');
+                return;
+            }
+            showWishlistOnly = !showWishlistOnly;
+            const btn = document.getElementById('btn-wishlist-only');
+            if (btn) btn.classList.toggle('active', showWishlistOnly);
+            renderMarket();
+        }
+
+        function renderManagerAccountsList() {
+            const container = document.getElementById('manager-accounts-list');
+            if (!container) return;
+            container.innerHTML = '';
+            managers.forEach(m => {
+                const row = document.createElement('div');
+                row.className = 'manager-account-row';
+                const status = m.auth_user_id ? 'Activa' : 'Sin cuenta';
+                row.innerHTML = `<span>${shortClubName(m.name)}<br><span style="color:#64748b;font-size:9px;">${m.name}</span></span>
+                    <span style="color:${m.auth_user_id ? '#6fbfa0' : '#64748b'};font-weight:700;">${status}</span>
+                    <button type="button" class="btn btn-sm" style="width:auto;font-size:9px;padding:4px 8px;${m.auth_user_id ? '' : 'opacity:0.4;'}"
+                        onclick="adminResetManagerAuth(${m.id})" ${m.auth_user_id ? '' : 'disabled'}>Reset pass</button>`;
+                container.appendChild(row);
+            });
+        }
+
+        async function adminResetManagerAuth(managerId) {
+            if (!sbClient || !isAdminMode) return;
+            const mgr = managerById(managerId);
+            if (!mgr || !mgr.auth_user_id) return;
+            if (!confirm(`¿Resetear contraseña de ${mgr.name}? Podrá crear una nueva la próxima vez.`)) return;
+            const { error } = await sbClient.rpc('admin_reset_manager_auth', {
+                p_manager_id: Number(managerId),
+                p_admin_secret: 'draft2026'
+            });
+            if (error) {
+                alert('Error al resetear: ' + error.message);
+                return;
+            }
+            if (loggedInManager && String(loggedInManager.id) === String(managerId)) {
+                await sbClient.auth.signOut();
+                setLoggedInManager(null);
+                wishlistRows = [];
+            }
+            await loadManagers();
+            renderManagerAccountsList();
+            updateAuthPanelUI();
+            alert(`✅ Contraseña reseteada para ${mgr.name}.`);
+        }
+
+        function buildPlayerActionHtml(pObj, turnName, allowFichar) {
+            let buttonHtml = '';
+            if (resolvingPendingId && isAdminMode) {
+                buttonHtml = `<button class="btn-fichar" onclick="pickPlayer(${pObj.id})">Fichar</button>`;
+            } else if (!isLoggedIn() && !isAdminMode) {
+                buttonHtml = `<button class="btn-fichar" disabled onclick="alert('Inicia sesión como mánager para fichar.')">Espectador</button>`;
+            } else if (isAdminMode) {
+                if (!draftState.is_active) {
+                    buttonHtml = `<button class="btn-fichar" disabled>Inactivo</button>`;
+                } else {
+                    buttonHtml = `<button class="btn-fichar" onclick="pickPlayer(${pObj.id})">Fichar (${shortClubName(turnName) || '?'})</button>`;
+                }
+            } else if (!allowFichar) {
+                buttonHtml = `<button class="btn-fichar" disabled onclick="alert('No es tu turno. Le toca a ${turnName}')">Fichar</button>`;
+            } else {
+                buttonHtml = `<button class="btn-fichar" onclick="pickPlayer(${pObj.id})">Fichar</button>`;
+            }
+            const starActive = isInWishlist(pObj.id) ? ' active' : '';
+            const starDisabled = isLoggedIn() ? '' : ' disabled';
+            const starBtn = `<button type="button" class="btn-wishlist${starActive}"${starDisabled} onclick="toggleWishlistPlayer(${pObj.id})" title="Wishlist">★</button>`;
+            return starBtn + buttonHtml;
+        }
+
+        function renderWishlist() {
+            const pool = document.getElementById('players-pool');
+            if (!pool) return;
+            pool.innerHTML = '';
+            ensureWlTeamFilterButtons();
+            syncWishlistFilterButtons();
+            if (!isLoggedIn()) {
+                pool.innerHTML = `<p style="color:#475569;text-align:center;padding-top:50px;font-size:12px;font-weight:700;">Inicia sesión para ver tu wishlist</p>`;
+                return;
+            }
+            const sorted = getWishlistPlayersFilteredSorted();
+            if (!sorted.length) {
+                const msg = wishlistRows.length
+                    ? 'Ningún jugador coincide con los filtros'
+                    : 'Tu wishlist está vacía. Pulsa ★ en el mercado.';
+                pool.innerHTML = `<p style="color:#475569;text-align:center;padding-top:50px;font-size:12px;font-weight:700;">${msg}</p>`;
+                return;
+            }
+            const turnName = (managerAt(draftState.current_manager_index) || {}).name || '';
+            const allowFichar = canFichar();
+            const showRank = wlSortMode === 'priority';
+            sorted.forEach((pObj, i) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                const posClass = `pos-${pObj.position}`;
+                const ptsLine = formatPlayerPtsLine(pObj);
+                const ptsHtml = ptsLine ? `<span class="pts">${ptsLine}</span>` : '';
+                const rankHtml = showRank ? `<span class="pts" style="color:#5b9fb8;">#${i + 1} en tu lista</span>` : '';
+                const rankBtns = showRank ? `<div class="wl-rank-btns">
+                    <button type="button" title="Subir" onclick="moveWishlistPlayer(${pObj.id}, 'up')">▲</button>
+                    <button type="button" title="Bajar" onclick="moveWishlistPlayer(${pObj.id}, 'down')">▼</button>
+                    <button type="button" title="Al top" onclick="moveWishlistPlayer(${pObj.id}, 'top')">⤒</button>
+                </div>` : '';
+                const actions = rankBtns + buildPlayerActionHtml(pObj, turnName, allowFichar);
+                card.innerHTML = `<div><span class="name">${pObj.name} <span class="pos-badge ${posClass}">${pObj.position}</span></span><span class="team">${pObj.real_team}</span>${ptsHtml}${rankHtml}</div><div class="actions-box">${actions}</div>`;
+                pool.appendChild(card);
+            });
         }
 
         window.onload = function() {
@@ -985,6 +1871,7 @@
             searchEditPlayers();
             renderPendingPicksAdmin();
             renderAdminsList();
+            renderManagerAccountsList();
             updateUI();
         }
 
@@ -1064,34 +1951,11 @@
             }
         }
 
-        function updateIdentity() {
-            currentIdentity = document.getElementById('user-identity').value;
-            localStorage.setItem('draft_user_identity', currentIdentity);
-            if (currentIdentity && activeTab === 'teams') {
-                selectedMdlFilter = currentIdentity;
-            }
-            updateUI();
-        }
+        function updateIdentity() { /* legacy noop — identity via auth session */ }
 
         function populateIdentitySelector() {
-            const selectEl = document.getElementById('user-identity');
-            selectEl.innerHTML = '<option value="">Espectador / Todos</option>';
-            managers.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m.name;
-                opt.innerText = m.name;
-                selectEl.appendChild(opt);
-            });
-            const savedIdentity = localStorage.getItem('draft_user_identity');
-            const names = managers.map(m => m.name);
-            if (savedIdentity && names.includes(savedIdentity)) {
-                currentIdentity = savedIdentity;
-                selectEl.value = currentIdentity;
-            } else {
-                currentIdentity = "";
-                selectEl.value = "";
-                localStorage.removeItem('draft_user_identity');
-            }
+            populateAuthManagerSelect();
+            updateAuthPanelUI();
         }
 
         function populateAdminManagers() {
@@ -1174,11 +2038,13 @@
 
         async function fetchAndSubscribe() {
             await loadManagers();
+            await restoreAuthSession();
             await loadDraftState();
             await loadPlayers();
             await loadDraftPicks();
             await loadPendingPicks();
             await loadAdmins();
+            if (isLoggedIn()) await loadWishlist();
 
             if (realtimeChannel) {
                 sbClient.removeChannel(realtimeChannel);
@@ -1197,6 +2063,7 @@
                 })
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'managers' }, async () => {
                     await loadManagers();
+                    await restoreAuthSession();
                 })
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'draft_picks' }, async () => {
                     await loadDraftPicks();
@@ -1207,7 +2074,22 @@
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'admins' }, async () => {
                     await loadAdmins();
                 })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'wishlist_items' }, async () => {
+                    if (isLoggedIn()) {
+                        await loadWishlist();
+                        updateAuthPanelUI();
+                    }
+                })
                 .subscribe();
+
+            sbClient.auth.onAuthStateChange(async (_event, session) => {
+                if (!session) {
+                    setLoggedInManager(null);
+                    wishlistRows = [];
+                    updateAuthPanelUI();
+                    updateUI();
+                }
+            });
         }
 
         async function loadManagers() {
@@ -1247,6 +2129,7 @@
                 console.error("Error loading players:", error);
             } else if (data) {
                 dbPlayers = data;
+                if (isLoggedIn()) await loadWishlist();
                 if (isAdminMode) {
                     searchAdminPlayers();
                     searchEditPlayers();
@@ -1414,6 +2297,10 @@
             }
 
             if (!isAdminMode) {
+                if (!isLoggedIn()) {
+                    alert('Inicia sesión como mánager para fichar.');
+                    return;
+                }
                 if (resolvingPendingId) {
                     alert("Solo el admin puede resolver pendientes.");
                     return;
@@ -2076,8 +2963,13 @@
         }
 
         function switchTab(tabName) {
+            if (tabName === 'wishlist' && !isLoggedIn()) {
+                alert('Inicia sesión para ver tu wishlist.');
+                return;
+            }
             activeTab = tabName;
             document.getElementById('tab-market').classList.toggle('active', tabName === 'market');
+            document.getElementById('tab-wishlist').classList.toggle('active', tabName === 'wishlist');
             document.getElementById('tab-teams').classList.toggle('active', tabName === 'teams');
             document.getElementById('tab-order').classList.toggle('active', tabName === 'order');
             document.getElementById('tab-board').classList.toggle('active', tabName === 'board');
@@ -2152,7 +3044,10 @@
             selectedTeamFilter = 'ALL';
             selectedMarketSort = 'points_total';
             teamFiltersOpen = false;
+            showWishlistOnly = false;
             document.getElementById('search-player').value = "";
+            const wlBtn = document.getElementById('btn-wishlist-only');
+            if (wlBtn) wlBtn.classList.remove('active');
             syncMarketFilterButtons();
             updateUI();
         }
@@ -2200,38 +3095,131 @@
                 <button class="btn btn-sm" style="background:rgba(0,0,0,0.4); width:auto;" onclick="cancelResolvePending()">Cancelar</button>`;
         }
 
+        function getDraftPhase() {
+            if (draftState.is_active) return 'live';
+            if (draftPicks.some(dp => !dp.is_retained)) return 'finished';
+            return 'idle';
+        }
+
+        function countNormalPicks() {
+            return draftPicks.filter(dp => !dp.is_retained).length;
+        }
+
+        function updateDraftStatusUI() {
+            const phase = getDraftPhase();
+            const turnMgr = managerAt(draftState.current_manager_index);
+            const isYourTurn = phase === 'live' && turnMgr && canFichar() && !resolvingPendingId;
+            const round = draftState.current_round || 1;
+            const roundPct = Math.min(100, Math.round((round / MAX_ROUNDS) * 100));
+            const normalPicks = countNormalPicks();
+            const pendingCount = pendingPicks.length;
+
+            const banner = document.getElementById('draft-status-banner');
+            const pill = document.getElementById('dsb-pill');
+            const progressWrap = document.getElementById('dsb-progress-wrap');
+            const progressBar = document.getElementById('dsb-progress-bar');
+            const roundBig = document.getElementById('dsb-round-big');
+            const direction = document.getElementById('dsb-direction');
+            const turnName = document.getElementById('dsb-turn-name');
+            const turnSub = document.getElementById('dsb-turn-sub');
+            const yourTurn = document.getElementById('dsb-your-turn');
+            const pickCount = document.getElementById('dsb-pick-count');
+            const headerStatus = document.getElementById('header-draft-status');
+            const headerText = document.getElementById('header-draft-text');
+
+            if (!banner) return;
+
+            banner.className = 'draft-status-banner draft-' + phase + (isYourTurn ? ' your-turn' : '');
+            if (headerStatus) {
+                headerStatus.className = 'header-draft-status ' + phase + (isYourTurn ? ' your-turn' : '');
+            }
+
+            if (phase === 'idle') {
+                pill.className = 'dsb-pill idle';
+                pill.textContent = 'En espera';
+                if (progressWrap) progressWrap.style.display = 'none';
+                if (roundBig) roundBig.innerHTML = 'Draft no iniciado';
+                if (direction) direction.style.display = 'none';
+                if (turnName) turnName.style.display = 'none';
+                if (turnSub) {
+                    const retCount = dbPlayers.filter(p => p.is_retained).length;
+                    turnSub.textContent = retCount
+                        ? `${retCount} retenciones cargadas · esperando «Iniciar Draft».`
+                        : 'El admin debe pulsar «Iniciar Draft» para comenzar.';
+                }
+                if (yourTurn) yourTurn.style.display = 'none';
+                if (pickCount) pickCount.textContent = managers.length ? `${managers.length} equipos · ${MAX_ROUNDS} rondas` : '';
+                if (headerText) headerText.innerHTML = 'Draft <strong>no iniciado</strong>';
+            } else if (phase === 'live' && turnMgr) {
+                pill.className = 'dsb-pill ' + (isYourTurn ? 'live-pulse' : 'live');
+                pill.textContent = isYourTurn ? '● En vivo · Tu turno' : '● En vivo';
+                if (progressWrap) progressWrap.style.display = 'block';
+                if (progressBar) progressBar.style.width = roundPct + '%';
+                if (roundBig) roundBig.innerHTML = `Ronda ${round} <span>/ ${MAX_ROUNDS}</span>`;
+                if (direction) {
+                    direction.style.display = 'inline-block';
+                    const isIda = round % 2 !== 0;
+                    direction.className = 'dsb-direction ' + (isIda ? 'ida' : 'vuelta');
+                    direction.textContent = isIda ? 'Ida ➡️' : 'Vuelta ⬅️';
+                }
+                if (turnName) {
+                    turnName.style.display = 'block';
+                    turnName.textContent = 'Le toca: ' + turnMgr.name;
+                }
+                if (turnSub) {
+                    let sub = `Pick #${normalPicks + 1} · ${shortClubName(turnMgr.name)} elige`;
+                    if (pendingCount) sub += ` · ${pendingCount} pick${pendingCount > 1 ? 's' : ''} pendiente${pendingCount > 1 ? 's' : ''}`;
+                    turnSub.textContent = sub;
+                }
+                if (yourTurn) yourTurn.style.display = isYourTurn ? 'inline-block' : 'none';
+                if (pickCount) pickCount.textContent = `${normalPicks} picks · ${roundPct}% del draft`;
+                if (headerText) {
+                    const dir = round % 2 !== 0 ? 'Ida' : 'Vuelta';
+                    headerText.innerHTML = isYourTurn
+                        ? `<strong>¡Tu turno!</strong> · R${round} ${dir}`
+                        : `Ronda <strong>${round}/${MAX_ROUNDS}</strong> · ${shortClubName(turnMgr.name)}`;
+                }
+            } else if (phase === 'live') {
+                pill.className = 'dsb-pill live';
+                pill.textContent = '● En vivo';
+                if (progressWrap) progressWrap.style.display = 'block';
+                if (progressBar) progressBar.style.width = '100%';
+                if (roundBig) roundBig.innerHTML = `Ronda ${round} <span>/ ${MAX_ROUNDS}</span>`;
+                if (direction) direction.style.display = 'none';
+                if (turnName) { turnName.style.display = 'none'; }
+                if (turnSub) turnSub.textContent = 'Calculando siguiente turno…';
+                if (yourTurn) yourTurn.style.display = 'none';
+                if (pickCount) pickCount.textContent = `${normalPicks} picks`;
+                if (headerText) headerText.innerHTML = 'Draft <strong>en curso</strong>';
+            } else {
+                pill.className = 'dsb-pill finished';
+                pill.textContent = 'Finalizado';
+                if (progressWrap) progressWrap.style.display = 'block';
+                if (progressBar) progressBar.style.width = '100%';
+                if (roundBig) roundBig.innerHTML = 'Draft <span>completado</span>';
+                if (direction) direction.style.display = 'none';
+                if (turnName) turnName.style.display = 'none';
+                if (turnSub) turnSub.textContent = `${normalPicks} picks realizados en ${MAX_ROUNDS} rondas.`;
+                if (yourTurn) yourTurn.style.display = 'none';
+                if (pickCount) pickCount.textContent = `${dbPlayers.filter(p => p.drafted_by && !p.is_retained).length} jugadores fichados`;
+                if (headerText) headerText.innerHTML = `Draft <strong>finalizado</strong> · ${normalPicks} picks`;
+            }
+        }
+
         function updateUI() { 
             const activePlayers = dbPlayers.filter(p => !p.drafted_by);
             document.getElementById('pool-count').innerText = activePlayers.length;
 
-             const turnMgr = managerAt(draftState.current_manager_index);
-
-            if (draftState.is_active && turnMgr) {
-                document.getElementById('turn-indicator').classList.remove('hidden');
-                document.getElementById('round-number').innerText = `Ronda ${draftState.current_round} / ${MAX_ROUNDS}`;
-                document.getElementById('current-drafter').innerText = turnMgr.name;
-
-                let tag = document.getElementById('direction-tag');
-                let panel = document.getElementById('turn-indicator');
-                if (draftState.current_round % 2 !== 0) {
-                    tag.innerText = "Ida ➡️";
-                    panel.className = "turn-panel neon-cyan";
-                } else {
-                    tag.innerText = "Vuelta ⬅️";
-                    panel.className = "turn-panel neon-fuchsia";
-                }
-            } else if (draftState.is_active) {
-                document.getElementById('turn-indicator').classList.remove('hidden');
-                document.getElementById('current-drafter').innerText = "COMPLETO";
-            } else {
-                document.getElementById('turn-indicator').classList.add('hidden');
-            }
+            updateDraftStatusUI();
 
             updatePendingBanner();
             if (isAdminMode) {
                 renderPendingPicksAdmin();
                 renderAdminsList();
+                renderManagerAccountsList();
             }
+
+            updateAuthPanelUI();
 
             const mainEl = document.querySelector('main');
             const poolEl = document.getElementById('players-pool');
@@ -2240,6 +3228,8 @@
             if (activeTab === 'market') {
                 document.getElementById('filter-wrapper').style.display = 'block';
                 document.getElementById('search-box').style.display = 'block';
+                document.getElementById('wishlist-toolbar').style.display = 'none';
+                document.getElementById('wishlist-search-box').style.display = 'none';
                 document.getElementById('mdl-filter-wrapper').style.display = 'none';
                 document.getElementById('order-round-nav').style.display = 'none';
                 mainContainer.classList.remove('board-mode');
@@ -2247,10 +3237,24 @@
                 if (poolEl) poolEl.className = 'grid';
                 syncMarketFilterButtons();
                 renderMarket();
-                    
+
+            } else if (activeTab === 'wishlist') {
+                document.getElementById('filter-wrapper').style.display = 'none';
+                document.getElementById('search-box').style.display = 'none';
+                document.getElementById('wishlist-toolbar').style.display = 'block';
+                document.getElementById('wishlist-search-box').style.display = 'block';
+                document.getElementById('mdl-filter-wrapper').style.display = 'none';
+                document.getElementById('order-round-nav').style.display = 'none';
+                mainContainer.classList.remove('board-mode');
+                if (mainEl) mainEl.classList.remove('layout-wide-center');
+                if (poolEl) poolEl.className = 'grid';
+                renderWishlist();
+
             } else if (activeTab === 'teams') {
                 document.getElementById('filter-wrapper').style.display = 'none';
                 document.getElementById('search-box').style.display = 'none';
+                document.getElementById('wishlist-toolbar').style.display = 'none';
+                document.getElementById('wishlist-search-box').style.display = 'none';
                 document.getElementById('mdl-filter-wrapper').style.display = 'block';
                 document.getElementById('order-round-nav').style.display = 'none';
                 mainContainer.classList.remove('board-mode');
@@ -2261,6 +3265,8 @@
             } else if (activeTab === 'order') {
                 document.getElementById('filter-wrapper').style.display = 'none';
                 document.getElementById('search-box').style.display = 'none';
+                document.getElementById('wishlist-toolbar').style.display = 'none';
+                document.getElementById('wishlist-search-box').style.display = 'none';
                 document.getElementById('mdl-filter-wrapper').style.display = 'none';
                 document.getElementById('order-round-nav').style.display = 'flex';
                 mainContainer.classList.remove('board-mode');
@@ -2271,6 +3277,8 @@
             } else if (activeTab === 'board') {
                 document.getElementById('filter-wrapper').style.display = 'none';
                 document.getElementById('search-box').style.display = 'none';
+                document.getElementById('wishlist-toolbar').style.display = 'none';
+                document.getElementById('wishlist-search-box').style.display = 'none';
                 document.getElementById('mdl-filter-wrapper').style.display = 'none';
                 document.getElementById('order-round-nav').style.display = 'none';
                 mainContainer.classList.add('board-mode');
@@ -2549,9 +3557,11 @@
             const filtered = sortMarketPlayers(available.filter(p => {
                 let normPTeam = normalizeTeamName(p.real_team);
                 let normFTeam = normalizeTeamName(selectedTeamFilter);
-                return (p.name.toLowerCase().includes(search) || normPTeam.includes(search)) &&
-                       (selectedPosFilter === 'ALL' || p.position === selectedPosFilter) &&
-                       (selectedTeamFilter === 'ALL' || normPTeam === normFTeam);
+                const matchSearch = p.name.toLowerCase().includes(search) || normPTeam.includes(search);
+                const matchPos = selectedPosFilter === 'ALL' || p.position === selectedPosFilter;
+                const matchTeam = selectedTeamFilter === 'ALL' || normPTeam === normFTeam;
+                const matchWishlist = !showWishlistOnly || isInWishlist(p.id);
+                return matchSearch && matchPos && matchTeam && matchWishlist;
             }));
 
             if (!filtered.length) {
@@ -2567,24 +3577,7 @@
                 let posClass = `pos-${pObj.position}`;
                 const card = document.createElement('div');
                 card.className = "card";
-
-                let buttonHtml = '';
-                if (resolvingPendingId && isAdminMode) {
-                    buttonHtml = `<button class="btn-fichar" onclick="pickPlayer(${pObj.id})">Fichar</button>`;
-                } else if (!currentIdentity && !isAdminMode) {
-                    buttonHtml = `<button class="btn-fichar" disabled onclick="alert('Selecciona tu identidad de mánager en el panel izquierdo para poder fichar.')">Espectador</button>`;
-                } else if (isAdminMode) {
-                    if (!draftState.is_active) {
-                        buttonHtml = `<button class="btn-fichar" disabled>Inactivo</button>`;
-                    } else {
-                        buttonHtml = `<button class="btn-fichar" onclick="pickPlayer(${pObj.id})">Fichar (${shortClubName(turnName) || '?'})</button>`;
-                    }
-                } else if (!allowFichar) {
-                    buttonHtml = `<button class="btn-fichar" disabled onclick="alert('No es tu turno. Le toca a ${turnName}')">Fichar</button>`;
-                } else {
-                    buttonHtml = `<button class="btn-fichar" onclick="pickPlayer(${pObj.id})">Fichar</button>`;
-                }
-
+                const buttonHtml = buildPlayerActionHtml(pObj, turnName, allowFichar);
                 const ptsLine = formatPlayerPtsLine(pObj);
                 const ptsHtml = ptsLine ? `<span class="pts">${ptsLine}</span>` : '';
                 card.innerHTML = `<div><span class="name">${pObj.name} <span class="pos-badge ${posClass}">${pObj.position}</span></span><span class="team">${pObj.real_team}</span>${ptsHtml}</div><div class="actions-box">${buttonHtml}</div>`;
