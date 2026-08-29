@@ -1025,9 +1025,116 @@
         .wl-list-header .wl-col-pts { width: 52px; flex-shrink: 0; text-align: right; }
         .wl-list-header .wl-col-avg { width: 44px; flex-shrink: 0; text-align: right; }
         .wl-list-header .wl-col-actions { width: 120px; flex-shrink: 0; text-align: right; }
+        .wl-list-pts-inline { display: none; }
+        .wl-list-sub { margin-top: 1px; }
+        .wl-list-team {
+            font-size: 9px;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         @media (max-width: 640px) {
-            .wl-list-header .wl-col-avg { display: none; }
+            .panel:has(#wishlist-search-box) {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            .wl-list-header { display: none; }
+            .wl-list-row {
+                display: grid;
+                grid-template-columns: 20px 34px minmax(0, 1fr) auto;
+                grid-template-rows: auto auto;
+                column-gap: 6px;
+                row-gap: 2px;
+                align-items: start;
+                padding: 7px 8px;
+                min-height: 0;
+            }
+            .wl-list-row .wl-col-rank {
+                grid-column: 1;
+                grid-row: 1 / 3;
+                width: auto;
+                padding-top: 1px;
+                font-size: 9px;
+            }
+            .wl-list-row .wl-col-move {
+                grid-column: 2;
+                grid-row: 1 / 3;
+                width: auto;
+                align-self: start;
+            }
+            .wl-list-row .wl-col-info {
+                grid-column: 3;
+                grid-row: 1;
+                overflow: visible;
+                min-width: 0;
+            }
+            .wl-list-row .wl-col-pts,
             .wl-list-row .wl-col-avg { display: none; }
+            .wl-list-row .wl-col-actions {
+                grid-column: 4;
+                grid-row: 1 / 3;
+                width: auto;
+                align-self: center;
+                flex-direction: row;
+                flex-wrap: nowrap;
+                align-items: center;
+                justify-content: flex-end;
+                gap: 4px;
+            }
+            .wl-list-sub {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                gap: 8px;
+                width: 100%;
+                font-size: var(--text-xs);
+                line-height: 1.2;
+            }
+            .wl-list-team {
+                min-width: 0;
+                white-space: normal;
+                overflow: visible;
+                text-overflow: unset;
+            }
+            .wl-list-pts-inline {
+                display: inline;
+                flex-shrink: 0;
+                font-size: var(--text-xs);
+                font-weight: 700;
+                color: var(--text);
+                font-variant-numeric: tabular-nums;
+            }
+            .wl-list-name {
+                white-space: normal;
+                overflow: visible;
+                text-overflow: unset;
+                line-height: 1.25;
+                font-size: var(--text-sm);
+            }
+            .wl-rank-btns.inline button:last-child { display: none; }
+            .wl-rank-btns.inline button {
+                width: 14px;
+                height: 14px;
+                font-size: 7px;
+            }
+            .wl-list-row .btn-fichar {
+                padding: 4px 6px;
+                font-size: 9px;
+                min-height: 28px;
+            }
+            .wl-list-row .btn-wishlist {
+                font-size: 12px;
+                min-height: 28px;
+                padding: 2px 4px;
+            }
+            .wl-list.no-rank .wl-list-row {
+                grid-template-columns: minmax(0, 1fr) auto;
+            }
+            .wl-list.no-rank .wl-col-rank,
+            .wl-list.no-rank .wl-col-move { display: none; }
+            .wl-list.no-rank .wl-col-info { grid-column: 1; }
+            .wl-list.no-rank .wl-col-actions { grid-column: 2; }
         }
         .wl-list-row {
             display: flex;
@@ -2334,6 +2441,7 @@
                     row.className = 'wl-list-row';
                     const posClass = `pos-${pObj.position}`;
                     const { pts, avg } = formatWlPts(pObj);
+                    const ptsLine = formatPlayerPtsLine(pObj);
                     const rankCol = showRank ? `<span class="wl-col-rank">${i + 1}</span>` : '<span class="wl-col-rank"></span>';
                     const moveCol = showRank
                         ? `<span class="wl-col-move">${buildWlRankBtns(pObj.id, true)}</span>`
@@ -2344,7 +2452,10 @@
                         ${moveCol}
                         <div class="wl-col-info">
                             <span class="wl-list-name">${pObj.name} <span class="pos-badge ${posClass}">${pObj.position}</span></span>
-                            <span class="wl-list-meta">${pObj.real_team}</span>
+                            <div class="wl-list-sub">
+                                <span class="wl-list-team">${pObj.real_team}</span>
+                                ${ptsLine ? `<span class="wl-list-pts-inline">${ptsLine}</span>` : ''}
+                            </div>
                         </div>
                         <span class="wl-col-pts">${pts}</span>
                         <span class="wl-col-avg">${avg}</span>
