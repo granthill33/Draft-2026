@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Sala de Guerra — Live Draft</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -41,16 +41,29 @@
             --shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        html {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
         body {
             font-family: system-ui, -apple-system, sans-serif;
             background: linear-gradient(165deg, var(--bg-1) 0%, var(--bg-0) 100%);
             color: var(--text);
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             padding-bottom: 30px;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
+        }
+        header, main, .panel {
+            max-width: 100%;
+            min-width: 0;
         }
         header {
             background: rgba(26, 25, 23, 0.96);
@@ -69,6 +82,8 @@
             font-size: 16px;
             color: var(--text-strong);
             letter-spacing: 1px;
+            max-width: 100%;
+            overflow-wrap: anywhere;
         }
         @media (min-width: 640px) { .logo { font-size: 20px; } }
         .header-right {
@@ -157,6 +172,10 @@
         .dsb-pill.live-pulse { background: var(--turn-soft); color: var(--turn); border: 1px solid var(--turn-border); }
         .dsb-pill.finished { background: var(--success-soft); color: var(--success); }
         .dsb-main { flex: 1; min-width: 180px; }
+        @media (max-width: 640px) {
+            .dsb-main { min-width: 0; }
+            .draft-status-banner { gap: 8px; padding: 10px 12px; }
+        }
         .dsb-round-row {
             display: flex;
             align-items: baseline;
@@ -265,6 +284,13 @@
             gap: 16px;
             flex-grow: 1;
         }
+        @media (max-width: 899px) {
+            main {
+                display: flex;
+                flex-direction: column;
+            }
+            main .panel:nth-child(2) { order: -1; }
+        }
         @media (min-width: 900px) {
             main { grid-template-columns: 300px 1fr; padding: 18px; }
             .panel-history { grid-column: 1 / -1; }
@@ -301,8 +327,11 @@
             border-radius: 10px;
             padding: 12px;
             color: var(--text-strong);
-            font-size: 12px;
+            font-size: 16px;
             outline: none;
+        }
+        @media (min-width: 640px) {
+            textarea, input, select { font-size: 12px; }
         }
         textarea { resize: none; font-family: monospace; }
         select { cursor: pointer; }
@@ -762,7 +791,6 @@
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 10px;
             padding: 12px 40px 12px 12px;
-            font-size: 14px;
             color: #fff;
             outline: none;
             box-sizing: border-box;
@@ -987,7 +1015,8 @@
         }
         #main-container.board-mode {
             max-height: none;
-            overflow: visible;
+            overflow-x: auto;
+            overflow-y: visible;
         }
         #players-pool.full-bleed {
             display: block;
@@ -2231,7 +2260,7 @@
                         <p style="font-size: 14px; margin-bottom: 25px; color: #64748b;">Contraseña requerida</p>
                         <input type="password" id="admin-password-input" style="width: 100%; background: rgba(0,0,0,0.5);
                             border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;
-                            font-size: 14px; color: #fff; margin-bottom: 20px; outline: none;" placeholder="Password">
+                            color: #fff; margin-bottom: 20px; outline: none;" placeholder="Password">
                         <div style="display: flex; gap: 10px;">
                             <button onclick="verifyAdminPassword()" class="btn" style="flex: 1;">Entrar</button>
                             <button onclick="closeAdminPasswordModal()" class="btn" style="flex: 1; background: rgba(0,0,0,0.3); color: #64748b;">Cancelar</button>
