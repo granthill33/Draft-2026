@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🏆 SALA DE GUERRA: DRAFT INTERNO PRO 🏆</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
     <style>
         :root {
             --bg-0: #0b1220;
@@ -590,6 +591,38 @@
             white-space: nowrap;
         }
         .btn-copy:hover { color: var(--text-strong); border-color: var(--accent-border); background: var(--accent-soft); }
+        .team-export-btns { display: flex; gap: 4px; flex-wrap: wrap; flex-shrink: 0; }
+        .export-roster-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+        .admin-slot-clickable { cursor: pointer; }
+        .admin-slot-clickable:hover { outline: 1px solid var(--accent-border); background: rgba(91,159,184,0.06) !important; }
+        .admin-slot-cell { cursor: pointer; }
+        .admin-slot-cell:hover { outline: 1px solid var(--accent-border); }
+        #admin-slot-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+            display: none; align-items: center; justify-content: center;
+            z-index: 10000; padding: 16px;
+        }
+        #admin-slot-modal.open { display: flex; }
+        .admin-slot-panel {
+            background: var(--panel-solid); border: 1px solid var(--border-strong);
+            border-radius: 16px; padding: 20px; max-width: 420px; width: 100%;
+            max-height: 90vh; overflow-y: auto;
+        }
+        .admin-slot-panel h3 { margin: 0 0 12px; font-size: 14px; color: var(--text-strong); }
+        .admin-slot-status { font-size: 11px; color: var(--muted); margin-bottom: 12px; line-height: 1.4; }
+        .admin-slot-search { margin-bottom: 10px; }
+        .admin-slot-player-list {
+            max-height: 180px; overflow-y: auto; border: 1px solid var(--border);
+            border-radius: 8px; margin-bottom: 12px;
+        }
+        .admin-slot-player-opt {
+            padding: 8px 10px; font-size: 11px; cursor: pointer; border-bottom: 1px solid var(--border);
+        }
+        .admin-slot-player-opt:last-child { border-bottom: none; }
+        .admin-slot-player-opt:hover { background: rgba(255,255,255,0.05); }
+        .admin-slot-player-opt.selected { background: var(--accent-soft); }
+        .admin-slot-actions { display: flex; flex-direction: column; gap: 6px; }
+        .admin-slot-actions .btn { font-size: 10px; min-height: 36px; }
         .team-box-header {
             display: flex;
             justify-content: space-between;
@@ -1135,6 +1168,7 @@
                 <div class="admin-section">
                     <span class="admin-section-title">4. Turno</span>
                     <button onclick="skipCurrentTurn()" class="btn btn-skip">⏭️ Saltar Turno (Pendiente)</button>
+                    <button onclick="adminRecalculateTurn()" class="btn" style="background:#64748b;margin-top:4px;">🔄 Recalcular turno</button>
                 </div>
 
                 <!-- 5. Pending picks -->
@@ -1221,6 +1255,9 @@
             <div id="order-round-nav" style="display:none;" class="order-round-nav"></div>
             <div id="pending-resolve-banner" class="pending-banner" style="display:none;"></div>
             <div id="mdl-filter-wrapper" style="display:none;">
+                <div class="export-roster-bar">
+                    <button type="button" class="btn-copy" onclick="exportAllTeamsCsvZip()">📦 Exportar todos (ZIP)</button>
+                </div>
                 <div class="filter-section-title"><span>Filtrar plantilla:</span></div>
                 <div class="filter-group" id="mdl-filter-group"></div>
             </div>
@@ -2390,21 +2427,131 @@
             return { nextRound, nextIndex, isStillActive: nextRound <= MAX_ROUNDS };
         }
 
+        function managersInRoundOrder(round) {
+            if (!managers.length) return [];
+            return (round % 2 !== 0) ? managers.slice() : managers.slice().reverse();
+        }
+
+        function hasNormalPick(managerId, round) {
+            return draftPicks.some(dp =>
+                (dp.manager_id === managerId || String(dp.manager_id) === String(managerId)) &&
+                Number(dp.round) === Number(round) &&
+                !dp.is_retained
+            );
+        }
+
+        function hasPendingPick(managerId, round) {
+            return pendingPicks.some(pp =>
+                (pp.manager_id === managerId || String(pp.manager_id) === String(managerId)) &&
+                Number(pp.round) === Number(round)
+            );
+        }
+
+        function recomputeCurrentTurn() {
+            if (!managers.length) {
+                return { current_round: 1, current_manager_index: 0, is_active: false };
+            }
+            for (let round = 1; round <= MAX_ROUNDS; round++) {
+                const ordered = managersInRoundOrder(round);
+                for (const m of ordered) {
+                    if (getRetentionCountForManager(m.name) >= round) continue;
+                    if (hasNormalPick(m.id, round)) continue;
+                    if (hasPendingPick(m.id, round)) continue;
+                    const mgrIndex = managers.findIndex(x => x.id === m.id || String(x.id) === String(m.id));
+                    return {
+                        current_round: round,
+                        current_manager_index: mgrIndex >= 0 ? mgrIndex : 0,
+                        is_active: true
+                    };
+                }
+            }
+            return {
+                current_round: MAX_ROUNDS,
+                current_manager_index: Math.max(0, managers.length - 1),
+                is_active: false
+            };
+        }
+
+        function getGlobalPickNumberForTurn(round, managerIndex) {
+            const turnMgr = managerAt(managerIndex);
+            if (!turnMgr) return 1;
+            let count = 0;
+            let found = false;
+            outer: for (let r = 1; r <= MAX_ROUNDS; r++) {
+                for (const m of managersInRoundOrder(r)) {
+                    if (getRetentionCountForManager(m.name) >= r) continue;
+                    if (Number(r) === Number(round) &&
+                        (m.id === turnMgr.id || String(m.id) === String(turnMgr.id))) {
+                        found = true;
+                        break outer;
+                    }
+                    if (hasNormalPick(m.id, r) || hasPendingPick(m.id, r)) count++;
+                }
+            }
+            return found ? count + 1 : count + 1;
+        }
+
+        const RESOLVED_PENDING_KEY = 'draft_resolved_pending_slots';
+
+        function getResolvedPendingSlots() {
+            try {
+                return JSON.parse(sessionStorage.getItem(RESOLVED_PENDING_KEY) || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function addResolvedPendingSlot(slotKey) {
+            const slots = getResolvedPendingSlots();
+            if (!slots.includes(slotKey)) {
+                slots.push(slotKey);
+                sessionStorage.setItem(RESOLVED_PENDING_KEY, JSON.stringify(slots));
+            }
+        }
+
+        function removeResolvedPendingSlot(slotKey) {
+            sessionStorage.setItem(
+                RESOLVED_PENDING_KEY,
+                JSON.stringify(getResolvedPendingSlots().filter(s => s !== slotKey))
+            );
+        }
+
+        async function persistRecomputedTurn() {
+            const turn = recomputeCurrentTurn();
+            const { error } = await sbClient
+                .from('draft_state')
+                .update({
+                    current_round: turn.current_round,
+                    current_manager_index: turn.current_manager_index,
+                    is_active: turn.is_active
+                })
+                .eq('id', 1);
+            if (error) {
+                console.error('Error updating draft_state:', error);
+                return false;
+            }
+            await loadDraftState();
+            return true;
+        }
+
+        async function adminRecalculateTurn() {
+            if (!sbClient || !isAdminMode) return;
+            await loadDraftPicks();
+            await loadPendingPicks();
+            if (!(await persistRecomputedTurn())) {
+                alert('Error al recalcular el turno.');
+                return;
+            }
+            updateUI();
+            alert('Turno recalculado según picks y pendientes.');
+        }
+
         function getRetentionCountForManager(managerName) {
             return dbPlayers.filter(p => p.drafted_by === managerName && p.is_retained).length;
         }
 
         function hasPickOrPending(managerId, round) {
-            const hasPick = draftPicks.some(dp =>
-                (dp.manager_id === managerId || String(dp.manager_id) === String(managerId)) &&
-                dp.round === round &&
-                !dp.is_retained
-            );
-            const hasPending = pendingPicks.some(pp =>
-                (pp.manager_id === managerId || String(pp.manager_id) === String(managerId)) &&
-                pp.round === round
-            );
-            return hasPick || hasPending;
+            return hasNormalPick(managerId, round) || hasPendingPick(managerId, round);
         }
 
         async function checkAndAutoAdvanceTurn() {
@@ -2458,6 +2605,13 @@
             if (!turnMgr) return false;
             if (isAdminMode) return true;
             return currentIdentity === turnMgr.name;
+        }
+
+        /** Solo para UI: el mánager logueado es quien tiene el turno (no admin ni espectador). */
+        function isMyDraftTurn() {
+            if (!draftState.is_active || resolvingPendingId || !isLoggedIn()) return false;
+            const turnMgr = managerAt(draftState.current_manager_index);
+            return !!(turnMgr && currentIdentity === turnMgr.name);
         }
 
         function getFicharTarget() {
@@ -2535,8 +2689,11 @@
             }
 
             if (target.isPending && target.pendingId) {
+                addResolvedPendingSlot(`${target.manager.id}-${target.round}`);
                 await sbClient.from('pending_picks').delete().eq('id', target.pendingId);
                 resolvingPendingId = null;
+                await loadDraftPicks();
+                await loadPendingPicks();
                 updateUI();
                 return;
             }
@@ -2671,16 +2828,27 @@
                 }).eq('id', player.id);
             }
 
-            const mgrIndex = managers.findIndex(m => m.id === last.manager_id || String(m.id) === String(last.manager_id));
-            await sbClient.from('draft_state').update({
-                current_round: last.round,
-                current_manager_index: mgrIndex >= 0 ? mgrIndex : 0,
-                is_active: true
-            }).eq('id', 1);
-
-            await loadDraftState();
             await loadDraftPicks();
+            await loadPendingPicks();
+
+            const slotKey = `${last.manager_id}-${last.round}`;
+            if (getResolvedPendingSlots().includes(slotKey) && !hasPendingPick(last.manager_id, last.round)) {
+                const { error: pendErr } = await sbClient.from('pending_picks').insert({
+                    manager_id: last.manager_id,
+                    round: last.round
+                });
+                if (!pendErr) {
+                    removeResolvedPendingSlot(slotKey);
+                    await loadPendingPicks();
+                }
+            }
+
+            if (!(await persistRecomputedTurn())) {
+                alert('Pick deshecho, pero hubo un error al recalcular el turno. Usa «Recalcular turno».');
+            }
+
             await loadPlayers();
+            updateUI();
         }
 
         async function retainPlayer() {
@@ -3294,7 +3462,7 @@
         function updateDraftStatusUI() {
             const phase = getDraftPhase();
             const turnMgr = managerAt(draftState.current_manager_index);
-            const isYourTurn = phase === 'live' && turnMgr && canFichar() && !resolvingPendingId;
+            const isYourTurn = phase === 'live' && isMyDraftTurn();
             const round = draftState.current_round || 1;
             const roundPct = Math.min(100, Math.round((round / MAX_ROUNDS) * 100));
             const normalPicks = countNormalPicks();
@@ -3353,7 +3521,8 @@
                     turnName.textContent = 'Le toca: ' + turnMgr.name;
                 }
                 if (turnSub) {
-                    let sub = `Pick #${normalPicks + 1} · ${shortClubName(turnMgr.name)} elige`;
+                    const globalPick = getGlobalPickNumberForTurn(round, draftState.current_manager_index);
+                    let sub = `Pick #${globalPick} · ${shortClubName(turnMgr.name)} elige`;
                     if (pendingCount) sub += ` · ${pendingCount} pick${pendingCount > 1 ? 's' : ''} pendiente${pendingCount > 1 ? 's' : ''}`;
                     turnSub.textContent = sub;
                 }
@@ -3476,11 +3645,6 @@
             renderHistory();
         }
 
-        function managersInRoundOrder(round) {
-            if (!managers.length) return [];
-            return (round % 2 !== 0) ? managers.slice() : managers.slice().reverse();
-        }
-
         function setOrderRoundFilter(round) {
             selectedOrderRound = round;
             renderOrderRoundNav();
@@ -3539,6 +3703,7 @@
                         managerAt(draftState.current_manager_index).id === m.id;
 
                     let rowClass = 'order-pick-row' + (isCurrent ? ' current' : '');
+                    if (isAdminMode) rowClass += ' admin-slot-clickable';
                     let choiceHtml = '';
 
                     if (pick) {
@@ -3558,7 +3723,8 @@
                         choiceHtml = `<div class="order-empty">Sin elegir</div>`;
                     }
 
-                    html += `<div class="${rowClass}">
+                    const adminClick = isAdminMode ? ` onclick="openAdminSlotModal(${m.id}, ${round})" title="Admin: editar casilla"` : '';
+                    html += `<div class="${rowClass}"${adminClick}>
                         <div class="order-pick-num">Pick ${pickInRound}</div>
                         <div>
                             <div class="order-pick-club">${shortClubName(m.name)}</div>
@@ -3656,7 +3822,6 @@
                     setTimeout(() => { btnEl.innerText = prev; }, 1200);
                 }
             } catch (e) {
-                // Fallback for older browsers / non-secure context
                 const ta = document.createElement('textarea');
                 ta.value = text;
                 document.body.appendChild(ta);
@@ -3671,6 +3836,321 @@
             }
         }
 
+        function sanitizeFilename(name) {
+            return (name || 'equipo').replace(/[<>:"/\\|?*]/g, '-').replace(/\s+/g, '-').slice(0, 80);
+        }
+
+        function escapeTsvField(val) {
+            if (val == null || val === '') return '';
+            const s = String(val);
+            if (/[\t"\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+            return s;
+        }
+
+        function formatCsvNumber(val) {
+            if (val == null || val === '') return '';
+            const n = Number(val);
+            return Number.isFinite(n) ? String(n) : '';
+        }
+
+        function buildTeamRosterCsv(managerId) {
+            const mgrPicks = getManagerPicksSorted(managerId);
+            const rows = mgrPicks.map(dp => {
+                const p = (dp.players && !Array.isArray(dp.players) ? dp.players : null) || getPlayerById(dp.player_id);
+                if (!p) return null;
+                return [
+                    escapeTsvField(p.name),
+                    escapeTsvField(p.real_team || ''),
+                    escapeTsvField(p.position || 'MED'),
+                    escapeTsvField(formatCsvNumber(p.points_total)),
+                    escapeTsvField(formatCsvNumber(p.points_avg))
+                ].join('\t');
+            }).filter(Boolean);
+            return rows.join('\n');
+        }
+
+        function downloadBlob(filename, blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function downloadTextFile(filename, content, mime) {
+            downloadBlob(filename, new Blob([content], { type: mime || 'text/plain;charset=utf-8' }));
+        }
+
+        function exportTeamCsv(managerId) {
+            const m = managerById(managerId);
+            if (!m) return;
+            const csv = buildTeamRosterCsv(managerId);
+            downloadTextFile(sanitizeFilename(shortClubName(m.name)) + '.csv', csv, 'text/csv;charset=utf-8');
+        }
+
+        async function exportAllTeamsCsvZip() {
+            if (!managers.length) {
+                alert('No hay equipos cargados.');
+                return;
+            }
+            if (typeof JSZip === 'undefined') {
+                alert('JSZip no está disponible. Recarga la página.');
+                return;
+            }
+            const zip = new JSZip();
+            managers.forEach(m => {
+                zip.file(sanitizeFilename(shortClubName(m.name)) + '.csv', buildTeamRosterCsv(m.id));
+            });
+            try {
+                const blob = await zip.generateAsync({ type: 'blob' });
+                downloadBlob('plantillas-draft.zip', blob);
+            } catch (e) {
+                alert('Error al generar ZIP: ' + e.message);
+            }
+        }
+
+        let adminSlotContext = null;
+        let adminSlotSelectedPlayerId = null;
+
+        function getSlotPick(managerId, round) {
+            return draftPicks.find(dp =>
+                (dp.manager_id === managerId || String(dp.manager_id) === String(managerId)) &&
+                Number(dp.round) === Number(round)
+            ) || null;
+        }
+
+        function getSlotPending(managerId, round) {
+            return pendingPicks.find(pp =>
+                (pp.manager_id === managerId || String(pp.manager_id) === String(managerId)) &&
+                Number(pp.round) === Number(round)
+            ) || null;
+        }
+
+        function ensureAdminSlotModal() {
+            if (document.getElementById('admin-slot-modal')) return;
+            const wrap = document.createElement('div');
+            wrap.id = 'admin-slot-modal';
+            wrap.innerHTML = `
+                <div class="admin-slot-panel" onclick="event.stopPropagation()">
+                    <h3 id="admin-slot-title">Editar casilla</h3>
+                    <div id="admin-slot-status" class="admin-slot-status"></div>
+                    <input type="text" id="admin-slot-search" class="admin-slot-search" placeholder="Buscar jugador libre..." oninput="renderAdminSlotPlayerList()">
+                    <div id="admin-slot-player-list" class="admin-slot-player-list"></div>
+                    <div class="admin-slot-actions">
+                        <button type="button" class="btn" style="background:#5b9fb8;" onclick="adminSlotAssignSelected()">Asignar / Cambiar jugador</button>
+                        <button type="button" class="btn" style="background:#c07070;" onclick="adminSlotClear()">Vaciar casilla</button>
+                        <button type="button" class="btn" style="background:#c4a35a;" onclick="adminSlotSetPending()">Marcar pendiente</button>
+                        <button type="button" class="btn" style="background:#64748b;" onclick="adminSlotClearPending()">Quitar pendiente</button>
+                        <button type="button" class="btn" style="background:rgba(0,0,0,0.3);color:#94a3b8;" onclick="closeAdminSlotModal()">Cancelar</button>
+                    </div>
+                </div>`;
+            wrap.onclick = closeAdminSlotModal;
+            document.body.appendChild(wrap);
+        }
+
+        function openAdminSlotModal(managerId, round) {
+            if (!isAdminMode) return;
+            ensureAdminSlotModal();
+            adminSlotContext = { managerId, round };
+            adminSlotSelectedPlayerId = null;
+            const mgr = managerById(managerId);
+            const pick = getSlotPick(managerId, round);
+            const pending = getSlotPending(managerId, round);
+            let status = `Mánager: <strong>${mgr ? mgr.name : '?'}</strong> · Ronda ${round}<br>`;
+            if (pick) {
+                const p = getPlayerById(pick.player_id);
+                status += pick.is_retained
+                    ? `Estado: <strong>Retención</strong> — ${p ? p.name : '?'}`
+                    : `Estado: <strong>Fichado</strong> — ${p ? p.name : '?'}`;
+            } else if (pending) {
+                status += 'Estado: <strong>Pendiente</strong>';
+            } else {
+                status += 'Estado: <strong>Vacío</strong>';
+            }
+            document.getElementById('admin-slot-title').textContent = 'Editar casilla (admin)';
+            document.getElementById('admin-slot-status').innerHTML = status;
+            document.getElementById('admin-slot-search').value = '';
+            renderAdminSlotPlayerList();
+            document.getElementById('admin-slot-modal').classList.add('open');
+        }
+
+        function closeAdminSlotModal() {
+            adminSlotContext = null;
+            adminSlotSelectedPlayerId = null;
+            const modal = document.getElementById('admin-slot-modal');
+            if (modal) modal.classList.remove('open');
+        }
+
+        function renderAdminSlotPlayerList() {
+            const list = document.getElementById('admin-slot-player-list');
+            if (!list) return;
+            const q = (document.getElementById('admin-slot-search')?.value || '').toLowerCase().trim();
+            const available = dbPlayers.filter(p => !p.drafted_by && (
+                !q || p.name.toLowerCase().includes(q) || (p.real_team || '').toLowerCase().includes(q)
+            )).slice(0, 60);
+            list.innerHTML = '';
+            if (!available.length) {
+                list.innerHTML = '<div style="padding:10px;font-size:11px;color:#64748b;">Sin jugadores libres</div>';
+                return;
+            }
+            available.forEach(p => {
+                const row = document.createElement('div');
+                row.className = 'admin-slot-player-opt' + (String(adminSlotSelectedPlayerId) === String(p.id) ? ' selected' : '');
+                row.textContent = `${p.name} · ${p.real_team} · ${p.position}`;
+                row.onclick = () => {
+                    adminSlotSelectedPlayerId = p.id;
+                    renderAdminSlotPlayerList();
+                };
+                list.appendChild(row);
+            });
+        }
+
+        async function adminEditDraftSlot(managerId, round, action, playerId) {
+            if (!sbClient || !isAdminMode) return false;
+            const mgr = managerById(managerId);
+            if (!mgr) return false;
+
+            const existingPick = getSlotPick(managerId, round);
+            const existingPending = getSlotPending(managerId, round);
+
+            if (action === 'assign') {
+                if (!playerId) {
+                    alert('Selecciona un jugador de la lista.');
+                    return false;
+                }
+                const player = getPlayerById(playerId);
+                if (!player || player.drafted_by) {
+                    alert('Jugador no disponible.');
+                    return false;
+                }
+                if (!confirm(`¿Asignar ${player.name} a ${mgr.name} (Ronda ${round})?`)) return false;
+
+                if (existingPending) {
+                    const { error } = await sbClient.from('pending_picks').delete().eq('id', existingPending.id);
+                    if (error) { alert('Error: ' + error.message); return false; }
+                }
+
+                let pickNumber;
+                if (existingPick) {
+                    if (existingPick.is_retained && !confirm('Es una retención. ¿Reemplazar jugador?')) return false;
+                    const oldPlayer = getPlayerById(existingPick.player_id);
+                    if (oldPlayer) {
+                        const { error } = await sbClient.from('players').update({
+                            drafted_by: null, round_drafted: null, pick_number: null,
+                            drafted_at: null, is_retained: false
+                        }).eq('id', oldPlayer.id);
+                        if (error) { alert('Error liberando jugador: ' + error.message); return false; }
+                    }
+                    pickNumber = existingPick.pick_number || 0;
+                    const { error } = await sbClient.from('draft_picks').update({
+                        player_id: playerId,
+                        made_by_admin: true,
+                        is_retained: false
+                    }).eq('id', existingPick.id);
+                    if (error) { alert('Error actualizando pick: ' + error.message); return false; }
+                } else {
+                    pickNumber = draftPicks.reduce((mx, dp) => Math.max(mx, dp.pick_number || 0), 0) + 1;
+                    const { error } = await sbClient.from('draft_picks').insert({
+                        round,
+                        pick_number: pickNumber,
+                        manager_id: managerId,
+                        player_id: playerId,
+                        is_retained: false,
+                        made_by_admin: true
+                    });
+                    if (error) { alert('Error insertando pick: ' + error.message); return false; }
+                }
+
+                const { error: pErr } = await sbClient.from('players').update({
+                    drafted_by: mgr.name,
+                    round_drafted: round,
+                    pick_number: pickNumber,
+                    drafted_at: new Date().toISOString(),
+                    is_retained: false
+                }).eq('id', playerId);
+                if (pErr) { alert('Error fichando jugador: ' + pErr.message); return false; }
+
+            } else if (action === 'clear') {
+                if (!existingPick) {
+                    alert('No hay pick en esta casilla.');
+                    return false;
+                }
+                if (existingPick.is_retained && !confirm('¿Liberar esta retención?')) return false;
+                const p = getPlayerById(existingPick.player_id);
+                if (!confirm(`¿Vaciar casilla${p ? ' (' + p.name + ')' : ''}?`)) return false;
+                const { error: dErr } = await sbClient.from('draft_picks').delete().eq('id', existingPick.id);
+                if (dErr) { alert('Error: ' + dErr.message); return false; }
+                if (p) {
+                    await sbClient.from('players').update({
+                        drafted_by: null, round_drafted: null, pick_number: null,
+                        drafted_at: null, is_retained: false
+                    }).eq('id', p.id);
+                }
+            } else if (action === 'setPending') {
+                if (existingPick) {
+                    alert('Ya hay un jugador en esta casilla.');
+                    return false;
+                }
+                if (existingPending) {
+                    alert('Ya está marcada como pendiente.');
+                    return false;
+                }
+                if (!confirm(`¿Marcar pendiente ${mgr.name} Ronda ${round}?`)) return false;
+                const { error } = await sbClient.from('pending_picks').insert({
+                    manager_id: managerId,
+                    round
+                });
+                if (error) { alert('Error: ' + error.message); return false; }
+            } else if (action === 'clearPending') {
+                if (!existingPending) {
+                    alert('No hay pendiente en esta casilla.');
+                    return false;
+                }
+                if (!confirm('¿Quitar pendiente de esta casilla?')) return false;
+                const { error } = await sbClient.from('pending_picks').delete().eq('id', existingPending.id);
+                if (error) { alert('Error: ' + error.message); return false; }
+            }
+
+            await loadDraftPicks();
+            await loadPendingPicks();
+            await loadPlayers();
+            await persistRecomputedTurn();
+            updateUI();
+            return true;
+        }
+
+        async function adminSlotAssignSelected() {
+            if (!adminSlotContext) return;
+            const ok = await adminEditDraftSlot(
+                adminSlotContext.managerId,
+                adminSlotContext.round,
+                'assign',
+                adminSlotSelectedPlayerId
+            );
+            if (ok) closeAdminSlotModal();
+        }
+
+        async function adminSlotClear() {
+            if (!adminSlotContext) return;
+            const ok = await adminEditDraftSlot(adminSlotContext.managerId, adminSlotContext.round, 'clear');
+            if (ok) closeAdminSlotModal();
+        }
+
+        async function adminSlotSetPending() {
+            if (!adminSlotContext) return;
+            const ok = await adminEditDraftSlot(adminSlotContext.managerId, adminSlotContext.round, 'setPending');
+            if (ok) closeAdminSlotModal();
+        }
+
+        async function adminSlotClearPending() {
+            if (!adminSlotContext) return;
+            const ok = await adminEditDraftSlot(adminSlotContext.managerId, adminSlotContext.round, 'clearPending');
+            if (ok) closeAdminSlotModal();
+        }
+
         function renderDraftBoard() {
             const pool = document.getElementById('players-pool');
             pool.innerHTML = '<div class="board-wrap"><table id="board-table"></table></div>';
@@ -3682,7 +4162,7 @@
                 const isCurrent = draftState.is_active && managerAt(draftState.current_manager_index) && managerAt(draftState.current_manager_index).id === m.id;
                 const style = isCurrent ? 'background: rgba(91,159,184,0.16); color: #5b9fb8; border: 1px solid #5b9fb8;' : '';
                 const label = shortClubName(m.name);
-                headerHtml += `<th style="${style}" title="${m.name}">${label}<button type="button" class="btn-copy board-copy-btn" onclick="event.stopPropagation(); copyTeamRoster(${m.id}, this)">Copiar</button></th>`;
+                headerHtml += `<th style="${style}" title="${m.name}">${label}<span class="team-export-btns"><button type="button" class="btn-copy board-copy-btn" onclick="event.stopPropagation(); copyTeamRoster(${m.id}, this)">Copiar</button><button type="button" class="btn-copy board-copy-btn" onclick="event.stopPropagation(); exportTeamCsv(${m.id})">CSV</button></span></th>`;
             });
             headerHtml += '</tr></thead>';
 
@@ -3726,7 +4206,8 @@
                         cellContent = '⚡ ELIGIENDO';
                     }
 
-                    bodyHtml += `<td style="${cellStyle}">${cellContent}</td>`;
+                    const adminCell = isAdminMode ? ` class="admin-slot-cell" onclick="openAdminSlotModal(${m.id}, ${r})" title="Admin: editar casilla"` : '';
+                    bodyHtml += `<td style="${cellStyle}"${adminCell}>${cellContent}</td>`;
                 });
                 bodyHtml += '</tr>';
             }
@@ -3795,7 +4276,10 @@
                         <h4 style="color:#5b9fb8; font-size:12px; margin:0;">👤 ${shortClubName(m.name)}${isYours ? ' · Tu plantilla' : ''}
                             <span style="display:block;font-size:10px;color:#64748b;font-weight:600;margin-top:2px;">${m.name}</span>
                         </h4>
-                        <button type="button" class="btn-copy" onclick="copyTeamRoster(${m.id}, this)">📋 Copiar</button>
+                        <div class="team-export-btns">
+                            <button type="button" class="btn-copy" onclick="copyTeamRoster(${m.id}, this)">📋 Copiar</button>
+                            <button type="button" class="btn-copy" onclick="exportTeamCsv(${m.id})">CSV</button>
+                        </div>
                     </div>
                     <div class="pos-counts">
                         <span class="pos-badge pos-POR">POR ${counts.POR}</span>
