@@ -39,6 +39,18 @@
             --turn-border: rgba(196, 168, 130, 0.35);
             --on-accent: #1a1917;
             --shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+            --text-2xs: clamp(0.625rem, 0.58rem + 0.2vw, 0.6875rem);
+            --text-xs: clamp(0.6875rem, 0.64rem + 0.25vw, 0.75rem);
+            --text-sm: clamp(0.75rem, 0.7rem + 0.35vw, 0.8125rem);
+            --text-base: clamp(0.8125rem, 0.76rem + 0.4vw, 0.875rem);
+            --text-md: clamp(0.875rem, 0.82rem + 0.5vw, 1rem);
+            --text-lg: clamp(1rem, 0.92rem + 0.8vw, 1.375rem);
+        }
+        .text-truncate {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html {
@@ -175,6 +187,9 @@
         @media (max-width: 640px) {
             .dsb-main { min-width: 0; }
             .draft-status-banner { gap: 8px; padding: 10px 12px; }
+            .dsb-round-big { line-height: 1.15; }
+            .tabs { gap: 4px; }
+            .tab { padding: 7px 8px; min-height: 34px; }
         }
         .dsb-round-row {
             display: flex;
@@ -184,12 +199,12 @@
             margin-bottom: 6px;
         }
         .dsb-round-big {
-            font-size: 22px;
+            font-size: var(--text-lg);
             font-weight: 900;
             color: var(--text-strong);
             line-height: 1;
         }
-        .dsb-round-big span { font-size: 13px; font-weight: 700; color: var(--muted); }
+        .dsb-round-big span { font-size: var(--text-sm); font-weight: 700; color: var(--muted); }
         .dsb-direction {
             font-size: 10px;
             font-weight: 800;
@@ -201,7 +216,7 @@
         .dsb-direction.ida { background: var(--accent-soft); color: var(--accent); }
         .dsb-direction.vuelta { background: var(--mine-soft); color: var(--mine); }
         .dsb-turn-name {
-            font-size: 16px;
+            font-size: var(--text-md);
             font-weight: 800;
             color: var(--text-strong);
             line-height: 1.2;
@@ -312,7 +327,7 @@
             box-shadow: var(--shadow);
         }
         h2 {
-            font-size: 13px;
+            font-size: var(--text-sm);
             text-transform: uppercase;
             color: var(--accent);
             border-bottom: 1px solid var(--border);
@@ -405,13 +420,14 @@
             color: var(--muted);
             padding: 8px 10px;
             border-radius: 8px;
-            font-size: 10px;
+            font-size: var(--text-xs);
             font-weight: 700;
             cursor: pointer;
             text-transform: uppercase;
             min-height: 36px;
+            max-width: 100%;
         }
-        @media (min-width: 640px) { .tab { font-size: 11px; padding: 6px 12px; } }
+        @media (min-width: 640px) { .tab { padding: 6px 12px; } }
         .tab.active { background: var(--accent-soft); border-color: var(--accent-border); color: var(--accent); }
 
         .filter-toolbar {
@@ -427,7 +443,7 @@
             gap: 4px;
         }
         .filter-row-label {
-            font-size: 9px;
+            font-size: var(--text-2xs);
             font-weight: 800;
             color: var(--muted-2);
             text-transform: uppercase;
@@ -453,7 +469,7 @@
             color: var(--muted);
             padding: 3px 7px;
             border-radius: 5px;
-            font-size: 9px;
+            font-size: var(--text-2xs);
             font-weight: 700;
             cursor: pointer;
             text-transform: none;
@@ -546,9 +562,28 @@
             justify-content: space-between;
             align-items: center;
             gap: 8px;
+            min-width: 0;
         }
-        .card .name { font-weight: 700; color: var(--text-strong); font-size: 13px; display: block; margin-bottom: 2px; }
-        .card .team { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; display: block; }
+        .card > div:first-child {
+            flex: 1;
+            min-width: 0;
+        }
+        .card .name {
+            font-weight: 700;
+            color: var(--text-strong);
+            font-size: var(--text-sm);
+            display: block;
+            margin-bottom: 2px;
+        }
+        .card .name.text-truncate,
+        .card .team.text-truncate { display: block; }
+        .card .team {
+            font-size: var(--text-2xs);
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            display: block;
+        }
         .card .pts { font-size: 10px; color: var(--muted); font-weight: 600; margin-top: 2px; display: block; }
 
         .pos-badge {
@@ -598,7 +633,6 @@
             border-radius: 8px;
             padding: 10px 12px;
             color: var(--text-strong);
-            font-size: 12px;
         }
         .history-list { display: flex; flex-direction: column; gap: 0; padding: 0; }
         .history-list-header {
@@ -606,7 +640,7 @@
             grid-template-columns: 44px 56px minmax(80px, 1fr) minmax(100px, 1.4fr) 36px minmax(70px, 0.8fr);
             gap: 6px;
             padding: 8px 10px;
-            font-size: 10px;
+            font-size: var(--text-2xs);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.04em;
@@ -618,8 +652,23 @@
             z-index: 1;
         }
         @media (max-width: 640px) {
+            .panel-history .history-list-wrap {
+                max-height: min(55dvh, 520px);
+                min-height: 240px;
+            }
+            .history-list-header {
+                font-size: var(--text-2xs);
+                padding: 6px 8px;
+            }
             .history-list-header,
-            .history-row { grid-template-columns: 40px 48px 1fr 1fr; }
+            .history-row {
+                grid-template-columns: 36px 44px minmax(72px, 0.9fr) minmax(96px, 1.2fr);
+                gap: 4px;
+            }
+            .history-row {
+                padding: 8px;
+                font-size: var(--text-sm);
+            }
             .history-col-pos,
             .history-col-team,
             .history-list-header span:nth-child(5),
@@ -630,7 +679,7 @@
             grid-template-columns: 44px 56px minmax(80px, 1fr) minmax(100px, 1.4fr) 36px minmax(70px, 0.8fr);
             gap: 6px;
             padding: 9px 10px;
-            font-size: 12px;
+            font-size: var(--text-sm);
             border-bottom: 1px solid var(--border);
             align-items: center;
             line-height: 1.3;
@@ -638,9 +687,22 @@
         .history-row:hover { background: rgba(255,255,255,0.03); }
         .history-row.pending { background: var(--warn-soft); }
         .history-row .history-col-round { font-weight: 800; color: var(--muted); }
-        .history-row .history-col-pick { font-size: 11px; color: var(--muted-2); }
-        .history-row .history-col-manager { font-weight: 700; color: var(--text-strong); }
-        .history-row .history-col-player { font-weight: 600; color: var(--accent); }
+        .history-row .history-col-pick { font-size: var(--text-xs); color: var(--muted-2); }
+        .history-row .history-col-manager {
+            font-weight: 700;
+            color: var(--text-strong);
+        }
+        .history-row .history-col-player {
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .history-row .history-col-manager,
+        .history-row .history-col-player {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
         .history-row .history-col-pos { font-size: 10px; font-weight: 800; }
         .history-row .history-col-team { font-size: 10px; color: var(--muted); text-transform: uppercase; }
         .history-tag {
@@ -2204,7 +2266,7 @@
                 const rankHtml = showRank ? `<span class="pts" style="color:#5b9fb8;">#${i + 1} en tu lista</span>` : '';
                 const rankBtns = showRank ? buildWlRankBtns(pObj.id, false) : '';
                 const actions = rankBtns + buildPlayerActionHtml(pObj, turnName, allowFichar);
-                card.innerHTML = `<div><span class="name">${pObj.name} <span class="pos-badge ${posClass}">${pObj.position}</span></span><span class="team">${pObj.real_team}</span>${ptsHtml}${rankHtml}</div><div class="actions-box">${actions}</div>`;
+                card.innerHTML = `<div><span class="name text-truncate">${pObj.name} <span class="pos-badge ${posClass}">${pObj.position}</span></span><span class="team text-truncate">${pObj.real_team}</span>${ptsHtml}${rankHtml}</div><div class="actions-box">${actions}</div>`;
                 pool.appendChild(card);
             });
         }
@@ -4513,6 +4575,7 @@
                 if (entry.type === 'pending') {
                     row.classList.add('pending');
                     const mName = entry.mgr ? shortClubName(entry.mgr.name) : '?';
+                    const mFull = entry.mgr ? entry.mgr.name : mName;
                     row.innerHTML = `
                         <span class="history-col-round">${entry.pp.round}</span>
                         <span class="history-col-pick">—</span>
@@ -4520,12 +4583,16 @@
                         <span class="history-col-player" style="color:var(--warn);">Sin elegir</span>
                         <span class="history-col-pos">—</span>
                         <span class="history-col-team">—</span>`;
+                    row.title = `${mFull} — pendiente`;
+                    const mgrEl = row.querySelector('.history-col-manager');
+                    if (mgrEl) mgrEl.title = mFull;
                 } else {
                     const dp = entry.dp;
                     const pName = entry.player ? entry.player.name : '?';
                     const pos = entry.player ? entry.player.position : '—';
                     const team = entry.player ? entry.player.real_team : '—';
                     const mName = entry.mgr ? shortClubName(entry.mgr.name) : '?';
+                    const mFull = entry.mgr ? entry.mgr.name : mName;
                     const pickLabel = dp.is_retained ? '—' : `#${dp.pick_number || '—'}`;
                     let tags = '';
                     if (dp.is_retained) tags += '<span class="history-tag ret">RET</span>';
@@ -4537,6 +4604,11 @@
                         <span class="history-col-player">${pName}</span>
                         <span class="history-col-pos">${pos}</span>
                         <span class="history-col-team">${team}</span>`;
+                    row.title = `${mFull} · ${pName}`;
+                    const mgrEl = row.querySelector('.history-col-manager');
+                    const playerEl = row.querySelector('.history-col-player');
+                    if (mgrEl) mgrEl.title = mFull;
+                    if (playerEl) playerEl.title = pName;
                 }
                 container.appendChild(row);
             });
