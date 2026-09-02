@@ -1011,6 +1011,7 @@
             white-space: nowrap;
         }
         .btn-wl-save-order:hover { filter: brightness(1.08); }
+        .wl-export-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
         .wl-col-rank-btn {
             background: transparent;
             border: none;
@@ -1832,6 +1833,9 @@
             </div>
             <div id="wishlist-toolbar" style="display:none;" class="filter-toolbar">
                 <p class="wl-hint">Mi orden: pulsa el # para mover a un puesto. ▲▼ para ajustes finos. Los fichados desaparecen solos.</p>
+                <div class="wl-export-bar">
+                    <button type="button" class="btn-copy" onclick="exportWishlistExcel()">📥 Exportar Excel</button>
+                </div>
                 <div class="filter-row">
                     <span class="filter-row-label">Pos</span>
                     <div class="filter-chips" id="wl-pos-filter-group">
@@ -4612,6 +4616,45 @@
 
         function downloadTextFile(filename, content, mime) {
             downloadBlob(filename, new Blob([content], { type: mime || 'text/plain;charset=utf-8' }));
+        }
+
+        function downloadExcelFile(filename, content) {
+            const bom = '\uFEFF';
+            downloadBlob(filename, new Blob([bom + content], { type: 'application/vnd.ms-excel;charset=utf-8' }));
+        }
+
+        function buildWishlistCsv() {
+            const rows = wishlistRows.slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+            const header = ['#', 'Jugador', 'Equipo', 'Pos', 'Pts', 'Media', 'Fichado']
+                .map(escapeTsvField).join('\t');
+            const data = rows.map((r, i) => {
+                const p = getPlayerById(r.player_id);
+                if (!p) return null;
+                return [
+                    escapeTsvField(i + 1),
+                    escapeTsvField(p.name),
+                    escapeTsvField(p.real_team || ''),
+                    escapeTsvField(p.position || ''),
+                    escapeTsvField(formatCsvNumber(p.points_total)),
+                    escapeTsvField(formatCsvNumber(p.points_avg)),
+                    escapeTsvField(p.drafted_by ? 'Sí' : 'No')
+                ].join('\t');
+            }).filter(Boolean);
+            return header + '\n' + data.join('\n');
+        }
+
+        function exportWishlistExcel() {
+            if (!isLoggedIn()) {
+                alert('Inicia sesión para exportar tu wishlist.');
+                return;
+            }
+            if (!wishlistRows.length) {
+                alert('Tu wishlist está vacía.');
+                return;
+            }
+            const csv = buildWishlistCsv();
+            const mgrName = loggedInManager ? sanitizeFilename(shortClubName(loggedInManager.name)) : 'wishlist';
+            downloadExcelFile(mgrName + '-wishlist.csv', csv);
         }
 
         function exportTeamCsv(managerId) {
