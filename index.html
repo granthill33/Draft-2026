@@ -1780,8 +1780,8 @@
         let loggedInManager = null;
         let wishlistRows = [];
         let showWishlistOnly = false;
-        let wlPosFilter = 'ALL';
-        let wlTeamFilter = 'ALL';
+        let wlPosFilters = new Set();
+        let wlTeamFilters = new Set();
         let wlSortMode = 'priority';
         let wlTeamFiltersOpen = false;
         let wlViewMode = localStorage.getItem('wlViewMode') || 'cards';
@@ -1793,8 +1793,8 @@
         let sbClient = null;
         let activeTab = 'market';
         let selectedOrderRound = 'ALL';
-        let selectedPosFilter = 'ALL';
-        let selectedTeamFilter = 'ALL';
+        let selectedPosFilters = new Set();
+        let selectedTeamFilters = new Set();
         let selectedMarketSort = 'points_total';
         let teamFiltersOpen = false;
         let realtimeChannel = null;
@@ -1834,6 +1834,47 @@
             return wishlistRows.some(r => String(r.player_id) === String(playerId));
         }
 
+        function toggleMultiFilter(set, value, allToken) {
+            if (value === allToken) {
+                set.clear();
+                return;
+            }
+            if (set.has(value)) set.delete(value);
+            else set.add(value);
+        }
+
+        function matchesMultiFilter(value, set, normalizeFn) {
+            if (!set.size) return true;
+            const v = normalizeFn ? normalizeFn(value) : value;
+            for (const f of set) {
+                const fv = normalizeFn ? normalizeFn(f) : f;
+                if (fv === v) return true;
+            }
+            return false;
+        }
+
+        function syncMultiFilterButtons(selector, attrName, set, allToken) {
+            document.querySelectorAll(selector).forEach(btn => {
+                const val = btn.getAttribute(attrName);
+                if (val === allToken) btn.classList.toggle('active', set.size === 0);
+                else btn.classList.toggle('active', set.has(val));
+            });
+        }
+
+        function multiFilterTeamLabel(selectedSet, options, allLabel, countSuffix) {
+            if (!selectedSet.size) return allLabel;
+            const keys = [...selectedSet];
+            const labelFor = (key) => {
+                const found = options?.find(o => o[0] === key);
+                if (found) return found[1];
+                const btn = document.querySelector('#team-filter-group .btn-filter[data-filter="' + key.replace(/"/g, '\\"') + '"]');
+                return btn ? btn.textContent.trim() : key;
+            };
+            if (keys.length === 1) return labelFor(keys[0]);
+            if (keys.length === 2) return labelFor(keys[0]) + ' +1';
+            return keys.length + ' ' + countSuffix;
+        }
+
         const WL_TEAM_OPTIONS = [
             ['ALL', 'Todos'], ['Athletic', 'Athletic'], ['Atlético', 'Atlético'], ['Osasuna', 'Osasuna'],
             ['Alavés', 'Alavés'], ['Elche', 'Elche'], ['Barcelona', 'Barcelona'], ['Getafe', 'Getafe'],
@@ -1857,10 +1898,8 @@
             });
         }
 
-        function wlTeamFilterDisplayLabel(key) {
-            if (!key || key === 'ALL') return 'Todos';
-            const found = WL_TEAM_OPTIONS.find(o => o[0] === key);
-            return found ? found[1] : key;
+        function wlTeamFilterDisplayLabel() {
+            return multiFilterTeamLabel(wlTeamFilters, WL_TEAM_OPTIONS, 'Todos', 'equipos');
         }
 
         function syncWlTeamFilterToggle() {
@@ -1869,37 +1908,33 @@
             const chev = document.getElementById('wl-team-filter-chev');
             const group = document.getElementById('wl-team-filter-group');
             if (!toggle || !label || !group) return;
-            label.textContent = wlTeamFilterDisplayLabel(wlTeamFilter);
-            toggle.classList.toggle('has-filter', wlTeamFilter !== 'ALL');
+            label.textContent = wlTeamFilterDisplayLabel();
+            toggle.classList.toggle('has-filter', wlTeamFilters.size > 0);
             group.classList.toggle('open', wlTeamFiltersOpen);
             if (chev) chev.textContent = wlTeamFiltersOpen ? '▴' : '▾';
         }
 
         function syncWishlistFilterButtons() {
-            document.querySelectorAll('#wl-pos-filter-group .btn-filter').forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('data-wl-filter') === wlPosFilter);
-            });
+            syncMultiFilterButtons('#wl-pos-filter-group .btn-filter', 'data-wl-filter', wlPosFilters, 'ALL');
             document.querySelectorAll('#wl-sort-group .btn-filter').forEach(btn => {
                 btn.classList.toggle('active', btn.getAttribute('data-wl-sort') === wlSortMode);
             });
             document.querySelectorAll('#wl-view-group .btn-filter').forEach(btn => {
                 btn.classList.toggle('active', btn.getAttribute('data-wl-view') === wlViewMode);
             });
-            document.querySelectorAll('#wl-team-filter-group .btn-filter').forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('data-wl-filter') === wlTeamFilter);
-            });
+            syncMultiFilterButtons('#wl-team-filter-group .btn-filter', 'data-wl-filter', wlTeamFilters, 'ALL');
             syncWlTeamFilterToggle();
         }
 
         function setWlPosFilter(pos) {
-            wlPosFilter = (wlPosFilter === pos && pos !== 'ALL') ? 'ALL' : pos;
+            toggleMultiFilter(wlPosFilters, pos, 'ALL');
             syncWishlistFilterButtons();
             renderWishlist();
         }
 
         function setWlTeamFilter(team) {
-            wlTeamFilter = (wlTeamFilter === team && team !== 'ALL') ? 'ALL' : team;
-            wlTeamFiltersOpen = false;
+            toggleMultiFilter(wlTeamFilters, team, 'ALL');
+            if (team !== 'ALL') wlTeamFiltersOpen = false;
             syncWishlistFilterButtons();
             renderWishlist();
         }
@@ -1923,8 +1958,8 @@
         }
 
         function resetWishlistFilters() {
-            wlPosFilter = 'ALL';
-            wlTeamFilter = 'ALL';
+            wlPosFilters.clear();
+            wlTeamFilters.clear();
             wlSortMode = 'priority';
             wlTeamFiltersOpen = false;
             const search = document.getElementById('search-wishlist');
@@ -1944,10 +1979,9 @@
 
             players = players.filter(p => {
                 const normPTeam = normalizeTeamName(p.real_team);
-                const normFTeam = normalizeTeamName(wlTeamFilter);
                 return (p.name.toLowerCase().includes(search) || normPTeam.includes(search)) &&
-                    (wlPosFilter === 'ALL' || p.position === wlPosFilter) &&
-                    (wlTeamFilter === 'ALL' || normPTeam === normFTeam);
+                    matchesMultiFilter(p.position, wlPosFilters) &&
+                    matchesMultiFilter(p.real_team, wlTeamFilters, normalizeTeamName);
             });
 
             if (wlSortMode === 'priority') {
@@ -3739,10 +3773,8 @@
             updateUI();
         }
 
-        function teamFilterDisplayLabel(key) {
-            if (!key || key === 'ALL') return 'Todos';
-            const btn = document.querySelector('#team-filter-group .btn-filter[data-filter="' + key.replace(/"/g, '\\"') + '"]');
-            return btn ? btn.textContent.trim() : key;
+        function teamFilterDisplayLabel() {
+            return multiFilterTeamLabel(selectedTeamFilters, null, 'Todos', 'equipos');
         }
 
         function syncTeamFilterToggle() {
@@ -3751,8 +3783,8 @@
             const chev = document.getElementById('team-filter-chev');
             const group = document.getElementById('team-filter-group');
             if (!toggle || !label || !group) return;
-            label.textContent = teamFilterDisplayLabel(selectedTeamFilter);
-            toggle.classList.toggle('has-filter', selectedTeamFilter !== 'ALL');
+            label.textContent = teamFilterDisplayLabel();
+            toggle.classList.toggle('has-filter', selectedTeamFilters.size > 0);
             group.classList.toggle('open', teamFiltersOpen);
             if (chev) chev.textContent = teamFiltersOpen ? '▴' : '▾';
         }
@@ -3763,14 +3795,8 @@
         }
 
         function syncMarketFilterButtons() {
-            document.querySelectorAll('#pos-filter-group .btn-filter').forEach(btn => {
-                const val = btn.getAttribute('data-filter');
-                btn.classList.toggle('active', val === selectedPosFilter);
-            });
-            document.querySelectorAll('#team-filter-group .btn-filter').forEach(btn => {
-                const val = btn.getAttribute('data-filter');
-                btn.classList.toggle('active', val === selectedTeamFilter);
-            });
+            syncMultiFilterButtons('#pos-filter-group .btn-filter', 'data-filter', selectedPosFilters, 'ALL');
+            syncMultiFilterButtons('#team-filter-group .btn-filter', 'data-filter', selectedTeamFilters, 'ALL');
             document.querySelectorAll('#sort-filter-group .btn-filter').forEach(btn => {
                 const val = btn.getAttribute('data-sort');
                 btn.classList.toggle('active', val === selectedMarketSort);
@@ -3779,13 +3805,13 @@
         }
 
         function setPosFilter(pos) {
-            selectedPosFilter = (selectedPosFilter === pos && pos !== 'ALL') ? 'ALL' : pos;
+            toggleMultiFilter(selectedPosFilters, pos, 'ALL');
             syncMarketFilterButtons();
             updateUI();
         }
         function setTeamFilter(teamName) {
-            selectedTeamFilter = (selectedTeamFilter === teamName && teamName !== 'ALL') ? 'ALL' : teamName;
-            teamFiltersOpen = false;
+            toggleMultiFilter(selectedTeamFilters, teamName, 'ALL');
+            if (teamName !== 'ALL') teamFiltersOpen = false;
             syncMarketFilterButtons();
             updateUI();
         }
@@ -3800,8 +3826,8 @@
         }
         function filterPlayers() { renderMarket(); }
         function resetAllFilters() {
-            selectedPosFilter = 'ALL';
-            selectedTeamFilter = 'ALL';
+            selectedPosFilters.clear();
+            selectedTeamFilters.clear();
             selectedMarketSort = 'points_total';
             teamFiltersOpen = false;
             showWishlistOnly = false;
@@ -4629,10 +4655,9 @@
             const available = dbPlayers.filter(p => !p.drafted_by);
             const filtered = sortMarketPlayers(available.filter(p => {
                 let normPTeam = normalizeTeamName(p.real_team);
-                let normFTeam = normalizeTeamName(selectedTeamFilter);
                 const matchSearch = p.name.toLowerCase().includes(search) || normPTeam.includes(search);
-                const matchPos = selectedPosFilter === 'ALL' || p.position === selectedPosFilter;
-                const matchTeam = selectedTeamFilter === 'ALL' || normPTeam === normFTeam;
+                const matchPos = matchesMultiFilter(p.position, selectedPosFilters);
+                const matchTeam = matchesMultiFilter(p.real_team, selectedTeamFilters, normalizeTeamName);
                 const matchWishlist = !showWishlistOnly || isInWishlist(p.id);
                 return matchSearch && matchPos && matchTeam && matchWishlist;
             }));
