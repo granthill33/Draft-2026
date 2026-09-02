@@ -6,6 +6,7 @@
     <title>Sala de Guerra — Live Draft</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             /* Misma estructura de tokens que index.html — valores anti-fatiga */
@@ -1948,6 +1949,28 @@
             const paren = fullName.indexOf(' (');
             if (paren > 0) return fullName.slice(0, paren).trim();
             return fullName.trim();
+        }
+
+        /** "Las Palmas (Turu Flores)" → { team, manager } */
+        function parseManagerDisplay(fullName) {
+            if (!fullName) return { team: 'equipo', manager: '' };
+            const paren = fullName.indexOf(' (');
+            if (paren > 0 && fullName.endsWith(')')) {
+                return {
+                    team: fullName.slice(0, paren).trim(),
+                    manager: fullName.slice(paren + 2, -1).trim()
+                };
+            }
+            return { team: fullName.trim(), manager: '' };
+        }
+
+        function buildWishlistExportFilename() {
+            if (!loggedInManager) return 'wishlist.xlsx';
+            const { team, manager } = parseManagerDisplay(loggedInManager.name);
+            const parts = [sanitizeFilename(team)];
+            if (manager) parts.push(sanitizeFilename(manager));
+            parts.push('wishlist');
+            return parts.join('-') + '.xlsx';
         }
 
         function managerAuthEmail(managerId) {
@@ -4618,29 +4641,25 @@
             downloadBlob(filename, new Blob([content], { type: mime || 'text/plain;charset=utf-8' }));
         }
 
-        function downloadExcelFile(filename, content) {
-            const bom = '\uFEFF';
-            downloadBlob(filename, new Blob([bom + content], { type: 'application/vnd.ms-excel;charset=utf-8' }));
-        }
-
-        function buildWishlistCsv() {
+        function buildWishlistSheetData() {
             const rows = wishlistRows.slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
-            const header = ['#', 'Jugador', 'Equipo', 'Pos', 'Pts', 'Media', 'Fichado']
-                .map(escapeTsvField).join('\t');
-            const data = rows.map((r, i) => {
+            const data = [['#', 'Jugador', 'Equipo', 'Pos', 'Pts', 'Media', 'Fichado']];
+            rows.forEach((r, i) => {
                 const p = getPlayerById(r.player_id);
-                if (!p) return null;
-                return [
-                    escapeTsvField(i + 1),
-                    escapeTsvField(p.name),
-                    escapeTsvField(p.real_team || ''),
-                    escapeTsvField(p.position || ''),
-                    escapeTsvField(formatCsvNumber(p.points_total)),
-                    escapeTsvField(formatCsvNumber(p.points_avg)),
-                    escapeTsvField(p.drafted_by ? 'Sí' : 'No')
-                ].join('\t');
-            }).filter(Boolean);
-            return header + '\n' + data.join('\n');
+                if (!p) return;
+                const pts = p.points_total != null && p.points_total !== '' ? Number(p.points_total) : '';
+                const avg = p.points_avg != null && p.points_avg !== '' ? Number(p.points_avg) : '';
+                data.push([
+                    i + 1,
+                    p.name,
+                    p.real_team || '',
+                    p.position || '',
+                    Number.isFinite(pts) ? pts : '',
+                    Number.isFinite(avg) ? avg : '',
+                    p.drafted_by ? 'Sí' : 'No'
+                ]);
+            });
+            return data;
         }
 
         function exportWishlistExcel() {
@@ -4652,9 +4671,14 @@
                 alert('Tu wishlist está vacía.');
                 return;
             }
-            const csv = buildWishlistCsv();
-            const mgrName = loggedInManager ? sanitizeFilename(shortClubName(loggedInManager.name)) : 'wishlist';
-            downloadExcelFile(mgrName + '-wishlist.csv', csv);
+            if (typeof XLSX === 'undefined') {
+                alert('No se pudo cargar la librería Excel. Recarga la página.');
+                return;
+            }
+            const ws = XLSX.utils.aoa_to_sheet(buildWishlistSheetData());
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Wishlist');
+            XLSX.writeFile(wb, buildWishlistExportFilename());
         }
 
         function exportTeamCsv(managerId) {
