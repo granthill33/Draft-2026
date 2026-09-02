@@ -1776,6 +1776,9 @@
                 <div class="filter-group" id="mdl-filter-group"></div>
             </div>
             <div id="filter-wrapper" class="filter-toolbar">
+                <div class="wl-export-bar">
+                    <button type="button" class="btn-copy" onclick="exportMarketExcel()">📥 Exportar Excel</button>
+                </div>
                 <div class="filter-row">
                     <span class="filter-row-label">Pos</span>
                     <div class="filter-chips" id="pos-filter-group">
@@ -1964,13 +1967,21 @@
             return { team: fullName.trim(), manager: '' };
         }
 
-        function buildWishlistExportFilename() {
-            if (!loggedInManager) return 'wishlist.xlsx';
+        function buildExportFilename(suffix) {
+            if (!loggedInManager) return suffix + '.xlsx';
             const { team, manager } = parseManagerDisplay(loggedInManager.name);
             const parts = [sanitizeFilename(team)];
             if (manager) parts.push(sanitizeFilename(manager));
-            parts.push('wishlist');
+            parts.push(suffix);
             return parts.join('-') + '.xlsx';
+        }
+
+        function buildWishlistExportFilename() {
+            return buildExportFilename('wishlist');
+        }
+
+        function buildMarketExportFilename() {
+            return buildExportFilename('mercado');
         }
 
         function managerAuthEmail(managerId) {
@@ -4641,11 +4652,9 @@
             downloadBlob(filename, new Blob([content], { type: mime || 'text/plain;charset=utf-8' }));
         }
 
-        function buildWishlistSheetData() {
-            const rows = wishlistRows.slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+        function buildPlayerListSheetData(players) {
             const data = [['#', 'Jugador', 'Equipo', 'Pos', 'Pts', 'Media', 'Fichado']];
-            rows.forEach((r, i) => {
-                const p = getPlayerById(r.player_id);
+            players.forEach((p, i) => {
                 if (!p) return;
                 const pts = p.points_total != null && p.points_total !== '' ? Number(p.points_total) : '';
                 const avg = p.points_avg != null && p.points_avg !== '' ? Number(p.points_avg) : '';
@@ -4660,6 +4669,41 @@
                 ]);
             });
             return data;
+        }
+
+        function buildWishlistSheetData() {
+            const rows = wishlistRows.slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+            const players = rows.map(r => getPlayerById(r.player_id)).filter(Boolean);
+            return buildPlayerListSheetData(players);
+        }
+
+        function getMarketPlayersFilteredSorted() {
+            const search = (document.getElementById('search-player')?.value || '').toLowerCase().trim();
+            const available = dbPlayers.filter(p => !p.drafted_by);
+            return sortMarketPlayers(available.filter(p => {
+                const normPTeam = normalizeTeamName(p.real_team);
+                const matchSearch = p.name.toLowerCase().includes(search) || normPTeam.includes(search);
+                const matchPos = matchesMultiFilter(p.position, selectedPosFilters);
+                const matchTeam = matchesMultiFilter(p.real_team, selectedTeamFilters, normalizeTeamName);
+                const matchWishlist = !showWishlistOnly || isInWishlist(p.id);
+                return matchSearch && matchPos && matchTeam && matchWishlist;
+            }));
+        }
+
+        function exportMarketExcel() {
+            const players = getMarketPlayersFilteredSorted();
+            if (!players.length) {
+                alert('Ningún jugador disponible coincide con los filtros.');
+                return;
+            }
+            if (typeof XLSX === 'undefined') {
+                alert('No se pudo cargar la librería Excel. Recarga la página.');
+                return;
+            }
+            const ws = XLSX.utils.aoa_to_sheet(buildPlayerListSheetData(players));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Mercado');
+            XLSX.writeFile(wb, buildMarketExportFilename());
         }
 
         function exportWishlistExcel() {
@@ -5013,19 +5057,9 @@
         }
 
         function renderMarket() {
-            const search = document.getElementById('search-player').value.toLowerCase().trim();
             const pool = document.getElementById('players-pool');
             pool.innerHTML = "";
-
-            const available = dbPlayers.filter(p => !p.drafted_by);
-            const filtered = sortMarketPlayers(available.filter(p => {
-                let normPTeam = normalizeTeamName(p.real_team);
-                const matchSearch = p.name.toLowerCase().includes(search) || normPTeam.includes(search);
-                const matchPos = matchesMultiFilter(p.position, selectedPosFilters);
-                const matchTeam = matchesMultiFilter(p.real_team, selectedTeamFilters, normalizeTeamName);
-                const matchWishlist = !showWishlistOnly || isInWishlist(p.id);
-                return matchSearch && matchPos && matchTeam && matchWishlist;
-            }));
+            const filtered = getMarketPlayersFilteredSorted();
 
             if (!filtered.length) {
                 pool.innerHTML = `<p style="color:#475569; text-align:center; padding-top:50px; font-size:12px; font-weight:700; text-transform:uppercase;">Ningún jugador disponible coincide con los filtros</p>`;
