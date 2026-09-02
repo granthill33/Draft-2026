@@ -997,6 +997,129 @@
         }
         .wl-rank-btns button:hover { color: var(--text-strong); background: rgba(255,255,255,0.08); }
         .wl-hint { font-size: 10px; color: var(--muted); margin: 0 0 8px; line-height: 1.35; }
+        .btn-wl-save-order {
+            width: auto;
+            min-height: 28px;
+            padding: 4px 10px;
+            font-size: 10px;
+            font-weight: 700;
+            background: var(--accent-soft);
+            color: var(--accent);
+            border: 1px solid var(--accent-border);
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .btn-wl-save-order:hover { filter: brightness(1.08); }
+        .wl-col-rank-btn {
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin: 0;
+            font: inherit;
+            color: inherit;
+            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-color: rgba(91, 159, 184, 0.45);
+            text-underline-offset: 2px;
+        }
+        .wl-col-rank-btn:hover { color: #7ec0d8; }
+        .btn-wl-rank-jump {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 4px;
+            vertical-align: middle;
+            line-height: 1.2;
+        }
+        .btn-wl-rank-jump:hover { color: var(--text-strong); background: rgba(255,255,255,0.08); }
+        #wl-rank-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 16px;
+        }
+        #wl-rank-modal .wl-rank-panel {
+            background: var(--panel-solid, #1a1917);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            width: min(100%, 340px);
+            box-shadow: var(--shadow);
+        }
+        #wl-rank-modal h3 {
+            margin: 0 0 4px;
+            font-size: var(--text-sm);
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        #wl-rank-modal .wl-rank-player {
+            margin: 0 0 14px;
+            font-size: var(--text-sm);
+            font-weight: 700;
+            color: var(--text-strong);
+            line-height: 1.3;
+        }
+        #wl-rank-modal label {
+            display: block;
+            font-size: 10px;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+        #wl-rank-modal input[type="number"] {
+            margin-bottom: 10px;
+        }
+        #wl-rank-modal .wl-rank-shortcuts {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        #wl-rank-modal .wl-rank-shortcuts button {
+            flex: 1;
+            min-width: 120px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        #wl-rank-modal .wl-rank-shortcuts button:hover { background: rgba(255,255,255,0.08); }
+        #wl-rank-modal .wl-rank-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        #wl-rank-modal .wl-rank-actions button {
+            min-height: 38px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+        #wl-rank-modal .wl-rank-cancel {
+            background: transparent;
+            color: var(--muted);
+        }
+        #wl-rank-modal .wl-rank-confirm {
+            background: var(--accent);
+            color: var(--on-accent);
+            border-color: var(--accent);
+        }
 
         .wl-list {
             display: flex;
@@ -1708,7 +1831,7 @@
                 </div>
             </div>
             <div id="wishlist-toolbar" style="display:none;" class="filter-toolbar">
-                <p class="wl-hint">Mi orden: ▲▼ sube tus favoritos. Los jugadores fichados (por cualquiera) desaparecen solos de la lista.</p>
+                <p class="wl-hint">Mi orden: pulsa el # para mover a un puesto. ▲▼ para ajustes finos. Los fichados desaparecen solos.</p>
                 <div class="filter-row">
                     <span class="filter-row-label">Pos</span>
                     <div class="filter-chips" id="wl-pos-filter-group">
@@ -1728,6 +1851,7 @@
                         <button type="button" class="btn-filter" data-wl-sort="points_avg" onclick="setWlSortMode('points_avg')">Media ↓</button>
                         <button type="button" class="btn-filter" data-wl-sort="name" onclick="setWlSortMode('name')">Nombre</button>
                     </div>
+                    <button type="button" id="btn-wl-save-order" class="btn-wl-save-order" style="display:none;" onclick="saveVisibleOrderAsPriority()">Guardar como mi orden</button>
                 </div>
                 <div class="filter-row">
                     <span class="filter-row-label">Vista</span>
@@ -1923,6 +2047,8 @@
                 btn.classList.toggle('active', btn.getAttribute('data-wl-view') === wlViewMode);
             });
             syncMultiFilterButtons('#wl-team-filter-group .btn-filter', 'data-wl-filter', wlTeamFilters, 'ALL');
+            const saveBtn = document.getElementById('btn-wl-save-order');
+            if (saveBtn) saveBtn.style.display = wlSortMode !== 'priority' ? '' : 'none';
             syncWlTeamFilterToggle();
         }
 
@@ -1997,9 +2123,174 @@
             return players;
         }
 
+        function getWishlistSortedRows() {
+            return wishlistRows
+                .filter(r => {
+                    const p = getPlayerById(r.player_id);
+                    return p && !p.drafted_by;
+                })
+                .slice()
+                .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+        }
+
+        function getWishlistGlobalRankMap() {
+            const map = new Map();
+            getWishlistSortedRows().forEach((r, i) => map.set(String(r.player_id), i + 1));
+            return map;
+        }
+
+        function getWishlistPlayersSortedByMode(mode) {
+            let players = wishlistRows
+                .map(r => {
+                    const p = getPlayerById(r.player_id);
+                    return p ? { ...p, _wlSort: r.sort_order ?? 0 } : null;
+                })
+                .filter(p => p && !p.drafted_by);
+
+            if (mode === 'priority') {
+                players.sort((a, b) => (a._wlSort - b._wlSort) || a.name.localeCompare(b.name, 'es'));
+            } else if (mode === 'name') {
+                players.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+            } else {
+                const prev = selectedMarketSort;
+                selectedMarketSort = mode;
+                players = sortMarketPlayers(players);
+                selectedMarketSort = prev;
+            }
+            return players;
+        }
+
+        async function renormalizeWishlistSortOrders(orderedRows) {
+            const results = await Promise.all(orderedRows.map((row, i) =>
+                sbClient.from('wishlist_items').update({ sort_order: (i + 1) * 10 }).eq('id', row.id)
+            ));
+            const failed = results.find(r => r.error);
+            if (failed?.error) throw new Error(failed.error.message);
+        }
+
+        let wlRankModalPlayerId = null;
+
+        function openWlRankModal(playerId) {
+            if (!isLoggedIn() || wlSortMode !== 'priority') return;
+            const p = getPlayerById(playerId);
+            const name = p ? p.name : '?';
+            const rankMap = getWishlistGlobalRankMap();
+            const currentRank = rankMap.get(String(playerId)) || 1;
+            const n = getWishlistSortedRows().length;
+            if (!n) return;
+            closeWlRankModal();
+            wlRankModalPlayerId = playerId;
+            const modalHtml = `
+                <div id="wl-rank-modal" onclick="if(event.target===this)closeWlRankModal()">
+                    <div class="wl-rank-panel" onclick="event.stopPropagation()">
+                        <h3>Mover a puesto</h3>
+                        <p class="wl-rank-player" id="wl-rank-modal-name"></p>
+                        <label for="wl-rank-input">Nuevo puesto (1–${n})</label>
+                        <input type="number" id="wl-rank-input" min="1" max="${n}" value="${currentRank}" inputmode="numeric">
+                        <div class="wl-rank-shortcuts">
+                            <button type="button" onclick="document.getElementById('wl-rank-input').value=1">Primero (1)</button>
+                            <button type="button" onclick="document.getElementById('wl-rank-input').value=${n}">Último (${n})</button>
+                        </div>
+                        <div class="wl-rank-actions">
+                            <button type="button" class="wl-rank-cancel" onclick="closeWlRankModal()">Cancelar</button>
+                            <button type="button" class="wl-rank-confirm" onclick="confirmWlRankMove()">Mover</button>
+                        </div>
+                    </div>
+                </div>`;
+            document.body.insertAdjacentHTML('beforeEnd', modalHtml);
+            document.getElementById('wl-rank-modal-name').textContent = name;
+            const input = document.getElementById('wl-rank-input');
+            input.focus();
+            input.select();
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') confirmWlRankMove();
+                if (e.key === 'Escape') closeWlRankModal();
+            });
+        }
+
+        function closeWlRankModal() {
+            const modal = document.getElementById('wl-rank-modal');
+            if (modal) modal.remove();
+            wlRankModalPlayerId = null;
+        }
+
+        async function confirmWlRankMove() {
+            const input = document.getElementById('wl-rank-input');
+            if (!input || !wlRankModalPlayerId) return;
+            await moveWishlistPlayerToRank(wlRankModalPlayerId, input.value);
+        }
+
+        async function moveWishlistPlayerToRank(playerId, targetRank) {
+            if (!sbClient || !isLoggedIn() || wlSortMode !== 'priority') return;
+            const rows = getWishlistSortedRows();
+            const n = rows.length;
+            const rank = Math.floor(Number(targetRank));
+            if (!Number.isFinite(rank) || rank < 1 || rank > n) {
+                alert(`Introduce un puesto entre 1 y ${n}.`);
+                return;
+            }
+            const fromIdx = rows.findIndex(r => String(r.player_id) === String(playerId));
+            if (fromIdx < 0) return;
+            const toIdx = rank - 1;
+            if (fromIdx === toIdx) {
+                closeWlRankModal();
+                return;
+            }
+
+            const reordered = rows.slice();
+            const [item] = reordered.splice(fromIdx, 1);
+            reordered.splice(toIdx, 0, item);
+
+            const prevOrder = toIdx > 0 ? (reordered[toIdx - 1].sort_order ?? 0) : null;
+            const nextOrder = toIdx < reordered.length - 1 ? (reordered[toIdx + 1].sort_order ?? 0) : null;
+            let newOrder = null;
+
+            if (toIdx === 0) {
+                newOrder = (nextOrder != null ? nextOrder : 10) - 10;
+            } else if (toIdx === reordered.length - 1) {
+                newOrder = (prevOrder ?? 0) + 10;
+            } else if (prevOrder != null && nextOrder != null && nextOrder - prevOrder > 1) {
+                newOrder = Math.floor((prevOrder + nextOrder) / 2);
+            }
+
+            try {
+                if (newOrder == null) {
+                    await renormalizeWishlistSortOrders(reordered);
+                } else {
+                    const { error } = await sbClient.from('wishlist_items').update({ sort_order: newOrder }).eq('id', item.id);
+                    if (error) throw new Error(error.message);
+                }
+            } catch (e) {
+                alert('Error al mover: ' + e.message);
+                return;
+            }
+            closeWlRankModal();
+            await loadWishlist();
+            renderWishlist();
+        }
+
+        async function saveVisibleOrderAsPriority() {
+            if (!sbClient || !isLoggedIn() || wlSortMode === 'priority') return;
+            const players = getWishlistPlayersSortedByMode(wlSortMode);
+            if (!players.length) return;
+            const orderedRows = players
+                .map(p => wishlistRows.find(r => String(r.player_id) === String(p.id)))
+                .filter(Boolean);
+            try {
+                await renormalizeWishlistSortOrders(orderedRows);
+            } catch (e) {
+                alert('Error al guardar orden: ' + e.message);
+                return;
+            }
+            wlSortMode = 'priority';
+            syncWishlistFilterButtons();
+            await loadWishlist();
+            renderWishlist();
+        }
+
         async function moveWishlistPlayer(playerId, direction) {
             if (!sbClient || !isLoggedIn() || wlSortMode !== 'priority') return;
-            const rows = wishlistRows.slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+            const rows = getWishlistSortedRows();
             const idx = rows.findIndex(r => String(r.player_id) === String(playerId));
             if (idx < 0) return;
 
@@ -2463,6 +2754,7 @@
             const turnName = (managerAt(draftState.current_manager_index) || {}).name || '';
             const allowFichar = canFichar();
             const showRank = wlSortMode === 'priority';
+            const rankMap = showRank ? getWishlistGlobalRankMap() : null;
 
             if (wlViewMode === 'list') {
                 if (!showRank) pool.classList.add('no-rank');
@@ -2482,7 +2774,10 @@
                     const posClass = `pos-${pObj.position}`;
                     const { pts, avg } = formatWlPts(pObj);
                     const ptsLine = formatPlayerPtsLine(pObj);
-                    const rankCol = showRank ? `<span class="wl-col-rank">${i + 1}</span>` : '<span class="wl-col-rank"></span>';
+                    const globalRank = rankMap ? (rankMap.get(String(pObj.id)) || (i + 1)) : (i + 1);
+                    const rankCol = showRank
+                        ? `<button type="button" class="wl-col-rank wl-col-rank-btn" title="Mover a puesto…" onclick="openWlRankModal(${pObj.id})">${globalRank}</button>`
+                        : '<span class="wl-col-rank"></span>';
                     const moveCol = showRank
                         ? `<span class="wl-col-move">${buildWlRankBtns(pObj.id, true)}</span>`
                         : '<span class="wl-col-move"></span>';
@@ -2511,7 +2806,10 @@
                 const posClass = `pos-${pObj.position}`;
                 const ptsLine = formatPlayerPtsLine(pObj);
                 const ptsHtml = ptsLine ? `<span class="pts">${ptsLine}</span>` : '';
-                const rankHtml = showRank ? `<span class="pts" style="color:#5b9fb8;">#${i + 1} en tu lista</span>` : '';
+                const globalRank = rankMap ? (rankMap.get(String(pObj.id)) || (i + 1)) : (i + 1);
+                const rankHtml = showRank
+                    ? `<span class="pts" style="color:#5b9fb8;">#${globalRank} en tu lista<button type="button" class="btn-wl-rank-jump" title="Mover a puesto…" onclick="openWlRankModal(${pObj.id})">↕</button></span>`
+                    : '';
                 const rankBtns = showRank ? buildWlRankBtns(pObj.id, false) : '';
                 const actions = rankBtns + buildPlayerActionHtml(pObj, turnName, allowFichar);
                 card.innerHTML = `<div><span class="name text-truncate">${pObj.name} <span class="pos-badge ${posClass}">${pObj.position}</span></span><span class="team text-truncate">${pObj.real_team}</span>${ptsHtml}${rankHtml}</div><div class="actions-box">${actions}</div>`;
