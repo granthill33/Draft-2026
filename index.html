@@ -1934,6 +1934,9 @@
                     <span id="dsb-pick-count" class="dsb-pick-count"></span>
                 </div>
             </div>
+            <div id="order-export-bar" style="display:none;" class="export-roster-bar">
+                <button type="button" class="btn-copy" onclick="exportDraftOrderExcel()">📥 Exportar draft (Excel)</button>
+            </div>
             <div id="order-round-nav" style="display:none;" class="order-round-nav"></div>
             <div id="pending-resolve-banner" class="pending-banner" style="display:none;"></div>
             <div id="mdl-filter-wrapper" style="display:none;">
@@ -4556,6 +4559,7 @@
                 document.getElementById('wishlist-toolbar').style.display = 'none';
                 document.getElementById('wishlist-search-box').style.display = 'none';
                 document.getElementById('mdl-filter-wrapper').style.display = 'none';
+                document.getElementById('order-export-bar').style.display = 'none';
                 document.getElementById('order-round-nav').style.display = 'none';
                 mainContainer.classList.remove('board-mode');
                 if (mainEl) mainEl.classList.remove('layout-wide-center');
@@ -4569,6 +4573,7 @@
                 document.getElementById('wishlist-toolbar').style.display = 'block';
                 document.getElementById('wishlist-search-box').style.display = 'block';
                 document.getElementById('mdl-filter-wrapper').style.display = 'none';
+                document.getElementById('order-export-bar').style.display = 'none';
                 document.getElementById('order-round-nav').style.display = 'none';
                 mainContainer.classList.remove('board-mode');
                 if (mainEl) mainEl.classList.remove('layout-wide-center');
@@ -4581,6 +4586,7 @@
                 document.getElementById('wishlist-toolbar').style.display = 'none';
                 document.getElementById('wishlist-search-box').style.display = 'none';
                 document.getElementById('mdl-filter-wrapper').style.display = 'none';
+                document.getElementById('order-export-bar').style.display = 'none';
                 document.getElementById('order-round-nav').style.display = 'none';
                 mainContainer.classList.remove('board-mode');
                 if (mainEl) mainEl.classList.remove('layout-wide-center');
@@ -4597,6 +4603,7 @@
                 document.getElementById('wishlist-toolbar').style.display = 'none';
                 document.getElementById('wishlist-search-box').style.display = 'none';
                 document.getElementById('mdl-filter-wrapper').style.display = 'block';
+                document.getElementById('order-export-bar').style.display = 'none';
                 document.getElementById('order-round-nav').style.display = 'none';
                 mainContainer.classList.remove('board-mode');
                 if (mainEl) mainEl.classList.remove('layout-wide-center');
@@ -4609,6 +4616,7 @@
                 document.getElementById('wishlist-toolbar').style.display = 'none';
                 document.getElementById('wishlist-search-box').style.display = 'none';
                 document.getElementById('mdl-filter-wrapper').style.display = 'none';
+                document.getElementById('order-export-bar').style.display = 'flex';
                 document.getElementById('order-round-nav').style.display = 'flex';
                 mainContainer.classList.remove('board-mode');
                 if (mainEl) mainEl.classList.remove('layout-wide-center');
@@ -4621,6 +4629,7 @@
                 document.getElementById('wishlist-toolbar').style.display = 'none';
                 document.getElementById('wishlist-search-box').style.display = 'none';
                 document.getElementById('mdl-filter-wrapper').style.display = 'none';
+                document.getElementById('order-export-bar').style.display = 'none';
                 document.getElementById('order-round-nav').style.display = 'none';
                 mainContainer.classList.add('board-mode');
                 if (mainEl) mainEl.classList.add('layout-wide-center');
@@ -5314,6 +5323,97 @@
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Wishlist');
             XLSX.writeFile(wb, buildWishlistExportFilename());
+        }
+
+        function buildDraftOrderSheetData() {
+            const data = [[
+                'Ronda',
+                'Dirección',
+                'Pick ronda',
+                'Pick global',
+                'Equipo',
+                'Manager',
+                'Jugador',
+                'Pos',
+                'Equipo real',
+                'Estado',
+                'Pts',
+                'Media'
+            ]];
+            if (!managers.length) return data;
+
+            for (let round = 1; round <= MAX_ROUNDS; round++) {
+                const isIda = round % 2 !== 0;
+                const ordered = managersInRoundOrder(round);
+                ordered.forEach((m, idx) => {
+                    const pickInRound = idx + 1;
+                    const pick = draftPicks.find(dp =>
+                        (dp.manager_id === m.id || String(dp.manager_id) === String(m.id)) &&
+                        Number(dp.round) === Number(round)
+                    );
+                    const pending = pendingPicks.find(pp =>
+                        (pp.manager_id === m.id || String(pp.manager_id) === String(m.id)) &&
+                        Number(pp.round) === Number(round)
+                    );
+                    const { team, manager } = parseManagerDisplay(m.name);
+                    let playerName = '';
+                    let pos = '';
+                    let realTeam = '';
+                    let pts = '';
+                    let avg = '';
+                    let estado = 'Sin elegir';
+                    let pickGlobal = '';
+
+                    if (pick) {
+                        const player = (pick.players && !Array.isArray(pick.players) ? pick.players : null)
+                            || getPlayerById(pick.player_id);
+                        playerName = player ? player.name : 'Jugador';
+                        pos = player ? (player.position || '') : '';
+                        realTeam = player ? (player.real_team || '') : '';
+                        if (player) {
+                            const ptsN = player.points_total != null && player.points_total !== '' ? Number(player.points_total) : NaN;
+                            const avgN = player.points_avg != null && player.points_avg !== '' ? Number(player.points_avg) : NaN;
+                            pts = Number.isFinite(ptsN) ? ptsN : '';
+                            avg = Number.isFinite(avgN) ? avgN : '';
+                        }
+                        estado = pick.is_retained ? 'Retenido' : 'Elegido';
+                        pickGlobal = pick.pick_number > 0 ? pick.pick_number : '';
+                    } else if (pending) {
+                        estado = 'Pendiente';
+                    }
+
+                    data.push([
+                        round,
+                        isIda ? 'Ida' : 'Vuelta',
+                        pickInRound,
+                        pickGlobal,
+                        team,
+                        manager,
+                        playerName,
+                        pos,
+                        realTeam,
+                        estado,
+                        pts,
+                        avg
+                    ]);
+                });
+            }
+            return data;
+        }
+
+        function exportDraftOrderExcel() {
+            if (!managers.length) {
+                alert('No hay managers cargados.');
+                return;
+            }
+            if (typeof XLSX === 'undefined') {
+                alert('No se pudo cargar la librería Excel. Recarga la página.');
+                return;
+            }
+            const ws = XLSX.utils.aoa_to_sheet(buildDraftOrderSheetData());
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Orden Draft');
+            XLSX.writeFile(wb, buildExportFilename('orden-draft'));
         }
 
         function exportTeamCsv(managerId) {
