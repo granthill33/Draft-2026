@@ -5114,6 +5114,28 @@
             }
         }
 
+        function shareLineupWhatsApp(btnEl) {
+            const empty = countEmptyLineupSlots();
+            if (empty > 0) {
+                setLineupStatus(`Faltan ${empty} puesto${empty === 1 ? '' : 's'} por rellenar.`, 'warn');
+                return;
+            }
+            const text = buildLineupCopyText();
+            if (!text) return;
+            const url = 'https://wa.me/?text=' + encodeURIComponent(text);
+            const win = window.open(url, '_blank');
+            if (!win) {
+                setLineupStatus('Permite ventanas emergentes para abrir WhatsApp.', 'warn');
+                return;
+            }
+            if (btnEl) {
+                const prev = btnEl.innerText;
+                btnEl.innerText = '✓ Abierto';
+                setTimeout(() => { btnEl.innerText = prev; }, 1200);
+            }
+            setLineupStatus('WhatsApp abierto: elige el grupo y envía.', 'ok');
+        }
+
         function lineupCandidatesForSlot(slotIndex) {
             if (!isLoggedIn()) return [];
             const slot = lineupSlots[slotIndex];
@@ -5195,6 +5217,7 @@
                                 ${formationOpts}
                             </select>
                             <button type="button" class="btn-copy" onclick="copyLineup(this)">Copiar alineación</button>
+                            <button type="button" class="btn-copy" onclick="shareLineupWhatsApp(this)">WhatsApp</button>
                             <button type="button" class="btn-copy" onclick="clearLineup()">Limpiar</button>
                         </div>
                         <div id="alineacion-status" class="alineacion-status${lineupSaveKind ? ' ' + lineupSaveKind : ''}">${lineupSaveStatus || ''}</div>
