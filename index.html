@@ -1419,6 +1419,173 @@
             display: block;
             width: 100%;
         }
+
+        /* —— Alineación / pitch —— */
+        .alineacion-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        .alineacion-header {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .alineacion-title {
+            font-size: var(--text-md);
+            font-weight: 800;
+            color: var(--text-strong);
+            letter-spacing: 0.02em;
+        }
+        .alineacion-title span {
+            color: var(--muted);
+            font-weight: 600;
+            font-size: var(--text-sm);
+        }
+        .alineacion-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+        .alineacion-toolbar select.alineacion-formation {
+            flex: 1 1 140px;
+            min-width: 140px;
+            max-width: 220px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-strong);
+            background: var(--bg-1);
+            color: var(--text-strong);
+            font-size: var(--text-sm);
+            font-weight: 700;
+        }
+        .alineacion-toolbar .btn-copy,
+        .alineacion-toolbar .btn {
+            padding: 8px 12px;
+            font-size: 11px;
+        }
+        .alineacion-status {
+            font-size: var(--text-xs);
+            color: var(--muted);
+            min-height: 1.2em;
+        }
+        .alineacion-status.ok { color: var(--success); }
+        .alineacion-status.warn { color: var(--warn); }
+        .alineacion-status.err { color: var(--danger); }
+        .alineacion-pitch {
+            position: relative;
+            border-radius: 16px;
+            border: 1px solid var(--border-strong);
+            overflow: hidden;
+            padding: 18px 12px 22px;
+            background:
+                linear-gradient(180deg, rgba(42, 52, 46, 0.55) 0%, rgba(28, 34, 30, 0.92) 100%);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            min-height: 420px;
+        }
+        .alineacion-pitch::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    transparent 0,
+                    transparent 28px,
+                    rgba(221, 216, 210, 0.03) 28px,
+                    rgba(221, 216, 210, 0.03) 29px
+                );
+            pointer-events: none;
+        }
+        .alineacion-pitch::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: min(42%, 180px);
+            aspect-ratio: 1;
+            transform: translate(-50%, -50%);
+            border: 1px solid rgba(221, 216, 210, 0.08);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .alineacion-line {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px 10px;
+        }
+        .alineacion-slot {
+            flex: 1 1 120px;
+            max-width: 160px;
+            min-width: 110px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: rgba(26, 25, 23, 0.72);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px;
+            backdrop-filter: blur(4px);
+        }
+        .alineacion-slot.filled {
+            border-color: var(--accent-border);
+            background: rgba(26, 25, 23, 0.88);
+        }
+        .alineacion-slot-label {
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .alineacion-slot select {
+            width: 100%;
+            padding: 6px 6px;
+            border-radius: 6px;
+            border: 1px solid var(--border-strong);
+            background: var(--bg-0);
+            color: var(--text-strong);
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .alineacion-empty {
+            text-align: center;
+            padding: 40px 16px;
+            color: var(--muted);
+            font-size: var(--text-sm);
+        }
+        @media (max-width: 640px) {
+            .alineacion-slot {
+                flex: 1 1 calc(50% - 8px);
+                max-width: none;
+                min-width: 0;
+            }
+            .alineacion-line.line-POR .alineacion-slot {
+                flex: 1 1 100%;
+                max-width: 280px;
+            }
+            .alineacion-pitch {
+                min-height: 0;
+                padding: 14px 10px 18px;
+                gap: 10px;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .alineacion-slot { transition: none; }
+        }
         .board-wrap {
             overflow: auto;
             width: 100%;
@@ -1725,7 +1892,7 @@
                     <div class="auth-actions">
                         <button type="button" onclick="openManagerAuthFlow()" class="btn" style="background:#5b9fb8;">Entrar / Crear cuenta</button>
                     </div>
-                    <small style="color: #64748b; font-size: 10px;">Sin sesión = espectador (mercado y plantillas, sin fichar ni wishlist).</small>
+                    <small style="color: #64748b; font-size: 10px;">Sin sesión = espectador (mercado y plantillas, sin fichar, wishlist ni alineación).</small>
                 </div>
                 <div id="auth-logged-in" style="display:none;">
                     <div class="auth-status">
@@ -1744,6 +1911,7 @@
             <div class="tabs">
                 <button id="tab-market" class="tab active" onclick="switchTab('market')">🛒 Mercado (<span id="pool-count">0</span>)</button>
                 <button id="tab-wishlist" class="tab" onclick="switchTab('wishlist')" style="display:none;">★ Wishlist (<span id="wishlist-count">0</span>)</button>
+                <button id="tab-alineacion" class="tab" onclick="switchTab('alineacion')" style="display:none;">⚽ Alineación</button>
                 <button id="tab-teams" class="tab" onclick="switchTab('teams')">👥 Plantillas</button>
                 <button id="tab-order" class="tab" onclick="switchTab('order')">📋 Orden Picks</button>
                 <button id="tab-board" class="tab" onclick="switchTab('board')">📊 Tablero</button>
@@ -1921,6 +2089,23 @@
         let resolvingPendingId = null;
         let selectedMdlFilter = 'ALL';
         const MAX_ROUNDS = 23;
+
+        const LINEUP_FORMATIONS = [
+            '1-3-4-3',
+            '1-3-5-2',
+            '1-4-3-3',
+            '1-4-4-2',
+            '1-4-5-1',
+            '1-5-3-2',
+            '1-5-4-1'
+        ];
+        const DEFAULT_LINEUP_FORMATION = '1-4-3-3';
+        let lineupFormation = DEFAULT_LINEUP_FORMATION;
+        let lineupSlots = [];
+        let lineupSaveStatus = '';
+        let lineupSaveKind = ''; // '' | 'ok' | 'warn' | 'err'
+        let lineupSaveTimer = null;
+        let lineupLoaded = false;
 
         let sbClient = null;
         let activeTab = 'market';
@@ -2360,6 +2545,7 @@
             const nameEl = document.getElementById('auth-manager-name');
             const countEl = document.getElementById('auth-wishlist-count');
             const tabWishlist = document.getElementById('tab-wishlist');
+            const tabAlineacion = document.getElementById('tab-alineacion');
             const wlCount = document.getElementById('wishlist-count');
             if (!loggedOut || !loggedIn) return;
             if (isLoggedIn()) {
@@ -2368,11 +2554,13 @@
                 if (nameEl) nameEl.textContent = loggedInManager.name;
                 if (countEl) countEl.textContent = `Wishlist: ${wishlistRows.length} jugadores`;
                 if (tabWishlist) tabWishlist.style.display = '';
+                if (tabAlineacion) tabAlineacion.style.display = '';
             } else {
                 loggedOut.style.display = 'block';
                 loggedIn.style.display = 'none';
                 if (tabWishlist) tabWishlist.style.display = 'none';
-                if (activeTab === 'wishlist') activeTab = 'market';
+                if (tabAlineacion) tabAlineacion.style.display = 'none';
+                if (activeTab === 'wishlist' || activeTab === 'alineacion') activeTab = 'market';
             }
             if (wlCount) wlCount.textContent = wishlistRows.length;
         }
@@ -2405,6 +2593,7 @@
             if (!session || !session.user) {
                 setLoggedInManager(null);
                 wishlistRows = [];
+                resetLineupState();
                 updateAuthPanelUI();
                 return;
             }
@@ -2413,11 +2602,13 @@
                 await sbClient.auth.signOut();
                 setLoggedInManager(null);
                 wishlistRows = [];
+                resetLineupState();
                 updateAuthPanelUI();
                 return;
             }
             setLoggedInManager(mgr);
             await loadWishlist();
+            await loadLineup();
         }
 
         function passwordFieldHtml(id, placeholder) {
@@ -2527,6 +2718,7 @@
                 closeManagerAuthModal();
                 setLoggedInManager(updated);
                 await loadWishlist();
+                await loadLineup();
                 alert(`✅ Cuenta creada. Bienvenido, ${updated.name}.`);
                 updateUI();
                 return;
@@ -2547,6 +2739,7 @@
             closeManagerAuthModal();
             setLoggedInManager(updated);
             await loadWishlist();
+            await loadLineup();
             updateUI();
         }
 
@@ -2619,6 +2812,7 @@
             setLoggedInManager(null);
             wishlistRows = [];
             showWishlistOnly = false;
+            resetLineupState();
             updateAuthPanelUI();
             updateUI();
         }
@@ -3043,7 +3237,10 @@
             await loadDraftPicks();
             await loadPendingPicks();
             await loadAdmins();
-            if (isLoggedIn()) await loadWishlist();
+            if (isLoggedIn()) {
+                await loadWishlist();
+                await loadLineup();
+            }
 
             if (realtimeChannel) {
                 sbClient.removeChannel(realtimeChannel);
@@ -3085,6 +3282,7 @@
                 if (!session) {
                     setLoggedInManager(null);
                     wishlistRows = [];
+                    resetLineupState();
                     updateAuthPanelUI();
                     updateUI();
                 }
@@ -4093,13 +4291,17 @@
         }
 
         function switchTab(tabName) {
-            if (tabName === 'wishlist' && !isLoggedIn()) {
-                alert('Inicia sesión para ver tu wishlist.');
+            if ((tabName === 'wishlist' || tabName === 'alineacion') && !isLoggedIn()) {
+                alert(tabName === 'alineacion'
+                    ? 'Inicia sesión para montar tu alineación.'
+                    : 'Inicia sesión para ver tu wishlist.');
                 return;
             }
             activeTab = tabName;
             document.getElementById('tab-market').classList.toggle('active', tabName === 'market');
             document.getElementById('tab-wishlist').classList.toggle('active', tabName === 'wishlist');
+            const tabAlineacion = document.getElementById('tab-alineacion');
+            if (tabAlineacion) tabAlineacion.classList.toggle('active', tabName === 'alineacion');
             document.getElementById('tab-teams').classList.toggle('active', tabName === 'teams');
             document.getElementById('tab-order').classList.toggle('active', tabName === 'order');
             document.getElementById('tab-board').classList.toggle('active', tabName === 'board');
@@ -4373,6 +4575,22 @@
                 if (poolEl) poolEl.className = wlViewMode === 'list' ? 'wl-list' : 'grid';
                 renderWishlist();
 
+            } else if (activeTab === 'alineacion') {
+                document.getElementById('filter-wrapper').style.display = 'none';
+                document.getElementById('search-box').style.display = 'none';
+                document.getElementById('wishlist-toolbar').style.display = 'none';
+                document.getElementById('wishlist-search-box').style.display = 'none';
+                document.getElementById('mdl-filter-wrapper').style.display = 'none';
+                document.getElementById('order-round-nav').style.display = 'none';
+                mainContainer.classList.remove('board-mode');
+                if (mainEl) mainEl.classList.remove('layout-wide-center');
+                if (poolEl) poolEl.className = 'full-bleed';
+                if (isLoggedIn() && !lineupLoaded) {
+                    loadLineup().then(() => renderAlineacion());
+                } else {
+                    renderAlineacion();
+                }
+
             } else if (activeTab === 'teams') {
                 document.getElementById('filter-wrapper').style.display = 'none';
                 document.getElementById('search-box').style.display = 'none';
@@ -4602,6 +4820,379 @@
                     setTimeout(() => { btnEl.innerText = prev; }, 1200);
                 }
             }
+        }
+
+        function resetLineupState() {
+            if (lineupSaveTimer) {
+                clearTimeout(lineupSaveTimer);
+                lineupSaveTimer = null;
+            }
+            lineupFormation = DEFAULT_LINEUP_FORMATION;
+            lineupSlots = slotsForFormation(DEFAULT_LINEUP_FORMATION);
+            lineupSaveStatus = '';
+            lineupSaveKind = '';
+            lineupLoaded = false;
+        }
+
+        function slotsForFormation(code) {
+            const parts = String(code || '').split('-').map(n => parseInt(n, 10));
+            if (parts.length !== 4 || parts.some(n => !Number.isFinite(n))) {
+                return slotsForFormation(DEFAULT_LINEUP_FORMATION);
+            }
+            const [por, def, med, del] = parts;
+            const slots = [];
+            for (let i = 0; i < por; i++) slots.push({ pos: 'POR', player_id: null });
+            for (let i = 0; i < def; i++) slots.push({ pos: 'DEF', player_id: null });
+            for (let i = 0; i < med; i++) slots.push({ pos: 'MED', player_id: null });
+            for (let i = 0; i < del; i++) slots.push({ pos: 'DEL', player_id: null });
+            return slots;
+        }
+
+        function rebuildSlotsForFormation(newFormation, oldSlots) {
+            const newSlots = slotsForFormation(newFormation);
+            const byPos = { POR: [], DEF: [], MED: [], DEL: [] };
+            (oldSlots || []).forEach(s => {
+                if (s && s.player_id != null && byPos[s.pos]) byPos[s.pos].push(s.player_id);
+            });
+            const used = new Set();
+            newSlots.forEach(slot => {
+                const next = byPos[slot.pos].find(id => !used.has(String(id)));
+                if (next != null) {
+                    slot.player_id = next;
+                    used.add(String(next));
+                }
+            });
+            return newSlots;
+        }
+
+        function getManagerRosterPlayers(managerId) {
+            return getManagerPicksSorted(managerId)
+                .map(dp => {
+                    const p = (dp.players && !Array.isArray(dp.players) ? dp.players : null) || getPlayerById(dp.player_id);
+                    return p || null;
+                })
+                .filter(Boolean);
+        }
+
+        function sanitizeLineupSlots(slots) {
+            if (!isLoggedIn()) return { slots: slots || [], changed: false };
+            // No vaciar el XI si aún no hemos cargado draft_picks
+            if (!Array.isArray(draftPicks) || draftPicks.length === 0) {
+                return {
+                    slots: (slots || []).map(s => ({ pos: s.pos, player_id: s.player_id == null ? null : s.player_id })),
+                    changed: false
+                };
+            }
+            const roster = getManagerRosterPlayers(loggedInManager.id);
+            const rosterById = new Map(roster.map(p => [String(p.id), p]));
+            const used = new Set();
+            let changed = false;
+            const next = (slots || []).map(s => {
+                const slot = { pos: s.pos, player_id: s.player_id == null ? null : s.player_id };
+                if (slot.player_id == null) return slot;
+                const key = String(slot.player_id);
+                const p = rosterById.get(key);
+                if (!p || p.position !== slot.pos || used.has(key)) {
+                    changed = true;
+                    slot.player_id = null;
+                    return slot;
+                }
+                used.add(key);
+                return slot;
+            });
+            return { slots: next, changed };
+        }
+
+        function normalizeLoadedSlots(formation, rawSlots) {
+            const base = slotsForFormation(formation);
+            if (!Array.isArray(rawSlots)) return base;
+            const byPos = { POR: [], DEF: [], MED: [], DEL: [] };
+            rawSlots.forEach(s => {
+                if (!s || !byPos[s.pos]) return;
+                byPos[s.pos].push(s.player_id == null ? null : s.player_id);
+            });
+            const used = new Set();
+            const cursors = { POR: 0, DEF: 0, MED: 0, DEL: 0 };
+            base.forEach(slot => {
+                const list = byPos[slot.pos];
+                let chosen = null;
+                while (cursors[slot.pos] < list.length) {
+                    const candidate = list[cursors[slot.pos]++];
+                    if (candidate == null) {
+                        chosen = null;
+                        break;
+                    }
+                    const key = String(candidate);
+                    if (used.has(key)) continue;
+                    chosen = candidate;
+                    used.add(key);
+                    break;
+                }
+                slot.player_id = chosen;
+            });
+            return base;
+        }
+
+        function setLineupStatus(msg, kind) {
+            lineupSaveStatus = msg || '';
+            lineupSaveKind = kind || '';
+            const el = document.getElementById('alineacion-status');
+            if (el) {
+                el.textContent = lineupSaveStatus;
+                el.className = 'alineacion-status' + (lineupSaveKind ? ' ' + lineupSaveKind : '');
+            }
+        }
+
+        async function loadLineup() {
+            if (!sbClient || !isLoggedIn()) {
+                resetLineupState();
+                return;
+            }
+            const { data, error } = await sbClient
+                .from('manager_lineups')
+                .select('formation, slots, updated_at')
+                .eq('manager_id', loggedInManager.id)
+                .maybeSingle();
+            if (error) {
+                console.error('Error loading lineup:', error);
+                lineupFormation = DEFAULT_LINEUP_FORMATION;
+                lineupSlots = slotsForFormation(DEFAULT_LINEUP_FORMATION);
+                setLineupStatus('No se pudo cargar la alineación.', 'err');
+            } else if (data) {
+                const formation = LINEUP_FORMATIONS.includes(data.formation) ? data.formation : DEFAULT_LINEUP_FORMATION;
+                lineupFormation = formation;
+                const normalized = normalizeLoadedSlots(formation, data.slots);
+                const sanitized = sanitizeLineupSlots(normalized);
+                lineupSlots = sanitized.slots;
+                if (sanitized.changed) {
+                    await saveLineup(true);
+                    setLineupStatus('Alineación actualizada (jugadores fuera de plantilla).', 'warn');
+                } else {
+                    setLineupStatus('Guardada', 'ok');
+                }
+            } else {
+                lineupFormation = DEFAULT_LINEUP_FORMATION;
+                lineupSlots = slotsForFormation(DEFAULT_LINEUP_FORMATION);
+                setLineupStatus('Sin guardar aún', '');
+            }
+            lineupLoaded = true;
+        }
+
+        async function saveLineup(immediate) {
+            if (!sbClient || !isLoggedIn()) return;
+            const doSave = async () => {
+                setLineupStatus('Guardando…', '');
+                const payload = {
+                    manager_id: loggedInManager.id,
+                    formation: lineupFormation,
+                    slots: lineupSlots,
+                    updated_at: new Date().toISOString()
+                };
+                const { error } = await sbClient.from('manager_lineups').upsert(payload);
+                if (error) {
+                    console.error('Error saving lineup:', error);
+                    setLineupStatus('Error al guardar: ' + error.message, 'err');
+                    return;
+                }
+                setLineupStatus('Guardado', 'ok');
+            };
+            if (immediate) {
+                if (lineupSaveTimer) {
+                    clearTimeout(lineupSaveTimer);
+                    lineupSaveTimer = null;
+                }
+                await doSave();
+                return;
+            }
+            if (lineupSaveTimer) clearTimeout(lineupSaveTimer);
+            lineupSaveTimer = setTimeout(() => {
+                lineupSaveTimer = null;
+                doSave();
+            }, 400);
+        }
+
+        function onLineupFormationChange(value) {
+            if (!LINEUP_FORMATIONS.includes(value)) return;
+            lineupFormation = value;
+            lineupSlots = rebuildSlotsForFormation(value, lineupSlots);
+            const sanitized = sanitizeLineupSlots(lineupSlots);
+            lineupSlots = sanitized.slots;
+            renderAlineacion();
+            saveLineup();
+        }
+
+        function onLineupSlotChange(index, playerId) {
+            if (!lineupSlots[index]) return;
+            const id = playerId === '' || playerId == null ? null : Number(playerId);
+            lineupSlots[index] = {
+                ...lineupSlots[index],
+                player_id: Number.isFinite(id) ? id : null
+            };
+            // Prevent duplicates if somehow selected
+            const chosen = lineupSlots[index].player_id;
+            if (chosen != null) {
+                lineupSlots.forEach((s, i) => {
+                    if (i !== index && s.player_id != null && String(s.player_id) === String(chosen)) {
+                        s.player_id = null;
+                    }
+                });
+            }
+            renderAlineacion();
+            saveLineup();
+        }
+
+        function clearLineup() {
+            if (!isLoggedIn()) return;
+            lineupSlots = slotsForFormation(lineupFormation);
+            renderAlineacion();
+            saveLineup(true);
+            setLineupStatus('Alineación limpiada', 'warn');
+        }
+
+        function countEmptyLineupSlots() {
+            return (lineupSlots || []).filter(s => s.player_id == null).length;
+        }
+
+        function buildLineupCopyText() {
+            if (!loggedInManager) return '';
+            const { team, manager } = parseManagerDisplay(loggedInManager.name);
+            const header = manager
+                ? `Alineación ${team} Manager ${manager}`
+                : `Alineación ${team}`;
+            const byPos = { POR: [], DEF: [], MED: [], DEL: [] };
+            lineupSlots.forEach(s => {
+                const p = s.player_id != null ? getPlayerById(s.player_id) : null;
+                byPos[s.pos].push(p ? p.name : '—');
+            });
+            const blocks = [
+                byPos.POR.join('\n'),
+                byPos.DEF.join('\n'),
+                byPos.MED.join('\n'),
+                byPos.DEL.join('\n')
+            ];
+            return [header, ...blocks].join('\n\n');
+        }
+
+        async function copyLineup(btnEl) {
+            const empty = countEmptyLineupSlots();
+            if (empty > 0) {
+                setLineupStatus(`Faltan ${empty} puesto${empty === 1 ? '' : 's'} por rellenar.`, 'warn');
+                return;
+            }
+            const text = buildLineupCopyText();
+            if (!text) return;
+            try {
+                await navigator.clipboard.writeText(text);
+                if (btnEl) {
+                    const prev = btnEl.innerText;
+                    btnEl.innerText = '✓ Copiado';
+                    setTimeout(() => { btnEl.innerText = prev; }, 1200);
+                }
+                setLineupStatus('Alineación copiada', 'ok');
+            } catch (e) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
+                if (btnEl) {
+                    const prev = btnEl.innerText;
+                    btnEl.innerText = '✓ Copiado';
+                    setTimeout(() => { btnEl.innerText = prev; }, 1200);
+                }
+                setLineupStatus('Alineación copiada', 'ok');
+            }
+        }
+
+        function lineupCandidatesForSlot(slotIndex) {
+            if (!isLoggedIn()) return [];
+            const slot = lineupSlots[slotIndex];
+            if (!slot) return [];
+            const used = new Set(
+                lineupSlots
+                    .map((s, i) => (i === slotIndex || s.player_id == null ? null : String(s.player_id)))
+                    .filter(Boolean)
+            );
+            return getManagerRosterPlayers(loggedInManager.id)
+                .filter(p => p.position === slot.pos && !used.has(String(p.id)))
+                .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+        }
+
+        function renderAlineacion() {
+            const pool = document.getElementById('players-pool');
+            if (!pool) return;
+            if (!isLoggedIn()) {
+                pool.innerHTML = '<div class="alineacion-empty">Inicia sesión como mánager para montar tu alineación.</div>';
+                return;
+            }
+
+            if (!lineupSlots.length) {
+                lineupSlots = slotsForFormation(lineupFormation);
+            }
+
+            const sanitized = sanitizeLineupSlots(lineupSlots);
+            if (sanitized.changed) {
+                lineupSlots = sanitized.slots;
+                saveLineup();
+            } else {
+                lineupSlots = sanitized.slots;
+            }
+
+            const { team, manager } = parseManagerDisplay(loggedInManager.name);
+            const subtitle = manager ? `${team} · ${manager}` : team;
+            const formationOpts = LINEUP_FORMATIONS.map(f =>
+                `<option value="${f}"${f === lineupFormation ? ' selected' : ''}>${f}</option>`
+            ).join('');
+
+            const order = ['DEL', 'MED', 'DEF', 'POR'];
+            const linesHtml = order.map(pos => {
+                const indices = [];
+                lineupSlots.forEach((s, i) => { if (s.pos === pos) indices.push(i); });
+                if (!indices.length) return '';
+                const slotsHtml = indices.map((idx, n) => {
+                    const slot = lineupSlots[idx];
+                    const candidates = lineupCandidatesForSlot(idx);
+                    const currentId = slot.player_id;
+                    // Keep current selection in options even if filtered (should already be excluded from used)
+                    let opts = `<option value="">— Elegir —</option>`;
+                    const seen = new Set();
+                    if (currentId != null) {
+                        const cur = getPlayerById(currentId);
+                        if (cur) {
+                            opts += `<option value="${cur.id}" selected>${cur.name}</option>`;
+                            seen.add(String(cur.id));
+                        }
+                    }
+                    candidates.forEach(p => {
+                        if (seen.has(String(p.id))) return;
+                        opts += `<option value="${p.id}">${p.name}</option>`;
+                    });
+                    const filled = currentId != null ? ' filled' : '';
+                    return `<div class="alineacion-slot${filled}">
+                        <div class="alineacion-slot-label"><span class="pos-badge pos-${pos}">${pos}</span> ${n + 1}</div>
+                        <select onchange="onLineupSlotChange(${idx}, this.value)">${opts}</select>
+                    </div>`;
+                }).join('');
+                return `<div class="alineacion-line line-${pos}">${slotsHtml}</div>`;
+            }).join('');
+
+            pool.innerHTML = `
+                <div class="alineacion-wrap">
+                    <div class="alineacion-header">
+                        <div class="alineacion-title">Alineación <span>${subtitle}</span></div>
+                        <div class="alineacion-toolbar">
+                            <select class="alineacion-formation" onchange="onLineupFormationChange(this.value)" aria-label="Formación">
+                                ${formationOpts}
+                            </select>
+                            <button type="button" class="btn-copy" onclick="copyLineup(this)">Copiar alineación</button>
+                            <button type="button" class="btn-copy" onclick="clearLineup()">Limpiar</button>
+                        </div>
+                        <div id="alineacion-status" class="alineacion-status${lineupSaveKind ? ' ' + lineupSaveKind : ''}">${lineupSaveStatus || ''}</div>
+                    </div>
+                    <div class="alineacion-pitch">${linesHtml}</div>
+                </div>
+            `;
         }
 
         function sanitizeFilename(name) {
